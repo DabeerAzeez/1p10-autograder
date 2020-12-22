@@ -2,19 +2,22 @@
 Welcome to testcaseUpdater
 author: Dabeer Abdul-Azeez (abdulazd@mcmaster.ca)
 
-This script automatically determines the appropriate outputs for testcases which are listed in an excel file and then
-populates said excel file appropriately. The completed excel file can then be used for comparing student submissions to
-the correct answers.
+This script automatically determines the appropriate outputs for testcases which are listed in an excel file (the
+"test case workbook" or TCWB) and then populates the file appropriately. The completed TCWB can then be used for
+comparing student submissions to the correct answers.
 
 Notes:
-- This version uses xlrd v1.2.0; newer versions do not support xlsx files, and this file cannot work around those yet
-- Don't have any excel files open otherwise permission errors may occur!
+- This version uses xlrd v1.2.0; newer versions do not support xlsx files
+- Don't have any excel files open otherwise permission errors will occur!
+- The inputs in the TCWB are assumed to be using python syntax (e.g. 4**2 instead of 4^2)
 """
 
 # TODO: Don't use old xlrd (https://stackoverflow.com/questions/65250207/pandas-cannot-open-an-excel-xlsx-file)
+# TODO: Edit existing sheet instead of creating a new one (prevent sheet from reappearing at end)
 
 import pandas as pd
 import importlib
+import openpyxl
 
 TEST_CASE_FILENAME = "MiniMilestone_TestCases.xlsx"
 
@@ -34,15 +37,34 @@ def select_sheet():
 
 def perform_test(parameters, function, solution_module):
     """
-    :param parameters: Parameters to be passed to function
+    :param parameters: Parameters from 'Inputs' column of test case worksheet; type int or string, string could be one
+                       input or multiple commma-separated values
     :param function: Function to run the test on
     :param solution_module: Solution file module from which to retrieve function
     :return: output(s) of function
     """
-    params_list = [eval(i) for i in parameters.split(",")]  # eval() assumes inputs in workbook use python syntax
-    output = getattr(solution_module, function)(*params_list)  # pass parameters into function from solution module
+    if isinstance(parameters, str):
+        parameters_list = [eval(i) for i in parameters.split(",")]
+
+        if len(parameters_list) > 1:  # Handle multiple comma-separated inputs
+            output = getattr(solution_module, function)(*parameters_list)
+        else:
+            output = getattr(solution_module, function)(parameters_list[0])
+
+    elif isinstance(parameters, int) or isinstance(parameters, float):
+        output = getattr(solution_module, function)(parameters)
+
+    else:
+        raise TypeError("Unknown parameters datatype for perform_test")
 
     return output
+
+
+def count_inputs(parameters):
+    if isinstance(parameters, int) or isinstance(parameters, float):
+        return 1
+    else:
+        return len(parameters.split(","))
 
 
 def perform_tests(chosen_sheet):
@@ -57,10 +79,13 @@ def perform_tests(chosen_sheet):
     # Fill 'Outputs' and '# Inputs' columns of selected sheet
     test_cases_df['Outputs'] = test_cases_df.apply(lambda x: perform_test(x['Inputs'], x['Function'], solution_module),
                                                    axis=1)
-    test_cases_df['# Inputs'] = test_cases_df.apply(lambda x: len(x['Inputs'].split(",")), axis=1)
+    test_cases_df['# Inputs'] = test_cases_df.apply(lambda x: count_inputs(x['Inputs']), axis=1)
 
     # Write dataframe content to excel file
     writer = pd.ExcelWriter(TEST_CASE_FILENAME, engine='openpyxl')  # TODO: Test without openpyxl
+    book = openpyxl.load_workbook(TEST_CASE_FILENAME)  # Load existing sheets
+    book.remove(book[chosen_sheet])  # Remove original sheet
+    writer.book = book  # Update writer's book
     test_cases_df.to_excel(writer, chosen_sheet, index=False)
 
     try:
