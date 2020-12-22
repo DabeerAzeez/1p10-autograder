@@ -86,7 +86,8 @@ def perform_tests(chosen_sheet):
     test_cases_df['# Inputs'] = test_cases_df.apply(lambda x: count_inputs(x['Inputs']), axis=1)
 
     # Write dataframe content to excel file
-    writer = pd.ExcelWriter(TEST_CASE_FILENAME, engine='openpyxl')  # TODO: Test without openpyxl
+    writer = pd.ExcelWriter(TEST_CASE_FILENAME, engine='openpyxl', mode='a')
+
     book = openpyxl.load_workbook(TEST_CASE_FILENAME)  # Load existing sheets
     book.remove(book[chosen_sheet])  # Remove original sheet
     writer.book = book  # Update writer's book
