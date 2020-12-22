@@ -13,7 +13,6 @@ Notes:
 """
 
 # TODO: Don't use old xlrd (https://stackoverflow.com/questions/65250207/pandas-cannot-open-an-excel-xlsx-file)
-# TODO: Edit existing sheet instead of creating a new one (prevent sheet from reappearing at end)
 
 import pandas as pd
 import importlib
@@ -56,7 +55,7 @@ def perform_test(parameters, function, solution_module):
         output = getattr(solution_module, function)(parameters)
 
     else:
-        raise TypeError("Unknown parameters datatype for perform_test")
+        raise TypeError("Unknown parameters datatype for perform_test()")
 
     return output
 
@@ -74,8 +73,8 @@ def perform_tests(chosen_sheet):
     the appropriate functions from the appropriates Python solution file.
     :param chosen_sheet: Chosen sheet of test cases workbook
     """
-    test_cases_df = pd.read_excel(test_case_xl, sheet_name=chosen_sheet)
-    solution_module = importlib.import_module(chosen_sheet + "_SOLUTION")
+    test_cases_df = pd.read_excel(test_case_xl, sheet_name=chosen_sheet)  # Read chosen sheet
+    solution_module = importlib.import_module(chosen_sheet + "_SOLUTION")  # Import appropriate solution module
 
     # Fill 'Outputs' and '# Inputs' columns of selected sheet
     test_cases_df['Outputs'] = test_cases_df.apply(lambda x: perform_test(x['Inputs'], x['Function'], solution_module),
@@ -87,6 +86,7 @@ def perform_tests(chosen_sheet):
     book = openpyxl.load_workbook(TEST_CASE_FILENAME)  # Load existing sheets
     book.remove(book[chosen_sheet])  # Remove original sheet
     writer.book = book  # Update writer's book
+
     test_cases_df.to_excel(writer, chosen_sheet, index=False)
 
     try:
@@ -103,7 +103,8 @@ def main():
     chosen_sheet_name = select_sheet()
     perform_tests(chosen_sheet_name)
 
-    print(f"Update complete. Check {TEST_CASE_FILENAME}.")
+    print(f"Update complete. Check {TEST_CASE_FILENAME}. Press enter to quit.")
+    input()
 
 
 main()
