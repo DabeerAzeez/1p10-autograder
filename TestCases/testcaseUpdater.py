@@ -101,6 +101,10 @@ def perform_tests(chosen_sheet):
 
     writer.close()
 
+    # Sort worksheets alphabetically
+    book._sheets.sort(key=lambda ws: ws.title)
+    book.save(TEST_CASE_FILENAME)
+
 
 def main():
     print("Welcome to the testcaseUpdater. Below are the extracted sheets from the test case spreadsheet.\n")
