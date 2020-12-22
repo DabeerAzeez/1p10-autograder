@@ -20,6 +20,7 @@ import importlib
 import openpyxl
 
 TEST_CASE_FILENAME = "MiniMilestone_TestCases.xlsx"
+DELIMITER = ";"
 
 test_case_xl = pd.ExcelFile(TEST_CASE_FILENAME)
 sheet_names_df = pd.DataFrame(test_case_xl.sheet_names, columns=['Sheet Name'])
@@ -38,13 +39,13 @@ def select_sheet():
 def perform_test(parameters, function, solution_module):
     """
     :param parameters: Parameters from 'Inputs' column of test case worksheet; type int or string, string could be one
-                       input or multiple commma-separated values
+                       input or multiple delimited values
     :param function: Function to run the test on
     :param solution_module: Solution file module from which to retrieve function
     :return: output(s) of function
     """
     if isinstance(parameters, str):
-        parameters_list = [eval(i) for i in parameters.split(",")]
+        parameters_list = [eval(i) for i in parameters.split(DELIMITER)]
 
         if len(parameters_list) > 1:  # Handle multiple comma-separated inputs
             output = getattr(solution_module, function)(*parameters_list)
@@ -64,7 +65,7 @@ def count_inputs(parameters):
     if isinstance(parameters, int) or isinstance(parameters, float):
         return 1
     else:
-        return len(parameters.split(","))
+        return len(parameters.split(DELIMITER))
 
 
 def perform_tests(chosen_sheet):
