@@ -45,7 +45,10 @@ def perform_test(parameters, function, solution_module):
     """
     for item in [parameters, function, solution_module]:
         if pd.isna(item):
-            raise TypeError("Received 'nan' as a test input; check that Excel rows are completely filled")
+            raise TypeError("Received 'nan' as a test input; check that input cells in workbook are completely filled")
+
+    if parameters == "None":
+        return getattr(solution_module, function)()
 
     if isinstance(parameters, str):
         parameters_list = [eval(i) for i in parameters.split(DELIMITER)]
@@ -112,6 +115,7 @@ def main():
     chosen_sheet_name = select_sheet()
     perform_tests(chosen_sheet_name)
 
+    print("*"*50)
     print(f"Update complete. Check {TEST_CASE_FILENAME}. Press enter to quit.")
     input()
 
