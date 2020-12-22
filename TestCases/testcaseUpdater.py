@@ -43,6 +43,10 @@ def perform_test(parameters, function, solution_module):
     :param solution_module: Solution file module from which to retrieve function
     :return: output(s) of function
     """
+    for item in [parameters, function, solution_module]:
+        if pd.isna(item):
+            raise TypeError("Received 'nan' as a test input; check that Excel rows are completely filled")
+
     if isinstance(parameters, str):
         parameters_list = [eval(i) for i in parameters.split(DELIMITER)]
 
