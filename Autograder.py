@@ -245,7 +245,7 @@ def gradeSubmissions(lab, path):
     - Loops through submissions directory.
     - Compiles and executes each python file.
     - Runs Autograder methods on the functions/classes defined.
-    - Returns names, filnames, grades, and feedback in a dataframe
+    - Returns names, filenames, grades, and feedback in a dataframe
     
     Author:
         Basem Yassa <yassab@mcmaster.ca>
@@ -350,9 +350,6 @@ def buildForAvenue(final, lab):
     """
     Reformats the dataframe and outputs it to an uploadable csv file.
     
-    Author:
-        Basem Yassa <yassab@mcmaster.ca>
-    
     Returns
     -------
     None
@@ -411,9 +408,6 @@ def appendFeedback(lab, results, path, feedbackPath):
     """
     Loops through student submission and creates a copy with feedback inserted at the top.
     
-    Author:
-        Basem Yassa <yassab@mcmaster.ca>
-    
     Returns
     -------
     None
@@ -437,22 +431,30 @@ def appendFeedback(lab, results, path, feedbackPath):
 
         with open(feedbackFile, "w", encoding="utf8") as f:
             f.write(msg + "\n\n\n\n\n" + content)
-    print("Done")
 
 
 def main():
     import os
     import time
+
     start = time.time()
     lab = input("Please input mini-milestone number (e.g. MM04): ")
+
+    subPath = SUBMISSION_PATH.format(lab)
     feedbackPath = FEEDBACK_PATH.format(lab)
-    subPath = SUBMISSION_PATH.format(lab)  # Make sure files are stored in this folder
     if not os.path.exists(feedbackPath):
         os.makedirs(feedbackPath)
+
+    print("\nBeginning grading...")
+    print("*"*75)
+
     results = gradeSubmissions(lab, subPath)
     buildForAvenue(results, lab)
     appendFeedback(lab, results, subPath, feedbackPath)
     numSubs = sum(filename.endswith(".py") for filename in sorted(os.listdir(subPath)))
+
+    print("*" * 75)
+    print("Grading complete")
     print("Autograder took {} seconds for {} submissions".format(time.time() - start, numSubs))
 
 
