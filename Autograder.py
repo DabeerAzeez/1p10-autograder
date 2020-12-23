@@ -86,7 +86,7 @@ class Autograder:
 
         """
         try:
-            assert x >= lower and x <= upper
+            assert lower <= x <= upper
             score += points
         except:
             score = score
