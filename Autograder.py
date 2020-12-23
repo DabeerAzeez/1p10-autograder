@@ -400,9 +400,10 @@ def buildFeedback(name, lab, feedback):
 
     body += "\n\n"
 
-    body += "If you have any questions about your mark, please visit us \nduring office hours or fill out the form: http://bit.ly/1p13-grade-review\n\n"
+    body += "If you have any questions about your mark, please visit us \nduring " \
+            "office hours or email prof1p10@mcmaster.ca"
 
-    body += "Have a wonderful day,\nYour Friendly Neighbourhood Bot"
+    body += "\nHave a wonderful day,\nYour Friendly Neighbourhood Bot"
 
     body += "\n'''"
 
@@ -454,7 +455,7 @@ def main():
     buildForAvenue(final, lab)
     appendFeedback(lab, results, subPath, feedbackPath)
     numSubs = sum(filename.endswith(".py") for filename in sorted(os.listdir(subPath)))
-    print("This took {} seconds for {} submissions".format(time.time() - start, numSubs))
+    print("Autograder took {} seconds for {} submissions".format(time.time() - start, numSubs))
 
 
 main()
