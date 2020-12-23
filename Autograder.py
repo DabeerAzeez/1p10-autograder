@@ -458,4 +458,5 @@ def main():
     print("Autograder took {} seconds for {} submissions".format(time.time() - start, numSubs))
 
 
-main()
+if __name__ == "__main__":
+    main()
