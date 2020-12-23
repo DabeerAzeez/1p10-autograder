@@ -55,10 +55,21 @@ def select_sheet(sheet_names_df):
     -------
     Name of selected sheet within TCWB
     """
+    sheet_names_df = sheet_names_df[sheet_names_df['Sheet Name'] != INSTRUCTIONS_SHEETNAME]  # Remove instructions sheet
     print(sheet_names_df, "\n")
-    chosen_index = int(input("Please select the row number of the sheet you'd like to update: "))
-    print()
-    return sheet_names_df.loc[chosen_index].values[0]
+
+    try:
+        chosen_index = int(input("Please select the row number of the sheet you'd like to update: "))
+
+        if chosen_index not in sheet_names_df.index:
+            raise ValueError
+
+        output = sheet_names_df.loc[chosen_index].values[0]
+    except ValueError:
+        print("Try again. Please choose the appropriate integer corresponding to the sheet you would like to update.\n")
+        output = select_sheet(sheet_names_df)
+
+    return output
 
 
 def perform_test(parameters, function, solution_module):
