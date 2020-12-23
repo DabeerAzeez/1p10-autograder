@@ -38,13 +38,12 @@ import importlib
 import openpyxl
 
 TEST_CASE_FILENAME = "MiniMilestone_TestCases.xlsx"
+SOLN_FILENAME_SUFFIX = "_SOLUTION"  # E.g. MM04_SOLUTION.py
+INSTRUCTIONS_SHEETNAME = "Instructions"  # Name of sheet within TEST_CASE_FILENAME containing instructions
 DELIMITER = ";"
 
-test_case_xl = pd.ExcelFile(TEST_CASE_FILENAME)
-sheet_names_df = pd.DataFrame(test_case_xl.sheet_names, columns=['Sheet Name'])
 
-
-def select_sheet():
+def select_sheet(sheet_names_df):
     """
     Allows user to select a sheet from the TCWB for updating
 
@@ -100,18 +99,7 @@ def perform_test(parameters, function, solution_module):
     return output
 
 
-def count_inputs(parameters):
-    if isinstance(parameters, int) or isinstance(parameters, float):
-        return 1
-    else:
-        return len(parameters.split(DELIMITER))
-
-
-def perform_tests(chosen_sheet):
-    """
-    Auto-fills '# Inputs' and 'Outputs' columns of selected sheet in test cases workbook by passing the inputs through
-    the appropriate functions from the appropriates Python solution file.
-    :param chosen_sheet: Chosen sheet of test cases workbook
+def perform_tests(test_case_xl, chosen_sheet):
     """
     Auto-fills 'Outputs' column of selected sheet in test cases workbook by passing the inputs through
     the appropriate functions from the appropriates Python solution file.
@@ -151,12 +139,15 @@ def perform_tests(chosen_sheet):
 
 
 def main():
+    test_case_xl = pd.ExcelFile(TEST_CASE_FILENAME)
+    sheet_names_df = pd.DataFrame(test_case_xl.sheet_names, columns=['Sheet Name'])
+
     print("Welcome to the testcaseUpdater. Below are the extracted sheets from the test case spreadsheet.\n")
 
-    chosen_sheet_name = select_sheet()
-    perform_tests(chosen_sheet_name)
+    chosen_sheet_name = select_sheet(sheet_names_df)
+    perform_tests(test_case_xl, chosen_sheet_name)
 
-    print("*"*50)
+    print("*" * 75)
     print(f"Update complete. Check {TEST_CASE_FILENAME}. Press enter to quit.")
     input()
 
