@@ -1,12 +1,29 @@
+"""
+1P10 Autograder Python script
+
+Original Author: Basem Yassa <yassab@mcmaster.ca>
+Adapted by: Dabeer Abdul-Azeez <abdulazd@mcmaster.ca> for use in marking the 1P10 iBioMed Computing Labs
+
+Required Files / Directories to be placed in root directory beside script:
+- Class list csv file containing (Username | Last Name | First Name | End-of-Line Indicator)
+    - This should be exported from Avenue the grade book
+- Test cases spreadsheet containing individual sheets containing testcases for each mini milestone
+    - See the "_Instructions" sheet included in the test cases workbook for information on how to write test cases
+- Directory containing student .py files
+
+This autograder will:
+- Grade all submissions in the submission directory
+- Add feedback as a multi-line comment within the submitted files
+- Generate a feedback folder wherein feedback-modified submissions will be stored (can be reuploaded to Avenue)
+- Create a grades csv file which can be uploaded to Avenue to update the gradebook
+"""
+
 import pandas as pd
 
 
 class Autograder:
     """
     Autograder Object to mark individual submissions
-    
-    Author:
-        Basem Yassa <yassab@mcmaster.ca>
         
     Attributes
     --------
