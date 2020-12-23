@@ -67,7 +67,8 @@ class Autograder:
         self.database = pd.read_excel(TESTCASES_PATH, sheet_name=milestone_num)
         self.tolerance = 0.0000001
 
-    def grade_testcase(self, x, lower, upper, score, points):
+    @staticmethod
+    def grade_testcase(x, lower, upper, score, points):
         """
         Returns
         -------
