@@ -38,8 +38,10 @@ class Autograder:
     
     """
 
-    def __init__(self, labnum):
-        self.database = pd.read_excel("lab{}testcases.xlsx".format(labnum), index_col=0)
+    DELIMITER = ";"
+
+    def __init__(self, milestone_num):
+        self.database = pd.read_excel(TESTCASES_PATH, sheet_name=milestone_num)
         self.tolerance = 0.0000001
 
     def grade_testcase(self, x, lower, upper, score, points):
@@ -145,25 +147,35 @@ class Autograder:
         feedback = []
         first = functiondb.index[0]
         last = first + len(functiondb.Function)
+
         for i in range(first, last):
+            input = functiondb.Inputs[i]
+            output = functiondb.Outputs[i]
+
+            if isinstance(input, str):
+                parameters_list = [eval(i) for i in functiondb.Inputs[i].split(Autograder.DELIMITER)]
+            elif isinstance(input, int) or isinstance(input, float):
+                parameters_list = [input]
+            else:
+                raise TypeError("Unknown function input: " + input)
+
             try:
-                if functiondb.Arguments[i] > 1:  # Unpack multiple arguments
-                    studentAnswer = func(*eval(functiondb.Inputs[i]))
-                else:
-                    try:
-                        studentAnswer = func(eval(functiondb.Inputs[i]))
-                    except:  # Single string input
-                        studentAnswer = func(functiondb.Inputs[i])
-                try:
-                    expected = eval(functiondb.Outputs[i])
-                except:  # numerical output
-                    expected = self.database.Outputs[i]
-                score = self.test(expected, studentAnswer, score, functiondb.Weight[i])
+                student_answer = func(*parameters_list)
             except:
-                feedback.append("Testcase input: " + str(functiondb.Inputs[i]) + " outputs an error")
+                feedback.append("Testcase input: " + str(parameters_list) + " outputs an error")
                 continue
+
+            if isinstance(output, int) or isinstance(output, float):
+                expected = output
+            elif isinstance(output, str):
+                expected = eval(output)  # TODO: accommodate string outputs
+            else:
+                raise TypeError("Unknown function output: " + output)
+
+            score = self.test(expected, student_answer, score, functiondb.Weight[i])
+
             if temp == score:  # If score did not update
-                feedback.append("Testcase input: " + str(functiondb.Inputs[i]) + " has an incorrect Output")
+                feedback.append("Testcase input: " + str(parameters_list) + " has an incorrect Output")
             else:
                 temp = score
 
