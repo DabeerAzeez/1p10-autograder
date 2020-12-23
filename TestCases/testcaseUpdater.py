@@ -117,12 +117,10 @@ def perform_tests(test_case_xl, chosen_sheet):
     test_cases_df = pd.read_excel(test_case_xl, sheet_name=chosen_sheet)  # Read chosen sheet
     solution_module = importlib.import_module(chosen_sheet + "_SOLUTION")  # Import appropriate solution module
 
-    # Fill 'Outputs' and '# Inputs' columns of selected sheet
+    # Fill 'Outputs' column of selected sheet
     test_cases_df['Outputs'] = test_cases_df.apply(lambda x: perform_test(x['Inputs'], x['Function'], solution_module),
                                                    axis=1)
-    test_cases_df['# Inputs'] = test_cases_df.apply(lambda x: count_inputs(x['Inputs']), axis=1)
 
-    # Write dataframe content to excel file
     writer = pd.ExcelWriter(TEST_CASE_FILENAME, engine='openpyxl', mode='a')
 
     book = openpyxl.load_workbook(TEST_CASE_FILENAME)  # Load existing sheets
