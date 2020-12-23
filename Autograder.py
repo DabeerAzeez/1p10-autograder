@@ -363,7 +363,8 @@ def buildForAvenue(final, lab):
         gradeItem = "Computing Lab {0} Points Grade <Numeric MaxPoints:{1}>".format(lab, final["Out of"][0])
     else:
         gradeItem = "Computing Lab {0} - Objective Points Grade <Numeric MaxPoints:{1}>".format(lab, final["Out of"][0])
-    avenueUpload = final.drop(columns=["Out of", "Comments", "Name", "First Name", "Last Name"])
+
+    avenueUpload = final.loc[:, ["Username", "Grade"]]
     avenueUpload.rename(columns={"Grade": gradeItem}, inplace=True)
     avenueUpload["End-of-Line Indicator"] = "#"
     avenueUpload.to_csv(GRADES_FILENAME.format(lab), index=False)
