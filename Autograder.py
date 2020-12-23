@@ -264,7 +264,7 @@ def gradeSubmissions(lab, path):
     systemInfo = sys.stdout  # To enable and disable print()
     AG = Autograder(lab)
     total = sum(AG.database.Weight)
-    results = pd.DataFrame(columns=["Name", "File Name", "Grade", "Out of", "Comments"])
+    results = pd.DataFrame(columns=["Username", "File Name", "Grade", "Out of", "Comments"])
     if lab == "2":
         def input(string=""):
             from random import random
@@ -272,10 +272,10 @@ def gradeSubmissions(lab, path):
     else:
         def input(string=""):
             return "You've been bamboozled"
-    for filename in sorted(os.listdir(path)):
+    for filename in sorted(os.listdir(path)):  # Sample filename: abdulazd_MM04.py
         if not filename.endswith(".py"):
             continue
-        name = filename.split(" - ")[1].rstrip(".py")
+        username = "#" + filename.split("_")[0].rstrip(".py")  # Pound symbol is to match Avenue classlist format
         with open(path + filename, encoding="utf8") as f:
             sys.stdout = open(os.devnull, 'w')  # Disable print()
             try:
@@ -286,14 +286,14 @@ def gradeSubmissions(lab, path):
                 exec(code, temp)
 
             except SyntaxError:
-                if name in list(results.Name):  # Account for multiple submissions
-                    results.loc[results.Name == name, :] = [name, filename, 0, total,
-                                                            "Program does not compile. You have recieved a grade of zero"]
+                if username in list(results.Username):  # Account for multiple submissions
+                    results.loc[results.Username == username, :] = [username, filename, 0, total,
+                                                                    "Program does not compile. You have recieved a grade of zero"]
                 else:
-                    results.loc[len(results)] = [name, filename, 0, total,
+                    results.loc[len(results)] = [username, filename, 0, total,
                                                  "Program does not compile. You have recieved a grade of zero"]
                 sys.stdout = systemInfo  # Enable print()
-                print(name, "graded. (Recieved Zero)")
+                print(username[1:], "graded. (Recieved Zero)")
                 continue
             except:  # Account for students who have garbage in their submission
                 try:
@@ -317,23 +317,20 @@ def gradeSubmissions(lab, path):
             feedbackStr = "\n".join(feedback)
         else:
             feedbackStr = "No functions found!"
-        if name in list(results.Name):  # Account for multiple submissions
-            results.loc[results.Name == name, :] = [name, filename, score, total, feedbackStr]
+        if username in list(results.Username):  # Account for multiple submissions
+            results.loc[results.Username == username, :] = [username, filename, score, total, feedbackStr]
         else:
-            results.loc[len(results)] = [name, filename, score, total, feedbackStr]
-        print(name, "graded.")
+            results.loc[len(results)] = [username, filename, score, total, feedbackStr]
+        print(username[1:], "graded.")
 
     results.to_csv("Computing {} Raw Results.csv".format(lab), index=False)
     return results
 
 
-def addMacID(results):
+def addName(results):
     """
-    Adds student MacID based by performing
-    an inner join with an extracted classlist. 
-    
-    Author:
-        Basem Yassa <yassab@mcmaster.ca>
+    Adds student name to inputted dataframe based by performing
+    an inner join with an extracted classlist.
     
     Returns
     -------
@@ -344,13 +341,9 @@ def addMacID(results):
     results: Raw results dataframe.
     """
     classlist = pd.read_csv(CLASSLIST_FILENAME)  # csv extracted from avenue in the format Username|Last Name|First Name
-    # Note the added (#) to usernames is to account for Avenue's upload format
-    classlist["Name"] = classlist["First Name"] + " " + classlist["Last Name"]
-    results = results[["Name", "Grade", "Out of", "Comments"]]
+    name_added = pd.merge(classlist, results, on=['Username'])
 
-    final = pd.merge(classlist, results, on=['Name'])
-
-    return (final)
+    return name_added
 
 
 def buildForAvenue(final, lab):
@@ -432,8 +425,10 @@ def appendFeedback(lab, results, path, feedbackPath):
     path: Student submissions folder path.
     feedbackPath: Student feedback folder path.
     """
+    results = addName(results)  # Add 'First Name' and 'Last Name' columns for personalized messages
+
     for i in range(len(results)):
-        name, feedback = results["Name"][i].split()[0], results["Comments"][i]
+        name, feedback = results["First Name"][i], results["Comments"][i]
         msg = buildFeedback(name, lab, feedback)
         file = path + results["File Name"][i]
         feedbackFile = feedbackPath + results["File Name"][i]
@@ -455,8 +450,7 @@ def main():
     if not os.path.exists(feedbackPath):
         os.makedirs(feedbackPath)
     results = gradeSubmissions(lab, subPath)
-    final = addMacID(results)
-    buildForAvenue(final, lab)
+    buildForAvenue(results, lab)
     appendFeedback(lab, results, subPath, feedbackPath)
     numSubs = sum(filename.endswith(".py") for filename in sorted(os.listdir(subPath)))
     print("Autograder took {} seconds for {} submissions".format(time.time() - start, numSubs))
