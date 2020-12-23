@@ -236,7 +236,7 @@ def gradeSubmissions(lab, path):
     for filename in sorted(os.listdir(path)):
         if not filename.endswith(".py"):
             continue
-        name = filename.split(" - ")[1]
+        name = filename.split(" - ")[1].rstrip(".py")
         with open(path + filename, encoding="utf8") as f:
             sys.stdout = open(os.devnull, 'w')  # Disable print()
             try:
