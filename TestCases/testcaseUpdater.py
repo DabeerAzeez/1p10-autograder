@@ -115,7 +115,7 @@ def perform_tests(test_case_xl, chosen_sheet):
     chosen_sheet: Chosen sheet of test cases workbook
     """
     test_cases_df = pd.read_excel(test_case_xl, sheet_name=chosen_sheet)  # Read chosen sheet
-    solution_module = importlib.import_module(chosen_sheet + "_SOLUTION")  # Import appropriate solution module
+    solution_module = importlib.import_module(chosen_sheet + SOLN_FILENAME_SUFFIX)  # Import appropriate solution module
 
     # Fill 'Outputs' column of selected sheet
     test_cases_df['Outputs'] = test_cases_df.apply(lambda x: perform_test(x['Inputs'], x['Function'], solution_module),
