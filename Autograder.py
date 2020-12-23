@@ -20,6 +20,12 @@ This autograder will:
 
 import pandas as pd
 
+CLASSLIST_FILENAME = "Classlist.csv"
+GRADES_FILENAME = "Computing {} Grades.csv"
+TESTCASES_PATH = "TestCases/stone_TestCases.xlsx"
+SUBMISSION_PATH = "./Computing {} Submission Files/"  # {} to be replaced by specific Mini-Milestone (e.g. MM04)
+FEEDBACK_PATH = "./Computing {} Feedback Files/"
+
 
 class Autograder:
     """
@@ -333,7 +339,7 @@ def addMacID(results):
     -------
     results: Raw results dataframe.
     """
-    classlist = pd.read_csv("Classlist.csv")  # csv extracted from avenue in the format Username|Last Name|First Name
+    classlist = pd.read_csv(CLASSLIST_FILENAME)  # csv extracted from avenue in the format Username|Last Name|First Name
     # Note the added (#) to usernames is to account for Avenue's upload format
     classlist["Name"] = classlist["First Name"] + " " + classlist["Last Name"]
     results = results[["Name", "Grade", "Out of", "Comments"]]
@@ -366,7 +372,7 @@ def buildForAvenue(final, lab):
     avenueUpload = final.drop(columns=["Out of", "Comments", "Name", "First Name", "Last Name"])
     avenueUpload.rename(columns={"Grade": gradeItem}, inplace=True)
     avenueUpload["End-of-Line Indicator"] = "#"
-    avenueUpload.to_csv("Computing {} Grades.csv".format(lab), index=False)
+    avenueUpload.to_csv(GRADES_FILENAME.format(lab), index=False)
 
 
 def buildFeedback(name, lab, feedback):
@@ -438,9 +444,9 @@ def main():
     import os
     import time
     start = time.time()
-    lab = input("Please input lab number: ")
-    feedbackPath = "./Computing {} Feedback Files/".format(lab)
-    subPath = "./Computing {} Submission Files/".format(lab)  # Make sure files are stored in this folder
+    lab = input("Please input mini-milestone number (e.g. MM04): ")
+    feedbackPath = FEEDBACK_PATH.format(lab)
+    subPath = SUBMISSION_PATH.format(lab)  # Make sure files are stored in this folder
     if not os.path.exists(feedbackPath):
         os.makedirs(feedbackPath)
     results = gradeSubmissions(lab, subPath)
