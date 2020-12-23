@@ -179,15 +179,17 @@ class Autograder:
 
             if isinstance(input, str):
                 parameters_list = [eval(i) for i in functiondb.Inputs[i].split(Autograder.DELIMITER)]
+                display_input = str(parameters_list)
             elif isinstance(input, int) or isinstance(input, float):
                 parameters_list = [input]
+                display_input = str(parameters_list[0])
             else:
                 raise TypeError("Unknown function input: " + input)
 
             try:
                 student_answer = func(*parameters_list)
             except:
-                feedback.append("Testcase input: " + str(parameters_list) + " outputs an error")
+                feedback.append("Testcase input: " + display_input + " outputs an error")
                 continue
 
             if isinstance(output, int) or isinstance(output, float):
@@ -200,7 +202,7 @@ class Autograder:
             score = self.test(expected, student_answer, score, functiondb.Weight[i])
 
             if temp == score:  # If score did not update
-                feedback.append("Testcase input: " + str(parameters_list) + " has an incorrect Output")
+                feedback.append("Testcase input: " + display_input + " has an incorrect Output")
             else:
                 temp = score
 
