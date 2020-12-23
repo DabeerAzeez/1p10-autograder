@@ -123,9 +123,9 @@ def perform_tests(test_case_xl, chosen_sheet):
 
     writer = pd.ExcelWriter(TEST_CASE_FILENAME, engine='openpyxl', mode='a')
 
-    book = openpyxl.load_workbook(TEST_CASE_FILENAME)  # Load existing sheets
-    book.remove(book[chosen_sheet])  # Remove original sheet
-    writer.book = book  # Update writer's book
+    book = openpyxl.load_workbook(TEST_CASE_FILENAME)  # Remove original sheet to prevent duplicates
+    book.remove(book[chosen_sheet])
+    writer.book = book
 
     test_cases_df.to_excel(writer, chosen_sheet, index=False)  # Write updated test case sheet to excel file
 
