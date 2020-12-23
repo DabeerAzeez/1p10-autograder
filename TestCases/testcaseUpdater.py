@@ -88,24 +88,18 @@ def perform_test(parameters, function, solution_module):
     """
     for item in [parameters, function, solution_module]:
         if pd.isna(item):
-            raise TypeError("Received 'nan' as a test input; check that input cells in workbook are completely filled")
+            raise TypeError("Encountered empty input cell in workbook; check that input cells are completely filled")
 
-    if parameters == "None":
-        return getattr(solution_module, function)()
-
-    if isinstance(parameters, str):
+    if parameters == "None":  # Lack of parameters must be indicated by the word 'None' instead of a blank cell
+        parameters_list = []
+    elif isinstance(parameters, str):
         parameters_list = [eval(i) for i in parameters.split(DELIMITER)]
-
-        if len(parameters_list) > 1:  # Handle multiple comma-separated inputs
-            output = getattr(solution_module, function)(*parameters_list)
-        else:
-            output = getattr(solution_module, function)(parameters_list[0])
-
-    elif isinstance(parameters, int) or isinstance(parameters, float):
-        output = getattr(solution_module, function)(parameters)
-
+    elif isinstance(parameters, int) or isinstance(parameters, float):  # ints and floats are recognized by Pandas
+        parameters_list = [parameters]
     else:
         raise TypeError("Unknown parameters datatype for perform_test()")
+
+    output = getattr(solution_module, function)(*parameters_list)  # Pass parameters into function
 
     return output
 
