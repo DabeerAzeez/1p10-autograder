@@ -22,7 +22,7 @@ import pandas as pd
 
 CLASSLIST_FILENAME = "Classlist.csv"
 GRADES_FILENAME = "Computing {} Grades.csv"
-TESTCASES_PATH = "TestCases/stone_TestCases.xlsx"
+TESTCASES_PATH = "TestCases/MiniMilestone_TestCases.xlsx"
 SUBMISSION_PATH = "./Computing {} Submission Files/"  # {} to be replaced by specific Mini-Milestone (e.g. MM04)
 FEEDBACK_PATH = "./Computing {} Feedback Files/"
 
