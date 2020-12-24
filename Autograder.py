@@ -75,7 +75,6 @@ class Autograder:
         -------
         score: Testcase score.
 
-        
         Inputs
         -------
         x: Actual output
@@ -83,7 +82,6 @@ class Autograder:
         upper: Expected output upper bound.
         score: Current score.
         points: Testcase points.
-
         """
         try:
             assert lower <= x <= upper
@@ -103,7 +101,6 @@ class Autograder:
         Inputs
         -------
         value: value to be tested.
-
         """
         upper_tolerance = value * (1 + self.tolerance)
         lower_tolerance = value * (1 - self.tolerance)
@@ -184,7 +181,7 @@ class Autograder:
                 parameters_list = [inputs]
                 display_input = str(parameters_list[0])
             else:
-                raise TypeError("Unknown function input: " + inputs)
+                raise TypeError("Unknown function input in test case workbook: " + inputs)
 
             try:
                 student_answer = func(*parameters_list)
@@ -260,7 +257,8 @@ def grade_submissions(lab, path):
     lab: lab number.
     path: Student submissions folder path.
     """
-    import os, sys
+    import os
+    import sys
     system_info = sys.stdout  # To enable and disable print()
     autograder = Autograder(lab)
     total = sum(autograder.database.Weight) / len(autograder.database.Student.drop_duplicates())
@@ -293,8 +291,8 @@ def grade_submissions(lab, path):
             try:
                 content = f.read()
                 code = compile(content, path + filename, 'exec')
-                temp = {"input": input}
-                exec(code, temp)
+                code_globals = {"input": input}
+                exec(code, code_globals)
 
             except SyntaxError:
                 compilation_error_msg = "Program does not compile. You have recieved a grade of zero"
@@ -320,7 +318,7 @@ def grade_submissions(lab, path):
 
             for func in relevant_functions:
                 try:
-                    funcs.append(temp[func])
+                    funcs.append(code_globals[func])
                 except KeyError:  # Function Misspelled or Does not exist
                     continue
 
@@ -329,7 +327,7 @@ def grade_submissions(lab, path):
 
         if feedback:
             for func in relevant_functions:
-                if func not in temp.keys():
+                if func not in code_globals.keys():
                     feedback.append(func + ": Missing!")
 
             feedback_string = "\n".join(feedback)
