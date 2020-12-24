@@ -263,8 +263,9 @@ def gradeSubmissions(lab, path):
     import os, sys
     systemInfo = sys.stdout  # To enable and disable print()
     AG = Autograder(lab)
-    total = sum(AG.database.Weight)
+    total = sum(AG.database.Weight) / len(AG.database.Student.drop_duplicates())  # Avg total points per student type
     results = pd.DataFrame(columns=["Username", "File Name", "Grade", "Out of", "Comments"])
+
     if lab == "2":
         def input(string=""):
             from random import random
@@ -272,10 +273,25 @@ def gradeSubmissions(lab, path):
     else:
         def input(string=""):
             return "You've been bamboozled"
+
+    # Extract relevant functions based on the student type
+    all_functions = list(AG.database.Function.drop_duplicates())
+    student_funcs_dict = dict.fromkeys(all_functions)
+
+    for function in all_functions:  # Connect functions with appropriate students
+        rows = AG.database.loc[AG.database['Function'] == function]
+        associated_student = rows.iloc[0].Student
+        student_funcs_dict[function] = associated_student
+
+    # Go through all files in submission directory
     for filename in sorted(os.listdir(path)):  # Sample filename: abdulazd_MM04.py
         if not filename.endswith(".py"):
             continue
-        username = "#" + filename.split("_")[0].rstrip(".py")  # Pound symbol is to match Avenue classlist format
+
+        filename_sections = filename.split("_")
+        username = "#" + filename_sections[0]  # Pound symbol is to match Avenue classlist format
+        current_student_type = filename_sections[2].lstrip("Student").rstrip(".py")  # Student A / B, etc.
+
         with open(path + filename, encoding="utf8") as f:
             sys.stdout = open(os.devnull, 'w')  # Disable print()
             try:
@@ -305,7 +321,13 @@ def gradeSubmissions(lab, path):
                 except:
                     pass  # If absolutely nothing works in their file
             funcs = []
-            for func in list(AG.database.Function.drop_duplicates()):
+
+            relevant_functions = []
+            for func, student_type in student_funcs_dict.items():
+                if student_type == current_student_type:
+                    relevant_functions.append(func)
+
+            for func in relevant_functions:
                 try:
                     funcs.append(temp[func])
                 except KeyError:  # Function Misspelled or Does not exist
