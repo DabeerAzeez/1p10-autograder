@@ -248,13 +248,9 @@ def grade_submissions(lab, path):
     - Runs Autograder methods on the functions/classes defined.
     - Returns names, filenames, grades, and feedback in a dataframe
     
-    Author:
-        Basem Yassa <yassab@mcmaster.ca>
-    
     Returns
     -------
     results: Raw results dataframe in the format, Name|File Name|Grade|Out of|Comments.
-
 
     Inputs
     -------
@@ -274,7 +270,7 @@ def grade_submissions(lab, path):
     all_functions = list(autograder.database.Function.drop_duplicates())
     student_funcs_dict = dict.fromkeys(all_functions)
 
-    for function in all_functions:  # Connect functions with appropriate students
+    for function in all_functions:  # Connect functions with appropriate students using a dictionary
         rows = autograder.database.loc[autograder.database['Function'] == function]
         associated_student = rows.iloc[0].Student
         student_funcs_dict[function] = associated_student
@@ -290,8 +286,8 @@ def grade_submissions(lab, path):
 
         with open(path + filename, encoding="utf8") as f:
             sys.stdout = open(os.devnull, 'w')  # Disable print()
-            try:
 
+            try:
                 content = f.read()
                 code = compile(content, path + filename, 'exec')
                 temp = {"input": input}
@@ -330,16 +326,19 @@ def grade_submissions(lab, path):
                 except KeyError:  # Function Misspelled or Does not exist
                     continue
 
-        feedback, score = autograder.mark_functions(*funcs)
+        feedback, score = autograder.mark_functions(*funcs)  # Test available functions
         sys.stdout = system_info  # Enable print()
+
         if feedback:
             feedback_string = "\n".join(feedback)
         else:
             feedback_string = "No functions found!"
+
         if username in list(results.Username):  # Account for multiple submissions
             results.loc[results.Username == username, :] = [username, filename, score, total, feedback_string]
         else:
             results.loc[len(results)] = [username, filename, score, total, feedback_string]
+
         print(username[1:], "graded.")
 
     results.to_csv("Computing {} Raw Results.csv".format(lab), index=False)
@@ -348,8 +347,7 @@ def grade_submissions(lab, path):
 
 def add_name(results):
     """
-    Adds student name to inputted dataframe based by performing
-    an inner join with an extracted classlist.
+    Adds student name to inputted dataframe based by performing an inner join with an extracted classlist.
     
     Returns
     -------
