@@ -88,7 +88,7 @@ class Autograder:
         try:
             assert lower <= x <= upper
             score += points
-        except:
+        except AssertionError:
             score = score
 
         return score
@@ -105,12 +105,12 @@ class Autograder:
         value: value to be tested.
 
         """
-        upperTolerance = value * (1 + self.tolerance)
-        lowerTolerance = value * (1 - self.tolerance)
+        upper_tolerance = value * (1 + self.tolerance)
+        lower_tolerance = value * (1 - self.tolerance)
         if value >= 0:  # accounts for negative numbers
-            return [lowerTolerance, upperTolerance]
+            return [lower_tolerance, upper_tolerance]
         else:
-            return [upperTolerance, lowerTolerance]
+            return [upper_tolerance, lower_tolerance]
 
     def test(self, expected, actual, score, points):
         """
@@ -152,7 +152,7 @@ class Autograder:
 
         return score
 
-    def markFunction(self, score, func):
+    def mark_function(self, score, func):
         """
         Returns
         -------
@@ -174,27 +174,27 @@ class Autograder:
         last = first + len(functiondb.Function)
 
         for i in range(first, last):
-            input = functiondb.Inputs[i]
+            inputs = functiondb.Inputs[i]
             output = functiondb.Outputs[i]
 
-            if isinstance(input, str):
+            if type(inputs) is str:
                 parameters_list = [eval(i) for i in functiondb.Inputs[i].split(Autograder.DELIMITER)]
                 display_input = str(parameters_list)
-            elif isinstance(input, int) or isinstance(input, float):
-                parameters_list = [input]
+            elif type(inputs) is int or type(inputs) is float:
+                parameters_list = [inputs]
                 display_input = str(parameters_list[0])
             else:
-                raise TypeError("Unknown function input: " + input)
+                raise TypeError("Unknown function input: " + inputs)
 
             try:
                 student_answer = func(*parameters_list)
-            except:
+            except:  # Bare except necessary to catch whatever error might occur in the student file
                 feedback.append("Testcase input: " + display_input + " outputs an error")
                 continue
 
-            if isinstance(output, int) or isinstance(output, float):
+            if type(output) is int or type(output) is float:
                 expected = output
-            elif isinstance(output, str):
+            elif type(output) is str:
                 expected = eval(output)  # TODO: accommodate string outputs
             else:
                 raise TypeError("Unknown function output: " + output)
@@ -213,14 +213,15 @@ class Autograder:
 
         return feedback_str, score
 
-    def markFunctions(self, *funcs):
+    def mark_functions(self, *funcs):
         """
+        Marks functions, providing a total score and feedback
+
         Returns
         -------
         feedback: Function(s) feedback string.
         total: lab score.
 
-        
         Inputs
         -------
         funcs: Function(s) to be tested.
@@ -228,19 +229,19 @@ class Autograder:
         total = 0
         feedback = []
         for func in funcs:
-            feedback_str, score = self.markFunction(0, func)
+            feedback_str, score = self.mark_function(0, func)
             total += score
             feedback.append(feedback_str)
         return feedback, total
 
-    def markFile(self, filename):  # TODO
+    def mark_file(self, filename):  # TODO
         return
 
-    def markObject(self, obj):  # TODO
+    def mark_object(self, obj):  # TODO
         return
 
 
-def gradeSubmissions(lab, path):
+def grade_submissions(lab, path):
     """
     - Loops through submissions directory.
     - Compiles and executes each python file.
@@ -261,25 +262,20 @@ def gradeSubmissions(lab, path):
     path: Student submissions folder path.
     """
     import os, sys
-    systemInfo = sys.stdout  # To enable and disable print()
-    AG = Autograder(lab)
-    total = sum(AG.database.Weight) / len(AG.database.Student.drop_duplicates())  # Avg total points per student type
+    system_info = sys.stdout  # To enable and disable print()
+    autograder = Autograder(lab)
+    total = sum(autograder.database.Weight) / len(autograder.database.Student.drop_duplicates())
     results = pd.DataFrame(columns=["Username", "File Name", "Grade", "Out of", "Comments"])
 
-    if lab == "2":
-        def input(string=""):
-            from random import random
-            return random() * 10
-    else:
-        def input(string=""):
-            return "You've been bamboozled"
+    def input(string=""):  # Override built-in input() function to prevent program from stopping
+        return "You've been bamboozled"
 
     # Extract relevant functions based on the student type
-    all_functions = list(AG.database.Function.drop_duplicates())
+    all_functions = list(autograder.database.Function.drop_duplicates())
     student_funcs_dict = dict.fromkeys(all_functions)
 
     for function in all_functions:  # Connect functions with appropriate students
-        rows = AG.database.loc[AG.database['Function'] == function]
+        rows = autograder.database.loc[autograder.database['Function'] == function]
         associated_student = rows.iloc[0].Student
         student_funcs_dict[function] = associated_student
 
@@ -302,13 +298,14 @@ def gradeSubmissions(lab, path):
                 exec(code, temp)
 
             except SyntaxError:
+                compilation_error_msg = "Program does not compile. You have recieved a grade of zero"
+
                 if username in list(results.Username):  # Account for multiple submissions
-                    results.loc[results.Username == username, :] = [username, filename, 0, total,
-                                                                    "Program does not compile. You have recieved a grade of zero"]
+                    results.loc[results.Username == username, :] = [username, filename, 0, total, compilation_error_msg]
                 else:
-                    results.loc[len(results)] = [username, filename, 0, total,
-                                                 "Program does not compile. You have recieved a grade of zero"]
-                sys.stdout = systemInfo  # Enable print()
+                    results.loc[len(results)] = [username, filename, 0, total, compilation_error_msg]
+
+                sys.stdout = system_info  # Enable print()
                 print(username[1:], "graded. (Recieved Zero)")
                 continue
             except:  # Account for students who have garbage in their submission
@@ -333,23 +330,23 @@ def gradeSubmissions(lab, path):
                 except KeyError:  # Function Misspelled or Does not exist
                     continue
 
-        feedback, score = AG.markFunctions(*funcs)
-        sys.stdout = systemInfo  # Enable print()
+        feedback, score = autograder.mark_functions(*funcs)
+        sys.stdout = system_info  # Enable print()
         if feedback:
-            feedbackStr = "\n".join(feedback)
+            feedback_string = "\n".join(feedback)
         else:
-            feedbackStr = "No functions found!"
+            feedback_string = "No functions found!"
         if username in list(results.Username):  # Account for multiple submissions
-            results.loc[results.Username == username, :] = [username, filename, score, total, feedbackStr]
+            results.loc[results.Username == username, :] = [username, filename, score, total, feedback_string]
         else:
-            results.loc[len(results)] = [username, filename, score, total, feedbackStr]
+            results.loc[len(results)] = [username, filename, score, total, feedback_string]
         print(username[1:], "graded.")
 
     results.to_csv("Computing {} Raw Results.csv".format(lab), index=False)
     return results
 
 
-def addName(results):
+def add_name(results):
     """
     Adds student name to inputted dataframe based by performing
     an inner join with an extracted classlist.
@@ -368,7 +365,7 @@ def addName(results):
     return name_added
 
 
-def buildForAvenue(final, lab):
+def build_for_avenue(final, lab):
     """
     Reformats the dataframe and outputs it to an uploadable csv file.
     
@@ -382,22 +379,19 @@ def buildForAvenue(final, lab):
     lab: Lab number
     """
     if str(lab) in "234":
-        gradeItem = "Computing Lab {0} Points Grade <Numeric MaxPoints:{1}>".format(lab, final["Out of"][0])
+        grade_item = "Computing Lab {0} Points Grade <Numeric MaxPoints:{1}>".format(lab, final["Out of"][0])
     else:
-        gradeItem = "Computing Lab {0} - Objective Points Grade <Numeric MaxPoints:{1}>".format(lab, final["Out of"][0])
+        grade_item = "Computing Lab {0} - Objective Points Grade <Numeric MaxPoints:{1}>".format(lab, final["Out of"][0])
 
-    avenueUpload = final.loc[:, ["Username", "Grade"]]
-    avenueUpload.rename(columns={"Grade": gradeItem}, inplace=True)
-    avenueUpload["End-of-Line Indicator"] = "#"
-    avenueUpload.to_csv(GRADES_FILENAME.format(lab), index=False)
+    avenue_upload = final.loc[:, ["Username", "Grade"]]
+    avenue_upload.rename(columns={"Grade": grade_item}, inplace=True)
+    avenue_upload["End-of-Line Indicator"] = "#"
+    avenue_upload.to_csv(GRADES_FILENAME.format(lab), index=False)
 
 
-def buildFeedback(name, lab, feedback):
+def build_feedback(name, lab, feedback):
     """
     Building feedback string to be inserted in student submissions.
-    
-    Author:
-        Basem Yassa <yassab@mcmaster.ca>
     
     Returns
     -------
@@ -427,7 +421,7 @@ def buildFeedback(name, lab, feedback):
     return body
 
 
-def appendFeedback(lab, results, path, feedbackPath):
+def append_feedback(lab, results, path, feedback_path):
     """
     Loops through student submission and creates a copy with feedback inserted at the top.
     
@@ -442,17 +436,17 @@ def appendFeedback(lab, results, path, feedbackPath):
     path: Student submissions folder path.
     feedbackPath: Student feedback folder path.
     """
-    results = addName(results)  # Add 'First Name' and 'Last Name' columns for personalized messages
+    results = add_name(results)  # Add 'First Name' and 'Last Name' columns for personalized messages
 
     for i in range(len(results)):
         name, feedback = results["First Name"][i], results["Comments"][i]
-        msg = buildFeedback(name, lab, feedback)
+        msg = build_feedback(name, lab, feedback)
         file = path + results["File Name"][i]
-        feedbackFile = feedbackPath + results["File Name"][i]
+        feedback_file = feedback_path + results["File Name"][i]
         with open(file, "r", encoding="utf8") as f:
             content = f.read()
 
-        with open(feedbackFile, "w", encoding="utf8") as f:
+        with open(feedback_file, "w", encoding="utf8") as f:
             f.write(msg + "\n\n\n\n\n" + content)
 
 
@@ -463,22 +457,22 @@ def main():
     start = time.time()
     lab = input("Please input mini-milestone number (e.g. MM04): ")
 
-    subPath = SUBMISSION_PATH.format(lab)
-    feedbackPath = FEEDBACK_PATH.format(lab)
-    if not os.path.exists(feedbackPath):
-        os.makedirs(feedbackPath)
+    sub_path = SUBMISSION_PATH.format(lab)
+    feedback_path = FEEDBACK_PATH.format(lab)
+    if not os.path.exists(feedback_path):
+        os.makedirs(feedback_path)
 
     print("\nBeginning grading...")
-    print("*"*75)
+    print("*" * 75)
 
-    results = gradeSubmissions(lab, subPath)
-    buildForAvenue(results, lab)
-    appendFeedback(lab, results, subPath, feedbackPath)
-    numSubs = sum(filename.endswith(".py") for filename in sorted(os.listdir(subPath)))
+    results = grade_submissions(lab, sub_path)
+    build_for_avenue(results, lab)
+    append_feedback(lab, results, sub_path, feedback_path)
+    num_subs = sum(filename.endswith(".py") for filename in sorted(os.listdir(sub_path)))
 
     print("*" * 75)
     print("Grading complete")
-    print("Autograder took {} seconds for {} submissions".format(time.time() - start, numSubs))
+    print("Autograder took {} seconds for {} submissions".format(time.time() - start, num_subs))
 
 
 if __name__ == "__main__":
