@@ -62,7 +62,7 @@ class Autograder:
     
     """
 
-    DELIMITER = ";"
+    DELIMITER = ";"  # Delimiter for test case input spreadsheet
 
     def __init__(self, milestone_num):
         self.database = pd.read_excel(TESTCASES_PATH, sheet_name=milestone_num)
