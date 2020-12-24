@@ -26,12 +26,6 @@ Notes:
 """
 
 # TODO: Don't rely on old xlrd (https://stackoverflow.com/questions/65250207/pandas-cannot-open-an-excel-xlsx-file)
-# TODO: Documentation:
-'''
-https://stackoverflow.com/questions/3898572/what-is-the-standard-python-docstring-format
-https://numpydoc.readthedocs.io/en/latest/
-https://www.python.org/dev/peps/pep-0257/
-'''
 
 import pandas as pd
 import importlib
