@@ -195,9 +195,12 @@ class Autograder:
             if type(output) is int or type(output) is float:
                 expected = output
             elif type(output) is str:
-                expected = eval(output)  # TODO: accommodate string outputs
+                if type(eval(output)) != str:
+                    expected = eval(output)  # In case the string is holding another datatype
+                else:
+                    expected = output
             else:
-                raise TypeError("Unknown function output: " + output)
+                raise TypeError("Unknown function output in test case workbook: " + output)
 
             score = self.test(expected, student_answer, score, functiondb.Weight[i])
 
