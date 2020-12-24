@@ -325,6 +325,10 @@ def grade_submissions(lab, path):
         sys.stdout = system_info  # Enable print()
 
         if feedback:
+            for func in relevant_functions:
+                if func not in temp.keys():
+                    feedback.append(func + ": Missing!")
+
             feedback_string = "\n".join(feedback)
         else:
             feedback_string = "No functions found!"
