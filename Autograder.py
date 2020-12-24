@@ -304,15 +304,10 @@ def grade_submissions(lab, path):
                 sys.stdout = system_info  # Enable print()
                 print(username[1:], "graded. (Recieved Zero)")
                 continue
-            except:  # Account for students who have garbage in their submission
-                try:
-                    extractedCode = content[content.find("# Implementation"):content.find("Testing")]
-                    extractedCode = extractedCode if extractedCode != "" else content
-                    code = compile(extractedCode, path + filename, 'exec')
-                    temp = {"input": input}
-                    exec(code, temp)
-                except:
-                    pass  # If absolutely nothing works in their file
+
+            except:
+                pass
+
             funcs = []
 
             relevant_functions = []
