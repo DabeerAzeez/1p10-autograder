@@ -25,6 +25,8 @@ Notes:
 - Instructions on how to write test cases are included in the TCWB
 """
 
+# TODO: Remove 'inputs' column and just read and compile the code
+# TODO: Reset TCWB column widths
 # TODO: Don't rely on old xlrd (https://stackoverflow.com/questions/65250207/pandas-cannot-open-an-excel-xlsx-file)
 
 import pandas as pd
@@ -140,8 +142,8 @@ def perform_tests(test_case_xl, chosen_sheet):
 
     writer = pd.ExcelWriter(TEST_CASE_FILENAME, engine='openpyxl', mode='a')
 
-    book = openpyxl.load_workbook(TEST_CASE_FILENAME)  # Remove original sheet to prevent duplicates
-    book.remove(book[chosen_sheet])
+    book = openpyxl.load_workbook(TEST_CASE_FILENAME)
+    book.remove(book[chosen_sheet])  # Remove original sheet to prevent duplicates
     writer.book = book
 
     test_cases_df.to_excel(writer, chosen_sheet, index=False)  # Write updated test case sheet to excel file
