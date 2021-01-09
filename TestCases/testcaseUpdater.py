@@ -125,9 +125,18 @@ def perform_tests(test_case_xl, chosen_sheet):
 
     verify_columns(test_cases_df.columns)
 
-    # Fill 'Outputs' column of selected sheet
-    test_cases_df['Outputs'] = test_cases_df.apply(lambda x: perform_test(x['Inputs'], x['Function'], solution_module),
-                                                   axis=1)
+    # Run test for each row
+    for index, row in test_cases_df.iterrows():  # iterrows generator should not be used for large dataframes
+        test_code = ""
+
+        if "Constructor" in row.columns:
+            if row["Constructor"] == "x":
+                test_code = row['Test']
+        else:
+            test_code = "row['Outputs'] = " + row['Test']
+
+        exec(test_code)
+        test_cases_df.loc[index] = row  # Update test_cases dataframe with local row Series
 
     writer = pd.ExcelWriter(TEST_CASE_FILENAME, engine='openpyxl', mode='a')
 
