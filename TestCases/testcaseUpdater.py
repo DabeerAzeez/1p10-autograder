@@ -66,23 +66,26 @@ def select_sheet(sheet_names_df):
     return output
 
 
-def perform_test(parameters, function, solution_module):
+def verify_columns(columns):
     """
-    Retrieves the output of a function from the solution script when the test case parameters are passed
+    Verify required columns are present in inputted columns
 
     Parameters
     ----------
-    parameters: Inputs from test case worksheet; type int/float/string (one input or multiple delimited values)
-    function: Function to test
-    solution_module: Solution module from which to retrieve function
+    columns: Columns to be checked for required columns
 
     Returns
     -------
-    Output(s) of function
+    String representing whether the function or object (or both) columns are present in 'columns'
     """
-    for item in [parameters, function, solution_module]:
-        if pd.isna(item):
-            raise TypeError("Encountered empty input cell in workbook; check that input cells are completely filled")
+    # TODO: Check for missing items in required columns
+
+    REQ_COLUMNS = ["Test", "Constructor", "Student", "Weight", "Outputs"]
+
+    for col in REQ_COLUMNS:
+        if col not in columns:
+            raise SyntaxError("Missing " + col + " column in test case worksheet")
+
 
     if parameters == "None":  # Lack of parameters must be indicated by the word 'None' instead of a blank cell
         parameters_list = []
