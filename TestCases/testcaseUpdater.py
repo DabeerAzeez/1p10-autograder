@@ -87,18 +87,27 @@ def verify_columns(columns):
             raise SyntaxError("Missing " + col + " column in test case worksheet")
 
 
-    if parameters == "None":  # Lack of parameters must be indicated by the word 'None' instead of a blank cell
-        parameters_list = []
-    elif isinstance(parameters, str):
-        parameters_list = [eval(i) for i in parameters.split(DELIMITER)]
-    elif isinstance(parameters, int) or isinstance(parameters, float):  # ints and floats are recognized by Pandas
-        parameters_list = [parameters]
+def import_solution(module_name):
+    """
+    Imports given module's methods into global namespace. Reused from
+    https://stackoverflow.com/questions/43059267/how-to-do-from-module-import-using-importlib
+
+    Parameters
+    ----------
+    module_name: name of module to be imported
+    """
+    # get a handle on the module
+    mdl = importlib.import_module(module_name)
+
+    # is there an __all__?  if so respect it
+    if "__all__" in mdl.__dict__:
+        names = mdl.__dict__["__all__"]
     else:
-        raise TypeError("Unknown parameters datatype for perform_test()")
+        # otherwise we import all names that don't begin with _
+        names = [x for x in mdl.__dict__ if not x.startswith("_")]
 
-    output = getattr(solution_module, function)(*parameters_list)  # Pass parameters into function
-
-    return output
+    # now drag them in
+    globals().update({k: getattr(mdl, k) for k in names})
 
 
 def perform_tests(test_case_xl, chosen_sheet):
