@@ -190,7 +190,6 @@ class Autograder:
                 feedback.append("Unknown error occurred while running your program...attempting to test functions.")
 
         for index, row in self.database.iterrows():
-            feedback_str = ""
             score = 0
             output = []  # List works more easily with exec() variable modification
 
@@ -206,13 +205,10 @@ class Autograder:
                     score = row['Weight']
                     feedback_str = "Correct!"
                 else:
-                    score = 0
                     feedback_str = "Testcase: " + row['Command'] + " gives an incorrect output."
             except NameError:
-                score = 0
                 feedback_str = "Testcase: " + row['Command'] + " results in a name error. Function not defined."
             except Exception as e:  # Bare except necessary to catch whatever error might occur in the student file
-                score = 0
                 feedback_str = "Testcase: " + row['Command'] + " outputs an error: " + str(e)
 
             score_msg = "({0}/{1}) ".format(score, row['Weight'])
