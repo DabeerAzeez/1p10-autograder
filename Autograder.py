@@ -209,9 +209,16 @@ def grade_submissions(milestone_num, sub_path):
 
     # Go through all python files in submission directory
     python_files = [file for file in sorted(os.listdir(sub_path)) if file.endswith(".py")]
+    if len(python_files) == 0:
+        raise FileNotFoundError("No submission files found!")
+
     for filename in python_files:  # Sample filename: abdulazd_MM04_StudentA.py
 
         filename_sections = filename.split("_")
+        if len(filename_sections) == 1:
+            raise ValueError("No submission files with underscore separator found.")
+
+        # TODO: Add more error handling for student file names
         username = "#" + filename_sections[0]  # Pound symbol is to match Avenue classlist format
         current_student_type = filename_sections[2].lstrip("Student").rstrip(".py")  # Student A / B, etc.
 
