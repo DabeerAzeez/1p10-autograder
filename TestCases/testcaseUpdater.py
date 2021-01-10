@@ -40,6 +40,38 @@ INSTRUCTIONS_SHEETNAME = "Instructions"  # Name of sheet within TEST_CASE_FILENA
 DELIMITER = ";"
 
 
+def import_solution(module_name, level):
+    """
+    Imports given module's methods into selected namespace. Adapted from
+    https://stackoverflow.com/questions/43059267/how-to-do-from-module-import-using-importlib
+
+    Parameters
+    ----------
+    module_name: name of module to be imported
+    level: Namespace level, whether "global" or "local"
+    """
+    if level not in ["global", "local"]:
+        raise TypeError("Improper level chosen for importing solution module.")
+
+    # get a handle on the module
+    mdl = importlib.import_module(module_name)
+
+    # is there an __all__?  if so respect it
+    if "__all__" in mdl.__dict__:
+        names = mdl.__dict__["__all__"]
+    else:
+        # otherwise we import all names that don't begin with _
+        names = [x for x in mdl.__dict__ if not x.startswith("_")]
+
+    # now drag them in
+    if level == "global":
+        globals().update({k: getattr(mdl, k) for k in names})
+    elif level == "local":
+        locals().update({k: getattr(mdl, k) for k in names})
+    else:
+        raise TypeError("Error updating selected namespace.")
+
+
 def select_sheets(sheet_names_df):
     """
     Allows user to select a sheet from the TCWB for updating
@@ -93,29 +125,6 @@ def verify_columns(columns):
             raise SyntaxError("Missing " + col + " column in test case worksheet")
 
 
-def import_solution(module_name):
-    """
-    Imports given module's methods into global namespace. Reused from
-    https://stackoverflow.com/questions/43059267/how-to-do-from-module-import-using-importlib
-
-    Parameters
-    ----------
-    module_name: name of module to be imported
-    """
-    # get a handle on the module
-    mdl = importlib.import_module(module_name)
-
-    # is there an __all__?  if so respect it
-    if "__all__" in mdl.__dict__:
-        names = mdl.__dict__["__all__"]
-    else:
-        # otherwise we import all names that don't begin with _
-        names = [x for x in mdl.__dict__ if not x.startswith("_")]
-
-    # now drag them in
-    globals().update({k: getattr(mdl, k) for k in names})
-
-
 def perform_tests(test_case_xl, chosen_sheet):
     """
     Auto-fills 'Outputs' column of selected sheet in test cases workbook by passing the inputs through
@@ -127,7 +136,7 @@ def perform_tests(test_case_xl, chosen_sheet):
     chosen_sheet: Chosen sheet of test cases workbook
     """
     test_cases_df = pd.read_excel(test_case_xl, sheet_name=chosen_sheet)  # Read chosen sheet
-    import_solution(chosen_sheet + SOLN_FILENAME_SUFFIX)  # Import appropriate solution module
+    import_solution(chosen_sheet + SOLN_FILENAME_SUFFIX, "global")  # Import appropriate solution module # TODO: test local version
 
     verify_columns(test_cases_df.columns)
 
