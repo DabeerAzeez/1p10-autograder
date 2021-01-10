@@ -198,11 +198,25 @@ class Autograder:
         return feedback, total
 
 
+def check_student_weights(autograder):
+    # total points per student type (averaged over number of student types within test case sheet)
+    student_types = list(autograder.database.Student.drop_duplicates())
+    student_weights = set()
+
+    for student_type in student_types:
+        student_weight = sum(autograder.database[autograder.database.Student == student_type]['Weight'])
+        student_weights.add(student_weight)
+
+    if len(student_weights) > 1:
+        print("Warning: Student Types have unequal weighting in testcases, so they will have different maximum points.")
+        input("Press enter to continue. ")
+
+    return student_weights
+
 def grade_submissions(milestone_num, sub_path):
     """
     - Loops through submissions directory.
     - Compiles and executes each python file.
-    - Runs Autograder methods on the functions/classes defined.
     - Returns names, filenames, grades, and feedback in a dataframe
     
     Returns
@@ -217,8 +231,11 @@ def grade_submissions(milestone_num, sub_path):
     autograder = Autograder(milestone_num)
     results = pd.DataFrame(columns=["Username", "File Name", "Grade", "Out of", "Comments"])
 
-    # total points per student type (averaged over number of student types within test case sheet)
-    total = sum(autograder.database.Weight) / len(autograder.database.Student.drop_duplicates())
+    student_weights = check_student_weights(autograder)
+    total = max(student_weights)
+
+    print("\nBeginning grading...")
+    print("*" * 75)
 
     # Go through all python files in submission directory
     python_files = [file for file in sorted(os.listdir(sub_path)) if file.endswith(".py")]
@@ -262,9 +279,12 @@ def add_name(results):
     -------
     results: Raw results dataframe.
     """
-    classlist = pd.read_csv(CLASSLIST_FILENAME)  # csv extracted from avenue in the format Username|Last Name|First Name
-    name_added = pd.merge(classlist, results, on=['Username'])
+    try:
+        classlist = pd.read_csv(CLASSLIST_FILENAME)  # csv from Avenue in the format Username|Last Name|First Name
+    except FileNotFoundError:
+        raise FileNotFoundError("Missing classlist CSV.")
 
+    name_added = pd.merge(classlist, results, on=['Username'])
     return name_added
 
 
@@ -360,14 +380,13 @@ def main():
 
     sub_path = SUBMISSION_PATH.format(lab)
     if not os.path.exists(sub_path):
-        raise NotADirectoryError("Missing directory: " + sub_path)
+        raise NotADirectoryError("Mini-Milestone " + lab + " submission directory not found.")
 
     feedback_path = FEEDBACK_PATH.format(lab)
     if not os.path.exists(feedback_path):
         os.makedirs(feedback_path)
 
-    print("\nBeginning grading...")
-    print("*" * 75)
+    print("\nProgram start...")
 
     results = grade_submissions(lab, sub_path)
     build_for_avenue(results, lab)
