@@ -18,8 +18,7 @@ This script will:
 - Generate a feedback folder wherein feedback-modified submissions will be stored (can be reuploaded to Avenue)
 - Create a grades csv file which can be uploaded to Avenue to update the gradebook
 """
-
-# TODO: Disable / enable print in utils
+# TODO: Parameterize test case workbook column headers
 
 import pandas as pd
 import os
@@ -195,7 +194,7 @@ class Autograder:
             if row['Student'] != student_type:  # Only perform a test case if the student is the right type
                 continue
 
-            test_code = "output.insert(0,str(" + row['Test'] + "))"
+            test_code = "output.insert(0,str(" + row['Command'] + "))"
             correct_output = row['Outputs']
 
             try:
@@ -205,13 +204,13 @@ class Autograder:
                     feedback_str = "Correct!"
                 else:
                     score = 0
-                    feedback_str = "Testcase: " + row['Test'] + " gives an incorrect output."
+                    feedback_str = "Testcase: " + row['Command'] + " gives an incorrect output."
             except NameError:
                 score = 0
-                feedback_str = "Testcase: " + row['Test'] + " results in a name error. Function not defined."
+                feedback_str = "Testcase: " + row['Command'] + " results in a name error. Function not defined."
             except Exception as e:  # Bare except necessary to catch whatever error might occur in the student file
                 score = 0
-                feedback_str = "Testcase: " + row['Test'] + " outputs an error: " + str(e)
+                feedback_str = "Testcase: " + row['Command'] + " outputs an error: " + str(e)
 
             score_msg = "({0}/{1}) ".format(score, row['Weight'])
             total += score
