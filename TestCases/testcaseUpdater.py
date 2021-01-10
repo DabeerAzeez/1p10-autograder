@@ -39,7 +39,7 @@ INSTRUCTIONS_SHEETNAME = "Instructions"  # Name of sheet within TEST_CASE_FILENA
 DELIMITER = ";"
 
 
-def select_sheet(sheet_names_df):
+def select_sheets(sheet_names_df):
     """
     Allows user to select a sheet from the TCWB for updating
 
@@ -49,23 +49,26 @@ def select_sheet(sheet_names_df):
 
     Returns
     -------
-    Name of selected sheet within TCWB
+    List of selected sheet names
     """
     sheet_names_df = sheet_names_df[sheet_names_df['Sheet Name'] != INSTRUCTIONS_SHEETNAME]  # Remove instructions sheet
     print(sheet_names_df, "\n")
 
+    chosen_index = input("Please select the row number of the sheet you'd like to update. If you would like to "
+                         "update ALL sheets, enter 'all': ").strip()
+
+    if chosen_index == "all":
+        return sheet_names_df.values.flatten()  # Return all sheet names; flattens numpy N-dimensional array
+
     try:
-        chosen_index = int(input("Please select the row number of the sheet you'd like to update: "))
-
-        if chosen_index not in sheet_names_df.index:
+        chosen_index = int(chosen_index)
+        if chosen_index not in sheet_names_df.index and chosen_index != -1:
             raise ValueError
-
-        output = sheet_names_df.loc[chosen_index].values[0]
     except ValueError:
-        print("Try again. Please choose the appropriate integer corresponding to the sheet you would like to update.\n")
-        output = select_sheet(sheet_names_df)
+        print("Please choose an appropriate option.\n")
+        return select_sheets(sheet_names_df)
 
-    return output
+    return [sheet_names_df.loc[chosen_index].values[0]]
 
 
 def verify_columns(columns):
@@ -166,8 +169,9 @@ def main():
 
     print("Welcome to the testcaseUpdater. Below are the extracted sheets from the test case spreadsheet.\n")
 
-    chosen_sheet_name = select_sheet(sheet_names_df)
-    perform_tests(test_case_xl, chosen_sheet_name)
+    chosen_sheet_names = select_sheets(sheet_names_df)
+    for sheet_name in chosen_sheet_names:
+        perform_tests(test_case_xl, sheet_name)
 
     print("*" * 75)
     print(f"Update complete. Check {TEST_CASE_FILENAME}. Press enter to quit.")
