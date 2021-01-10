@@ -22,7 +22,8 @@ This script will:
 # TODO: Disable / enable print in utils
 
 import pandas as pd
-from Autograder_utils import check_called
+import os
+from Autograder_utils import check_called, disable_print, enable_print
 
 CLASSLIST_FILENAME = "Classlist.csv"
 GRADES_FILENAME = "Computing {} Grades.csv"
@@ -157,7 +158,6 @@ class Autograder:
         total: lab score
         """
         with open(sub_path + filename, encoding="utf8") as f:
-            # sys.stdout = open(os.devnull, 'w')  # Disable print()
             content = f.read()
 
         total = 0
@@ -237,9 +237,6 @@ def grade_submissions(milestone_num, sub_path):
     lab: lab number.
     path: Student submissions folder path.
     """
-    import os
-    import sys
-    system_info = sys.stdout  # To enable and disable print()
     autograder = Autograder(milestone_num)
     results = pd.DataFrame(columns=["Username", "File Name", "Grade", "Out of", "Comments"])
 
@@ -254,9 +251,11 @@ def grade_submissions(milestone_num, sub_path):
         username = "#" + filename_sections[0]  # Pound symbol is to match Avenue classlist format
         current_student_type = filename_sections[2].lstrip("Student").rstrip(".py")  # Student A / B, etc.
 
+        disable_print()
+
         feedback, score = autograder.run_tests(sub_path, filename, current_student_type)  # Run tests
 
-        sys.stdout = system_info  # Enable print()
+        enable_print()
 
         if feedback:
             feedback_string = "\n".join(feedback)
