@@ -31,6 +31,8 @@ Notes:
 import pandas as pd
 import importlib
 import openpyxl
+import sys
+import os
 
 TEST_CASE_FILENAME = "MiniMilestone_TestCases.xlsx"
 SOLN_FILENAME_SUFFIX = "_SOLUTION"  # E.g. MM04_SOLUTION.py
@@ -169,8 +171,13 @@ def main():
     print("Welcome to the testcaseUpdater. Below are the extracted sheets from the test case spreadsheet.\n")
 
     chosen_sheet_names = select_sheets(sheet_names_df)
+
+    sys.stdout = open(os.devnull, 'w')  # Disable print
+
     for sheet_name in chosen_sheet_names:
         perform_tests(test_case_xl, sheet_name)
+
+    sys.stdout = sys.__stdout__  # Enable print
 
     print("*" * 75)
     print(f"Update complete. Check {TEST_CASE_FILENAME}. Press enter to quit.")
