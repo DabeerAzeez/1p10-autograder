@@ -58,10 +58,11 @@ class Autograder:
         Runs tests from test case workbook on student code. Returns feedback strings and total score.
     """
 
+    TOLERANCE = 0.0000001
+
     def __init__(self, milestone_num):
         self.milestone_num = milestone_num
         self.database = pd.read_excel(TESTCASES_PATH, sheet_name=milestone_num)
-        self.tolerance = 0.0000001
 
     @staticmethod
     def grade_testcase(x, lower, upper, score, points):
@@ -86,23 +87,12 @@ class Autograder:
 
         return score
 
-    def tol(self, value):
-        """
-        Returns
-        -------
-        [upperTolerance, lowerTolerance]: Upper and lower bounds.
-
-        
-        Inputs
-        -------
-        value: value to be tested.
-        """
-        upper_tolerance = value * (1 + self.tolerance)
-        lower_tolerance = value * (1 - self.tolerance)
-        if value >= 0:  # accounts for negative numbers
-            return [lower_tolerance, upper_tolerance]
-        else:
-            return [upper_tolerance, lower_tolerance]
+    @staticmethod
+    def within_tol(actual_value, expected_value):
+        """Returns a boolean if the actual value is within the Autograder's tolerance of the expected value"""
+        lower_bound = (1 - Autograder.TOLERANCE) * expected_value
+        upper_bound = (1 + Autograder.TOLERANCE) * expected_value
+        return True if lower_bound <= actual_value <= upper_bound else False
 
     def test(self, expected, actual, score, points):
         """
@@ -201,11 +191,23 @@ class Autograder:
 
             try:
                 exec(test_code)
-                if output[0] == correct_output:
+                student_output = output[0]
+                if student_output == correct_output:
                     score = row['Weight']
                     feedback_str = "Correct!"
                 else:
-                    feedback_str = "Testcase: " + row['Command'] + " gives an incorrect output."
+                    try:
+                        # Account for floating point errors if output should be numeric
+                        correct_output = float(correct_output)
+                        student_output = float(student_output)
+                    except ValueError:
+                        feedback_str = "Testcase: " + row['Command'] + " gives an incorrect output."
+
+                    if Autograder.within_tol(student_output, correct_output):
+                        score = row['Weight']
+                        feedback_str = "Correct!"
+                    else:
+                        feedback_str = "Testcase: " + row['Command'] + " gives an incorrect output."
             except NameError:
                 feedback_str = "Testcase: " + row['Command'] + " results in a name error. Function not defined."
             except Exception as e:  # Bare except necessary to catch whatever error might occur in the student file
