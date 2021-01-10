@@ -62,7 +62,7 @@ class Autograder:
 
     def __init__(self, milestone_num):
         self.milestone_num = milestone_num
-        self.database = pd.read_excel(TESTCASES_PATH, sheet_name=milestone_num)
+        self.testcases_xl = pd.read_excel(TESTCASES_PATH, sheet_name=milestone_num)
 
     @staticmethod
     def within_tol(actual_value, expected_value):
@@ -116,7 +116,7 @@ class Autograder:
             else:
                 feedback.append("Unknown error occurred while running your program...attempting to test functions.")
 
-        for index, row in self.database.iterrows():
+        for index, row in self.testcases_xl.iterrows():
             score = 0
             output = []  # List works more easily with exec() variable modification
 
@@ -160,11 +160,11 @@ class Autograder:
 
 def check_student_weights(autograder):
     # total points per student type (averaged over number of student types within test case sheet)
-    student_types = list(autograder.database.Student.drop_duplicates())
+    student_types = list(autograder.testcases_xl.Student.drop_duplicates())
     student_weights = set()
 
     for student_type in student_types:
-        student_weight = sum(autograder.database[autograder.database.Student == student_type]['Weight'])
+        student_weight = sum(autograder.testcases_xl[autograder.testcases_xl.Student == student_type]['Weight'])
         student_weights.add(student_weight)
 
     if len(student_weights) > 1:
