@@ -138,7 +138,7 @@ def perform_tests(test_case_xl, chosen_sheet):
             if row["Constructor"] == "x":
                 test_code = row['Test']
         else:
-            test_code = "row['Outputs'] = " + row['Test']
+            test_code = "row['Outputs'] = str(" + row['Test'] + ")"
 
         exec(test_code)
         test_cases_df.loc[index] = row  # Update test_cases dataframe with local row Series
