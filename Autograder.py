@@ -6,8 +6,8 @@ Adapted by: Dabeer Abdul-Azeez <abdulazd@mcmaster.ca> for use in marking the 1P1
 
 Requirements to run this script:
 - Class list csv file containing (Username | Last Name | First Name | End-of-Line Indicator)
-    - This should be exported from Avenue the grade book
-- Test cases spreadsheet containing individual sheets containing testcases for each mini milestone
+    - This should be exported from the Avenue grade book for the class (select NO assignments when doing this)
+- Test cases spreadsheet composed of individual sheets containing testcases for each mini milestone
     - See the "_Instructions" sheet included in the test cases workbook for information on how to write test cases
 - Directory containing student .py files
 
@@ -18,6 +18,8 @@ This script will:
 - Generate a feedback folder wherein feedback-modified submissions will be stored (can be reuploaded to Avenue)
 - Create a grades csv file which can be uploaded to Avenue to update the gradebook
 """
+
+# TODO: Disable / enable print in utils
 
 import pandas as pd
 from Autograder_utils import check_called
@@ -48,19 +50,9 @@ class Autograder:
     
     test(self, expected, actual, score, points)    
         tests that expected == actual and returns the students score according to the "points" that assertion is worth.
-    
-    markFunction(self, score, func)
-        Marks an individual function and returns function feedback and score.
-        
-    markFunctions(self, *funcs)
-        Marks the functions inputted and returns feedback and total score.
-        
-    markFile(self, file)
-        TODO
-    
-    markObject(self, obj)
-        TODO
-    
+
+    run_tests(self, sub_path, filename, student_type):
+        Runs tests from test case workbook on student code. Returns feedback strings and total score.
     """
 
     def __init__(self, milestone_num):
@@ -155,19 +147,16 @@ class Autograder:
 
         Parameters
         ----------
-        student_code: code object of student's compiled code
+        sub_path: Submission directory path
+        filename: name of student's file
         student_type: character representing student type (e.g. "A" or "B")
 
         Returns
         -------
-        feedback: Function(s) feedback string.
-        total: lab score.
-
-        Inputs
-        -------
-        funcs: Function(s) to be tested.
+        feedback: List of feedback strings
+        total: lab score
         """
-        with open(sub_path + filename, encoding="utf8") as f:  # TODO: Offset code compilation to separate function?
+        with open(sub_path + filename, encoding="utf8") as f:
             # sys.stdout = open(os.devnull, 'w')  # Disable print()
             content = f.read()
 
@@ -211,7 +200,7 @@ class Autograder:
 
             try:
                 exec(test_code)
-                if output[0] == correct_output:  # TODO: Pass 'output' to test_code and exec
+                if output[0] == correct_output:
                     score = row['Weight']
                     feedback_str = "Correct!"
                 else:
