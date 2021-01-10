@@ -257,24 +257,9 @@ def grade_submissions(milestone_num, sub_path):
     # total points per student type (averaged over number of student types within test case sheet)
     total = sum(autograder.database.Weight) / len(autograder.database.Student.drop_duplicates())
 
-    # Override built-in input() function to prevent program from stopping (students should avoid these within functions)
-    def input(string=""):
-        return "You've been bamboozled"
-
-    # Extract relevant functions based on the student type
-    # TODO: Test a test case sheet with only one student type
-    all_functions = list(autograder.database.Function.drop_duplicates())
-    student_funcs_dict = dict.fromkeys(all_functions)
-
-    for function in all_functions:  # Connect functions with appropriate students using a dictionary
-        rows = autograder.database.loc[autograder.database['Function'] == function]
-        associated_student = rows.iloc[0].Student
-        student_funcs_dict[function] = associated_student
-
-    # Go through all files in submission directory
-    for filename in sorted(os.listdir(path)):  # Sample filename: abdulazd_MM04.py
-        if not filename.endswith(".py"):
-            continue
+    # Go through all python files in submission directory
+    python_files = [file for file in sorted(os.listdir(sub_path)) if file.endswith(".py")]
+    for filename in python_files:  # Sample filename: abdulazd_MM04_StudentA.py
 
         filename_sections = filename.split("_")
         username = "#" + filename_sections[0]  # Pound symbol is to match Avenue classlist format
@@ -334,7 +319,8 @@ def build_for_avenue(final, lab):
     if str(lab) in "234":
         grade_item = "Computing Lab {0} Points Grade <Numeric MaxPoints:{1}>".format(lab, final["Out of"][0])
     else:
-        grade_item = "Computing Lab {0} - Objective Points Grade <Numeric MaxPoints:{1}>".format(lab, final["Out of"][0])
+        grade_item = "Computing Lab {0} - Objective Points Grade <Numeric MaxPoints:{1}>".format(lab,
+                                                                                                 final["Out of"][0])
 
     avenue_upload = final.loc[:, ["Username", "Grade"]]
     avenue_upload.rename(columns={"Grade": grade_item}, inplace=True)
