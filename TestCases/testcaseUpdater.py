@@ -85,7 +85,7 @@ def verify_columns(columns):
     """
     # TODO: Check for missing items in required columns
 
-    REQ_COLUMNS = ["Test", "Constructor", "Student", "Weight", "Outputs"]
+    REQ_COLUMNS = ["Test", "Student", "Weight", "Outputs"]
 
     for col in REQ_COLUMNS:
         if col not in columns:
