@@ -22,7 +22,7 @@ This script will:
 
 import pandas as pd
 import os
-from Autograder_utils import check_called, disable_print, enable_print
+from utils import check_called, disable_print, enable_print
 
 CLASSLIST_FILENAME = "Classlist.csv"
 GRADES_FILENAME = "Computing {} Grades.csv"
