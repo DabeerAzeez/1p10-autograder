@@ -134,7 +134,7 @@ class Autograder:
 
         return score
 
-    def run_tests(self, sub_path, filename, student_type):
+    def grade_submission(self, sub_path, filename, student_type):
         """
         Runs tests on provided student code based on their student type.
 
@@ -253,7 +253,7 @@ def grade_submissions(milestone_num, sub_path):
 
         disable_print()
 
-        feedback, score = autograder.run_tests(sub_path, filename, current_student_type)  # Run tests
+        feedback, score = autograder.grade_submission(sub_path, filename, current_student_type)  # Run tests
 
         enable_print()
 
