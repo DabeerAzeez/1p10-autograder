@@ -65,29 +65,6 @@ class Autograder:
         self.database = pd.read_excel(TESTCASES_PATH, sheet_name=milestone_num)
 
     @staticmethod
-    def grade_testcase(x, lower, upper, score, points):
-        """
-        Returns
-        -------
-        score: Testcase score.
-
-        Inputs
-        -------
-        x: Actual output
-        Lower: Expected output lower bound.
-        upper: Expected output upper bound.
-        score: Current score.
-        points: Testcase points.
-        """
-        try:
-            assert lower <= x <= upper
-            score += points
-        except AssertionError:
-            score = score
-
-        return score
-
-    @staticmethod
     def within_tol(actual_value, expected_value):
         """Returns a boolean if the actual value is within the Autograder's tolerance of the expected value"""
         lower_bound = (1 - Autograder.TOLERANCE) * expected_value
