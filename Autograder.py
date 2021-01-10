@@ -261,13 +261,17 @@ def grade_submissions(lab, path):
     import sys
     system_info = sys.stdout  # To enable and disable print()
     autograder = Autograder(lab)
-    total = sum(autograder.database.Weight) / len(autograder.database.Student.drop_duplicates())
     results = pd.DataFrame(columns=["Username", "File Name", "Grade", "Out of", "Comments"])
 
-    def input(string=""):  # Override built-in input() function to prevent program from stopping
+    # total points per student type (averaged over number of student types within test case sheet)
+    total = sum(autograder.database.Weight) / len(autograder.database.Student.drop_duplicates())
+
+    # Override built-in input() function to prevent program from stopping (students should avoid these within functions)
+    def input(string=""):
         return "You've been bamboozled"
 
     # Extract relevant functions based on the student type
+    # TODO: Test a test case sheet with only one student type
     all_functions = list(autograder.database.Function.drop_duplicates())
     student_funcs_dict = dict.fromkeys(all_functions)
 
