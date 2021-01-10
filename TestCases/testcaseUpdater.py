@@ -25,7 +25,6 @@ Notes:
 - Instructions on how to write test cases are included in the TCWB
 """
 
-# TODO: Remove 'inputs' column and just read and compile the code
 # TODO: Reset TCWB column widths
 # TODO: Don't rely on old xlrd (https://stackoverflow.com/questions/65250207/pandas-cannot-open-an-excel-xlsx-file)
 
