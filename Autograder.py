@@ -109,6 +109,7 @@ class Autograder:
 
         try:
             exec(content)  # Execute student code to import objects into local namespace
+            # TODO: Deal with syntax errors
         # except SyntaxError:
         #     compilation_error_msg = "Program does not compile. You have received a grade of zero"
         #
@@ -183,6 +184,7 @@ def check_student_weights(autograder):
 
     return student_weights
 
+
 def grade_submissions(milestone_num, sub_path):
     """
     - Loops through submissions directory.
@@ -204,8 +206,9 @@ def grade_submissions(milestone_num, sub_path):
     student_weights = check_student_weights(autograder)
     total = max(student_weights)
 
-    print("\nBeginning grading...")
     print("*" * 75)
+    print("Beginning grading...")
+    print("-" * 20)
 
     # Go through all python files in submission directory
     python_files = [file for file in sorted(os.listdir(sub_path)) if file.endswith(".py")]
@@ -361,12 +364,10 @@ def main():
     if not os.path.exists(feedback_path):
         os.makedirs(feedback_path)
 
-    print("\nProgram start...")
-
     results = grade_submissions(lab, sub_path)
     build_for_avenue(results, lab)
     append_feedback(lab, results, sub_path, feedback_path)
-    num_subs = sum(filename.endswith(".py") for filename in sorted(os.listdir(sub_path)))
+    num_subs = sum(filename.endswith(".py") for filename in sorted(os.listdir(sub_path)))  # TODO: Count submissions more accurately
 
     print("*" * 75)
     print("Grading complete")
