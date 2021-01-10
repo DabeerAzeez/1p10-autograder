@@ -134,7 +134,7 @@ def perform_tests(test_case_xl, chosen_sheet):
     for index, row in test_cases_df.iterrows():  # iterrows generator should not be used for large dataframes
         test_code = ""
 
-        if "Constructor" in row.columns:
+        if "Constructor" in list(row.index):
             if row["Constructor"] == "x":
                 test_code = row['Test']
         else:
