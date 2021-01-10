@@ -19,7 +19,6 @@ This script will:
 - Create a grades csv file which can be uploaded to Avenue to update the gradebook
 """
 # TODO: Parameterize test case workbook column headers
-# TODO: Implement tolerances for floating point answers
 # TODO: Test an object-oriented lab
 
 import pandas as pd
