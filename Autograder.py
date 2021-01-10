@@ -71,46 +71,6 @@ class Autograder:
         upper_bound = (1 + Autograder.TOLERANCE) * expected_value
         return True if lower_bound <= actual_value <= upper_bound else False
 
-    def test(self, expected, actual, score, points):
-        """
-        Returns
-        -------
-        score: Test score.
-
-        
-        Inputs
-        -------
-        expected: Autograder's output.
-        actual: Student's output.
-        score: Current score.
-        points: Testcase points.
-        """
-        if type(expected) is list or type(expected) is tuple:
-            # tests tuples and lists by recursively calling "test" and applying a tolerance to...
-            # ...each entry in a list/ tuple and adding "points" to "temp" each time an entry...
-            # ...passes the assertion test. Once it has gone through each entry it adds "points" to "score" if every ...
-            # ...if every entry in the list/ tuple was correct.
-            # If the list/ tuple is empty and is supposed to be empty then "points" is added to "score"
-
-            if len(actual) == len(expected):
-                temp = 0
-                for i in range(len(expected)):
-                    temp = self.test(actual[i], expected[i], temp, points)
-                if len(expected) == 0:
-                    score += points
-                else:
-                    score += (temp // (points * len(expected))) * points
-
-        elif type(expected) is str:
-            lower = upper = expected  # Strings
-            score = self.grade_testcase(actual, lower, upper, score, points)
-
-        else:
-            lower, upper = self.tol(expected)
-            score = self.grade_testcase(actual, lower, upper, score, points)
-
-        return score
-
     def grade_submission(self, sub_path, filename, student_type):
         """
         Runs tests on provided student code based on their student type.
