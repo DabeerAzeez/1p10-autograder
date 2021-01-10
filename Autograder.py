@@ -23,6 +23,7 @@ This script will:
 import pandas as pd
 import os
 from utils import check_called, disable_print, enable_print
+import time
 
 CLASSLIST_FILENAME = "Classlist.csv"
 GRADES_FILENAME = "Computing {} Grades.csv"
@@ -377,9 +378,6 @@ def append_feedback(lab, results, path, feedback_path):
 
 
 def main():
-    import os
-    import time
-
     start = time.time()
     lab = input("Please input mini-milestone number (e.g. MM04): ")
 
