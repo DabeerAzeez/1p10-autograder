@@ -35,27 +35,28 @@ FEEDBACK_PATH = "./Computing {} Feedback Files/"
 
 class Autograder:
     """
-    Autograder Object to mark individual submissions
-        
-    Attributes
+    Autograder Class to mark individual submissions
+
+    Class Attributes
+    ----------------
+    TOLERANCE: set to 0.00001% to avoid floating point errors.
+
+    Instance Attributes
     --------
     database: Lab testcase info stored as a Pandas dataframe.
-    tolerance: set to 0.00001% to avoid floating point errors.
     
     Methods
     --------
-    grade_testcase(self, x, lower, upper, score, points)
-        Runs assetion test and returns testcase score. 
-    
-    tol(self, value)
-        Returns the upper and lower tolerance bounds for value.
+    within_tol(actual_value, expected_value)
+        Returns a boolean if the actual value is within the Autograder's tolerance of the expected value
     
     test(self, expected, actual, score, points)    
         tests that expected == actual and returns the students score according to the "points" that assertion is worth.
 
-    run_tests(self, sub_path, filename, student_type):
+    grade_submission(self, sub_path, filename, student_type):
         Runs tests from test case workbook on student code. Returns feedback strings and total score.
     """
+
 
     TOLERANCE = 0.0000001
 
