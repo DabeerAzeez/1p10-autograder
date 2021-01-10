@@ -62,9 +62,8 @@ class Autograder:
     
     """
 
-    DELIMITER = ";"  # Delimiter for test case input spreadsheet
-
     def __init__(self, milestone_num):
+        self.milestone_num = milestone_num
         self.database = pd.read_excel(TESTCASES_PATH, sheet_name=milestone_num)
         self.tolerance = 0.0000001
 
@@ -149,73 +148,14 @@ class Autograder:
 
         return score
 
-    def mark_function(self, score, func):
+    def run_tests(self, sub_path, filename, student_type):
         """
-        Returns
-        -------
-        feedback_str: Function feedback string.
-        score: Function score.
+        Runs tests on provided student code based on their student type.
 
-        
-        Inputs
-        -------
-        score: current score.
-        func: Function to be tested.
-        """
-
-        functiondb = self.database.loc[self.database["Function"] == func.__name__]  # Function database
-        total = sum(functiondb.Weight)
-        temp = 0
-        feedback = []
-        first = functiondb.index[0]
-        last = first + len(functiondb.Function)
-
-        for i in range(first, last):
-            inputs = functiondb.Inputs[i]
-            output = functiondb.Outputs[i]
-
-            if type(inputs) is str:
-                parameters_list = [eval(i) for i in functiondb.Inputs[i].split(Autograder.DELIMITER)]
-                display_input = str(parameters_list)
-            elif type(inputs) is int or type(inputs) is float:
-                parameters_list = [inputs]
-                display_input = str(parameters_list[0])
-            else:
-                raise TypeError("Unknown function input in test case workbook: " + inputs)
-
-            try:
-                student_answer = func(*parameters_list)
-            except:  # Bare except necessary to catch whatever error might occur in the student file
-                feedback.append("Testcase input: " + display_input + " outputs an error")
-                continue
-
-            if type(output) is int or type(output) is float:
-                expected = output
-            elif type(output) is str:
-                if type(eval(output)) != str:
-                    expected = eval(output)  # In case the string is holding another datatype
-                else:
-                    expected = output
-            else:
-                raise TypeError("Unknown function output in test case workbook: " + output)
-
-            score = self.test(expected, student_answer, score, functiondb.Weight[i])
-
-            if temp == score:  # If score did not update
-                feedback.append("Testcase input: " + display_input + " has an incorrect Output")
-            else:
-                temp = score
-
-        feedback = list(dict.fromkeys(feedback))  # Remove duplicate comments
-
-        feedback_str = func.__name__ + ": ({0}/{1})\n\t".format(score, total) + (
-            ",\n\t".join(feedback) if feedback != [] else "Correct!")
-
-        return feedback_str, score
-
-    def mark_functions(self, *funcs):
-        """
-        Marks functions, providing a total score and feedback
+        Parameters
+        ----------
+        student_code: code object of student's compiled code
+        student_type: character representing student type (e.g. "A" or "B")
 
         Returns
         -------
@@ -226,22 +166,72 @@ class Autograder:
         -------
         funcs: Function(s) to be tested.
         """
+        with open(sub_path + filename, encoding="utf8") as f:  # TODO: Offset code compilation to separate function?
+            # sys.stdout = open(os.devnull, 'w')  # Disable print()
+            content = f.read()
+
         total = 0
         feedback = []
-        for func in funcs:
-            feedback_str, score = self.mark_function(0, func)
+
+        # Override built-in input() function to prevent program halt (students should avoid these within functions)
+        @check_called
+        def input(string=""):
+            return "You shouldn't have input statements!"
+
+        try:
+            exec(content)  # Execute student code to import objects into local namespace
+        # except SyntaxError:
+        #     compilation_error_msg = "Program does not compile. You have received a grade of zero"
+        #
+        #     if username in list(results.Username):  # Account for multiple submissions
+        #         results.loc[results.Username == username, :] = [username, filename, 0, total, compilation_error_msg]
+        #     else:
+        #         results.loc[len(results)] = [username, filename, 0, total, compilation_error_msg]
+        #
+        #     sys.stdout = system_info  # Enable print()
+        #     print(username[1:], "graded. (Received Zero)")
+        #     continue
+        except ValueError:  # In case input statement results in ValueError
+            if input.called:
+                feedback.append("You shouldn't have input statements!")
+            else:
+                feedback.append("Unknown error occurred while running your program...attempting to test functions.")
+
+        for index, row in self.database.iterrows():
+            feedback_str = ""
+            score = 0
+            output = []  # List works more easily with exec() variable modification
+
+            if row['Student'] != student_type:  # Only perform a test case if the student is the right type
+                continue
+
+            test_code = "output.insert(0,str(" + row['Test'] + "))"
+            correct_output = row['Outputs']
+
+            try:
+                exec(test_code)
+                if output[0] == correct_output:  # TODO: Pass 'output' to test_code and exec
+                    score = row['Weight']
+                    feedback_str = "Correct!"
+                else:
+                    score = 0
+                    feedback_str = "Testcase: " + row['Test'] + " gives an incorrect output."
+            except NameError:
+                score = 0
+                feedback_str = "Testcase: " + row['Test'] + " results in a name error. Function not defined."
+            except Exception as e:  # Bare except necessary to catch whatever error might occur in the student file
+                score = 0
+                feedback_str = "Testcase: " + row['Test'] + " outputs an error: " + str(e)
+
+            score_msg = "({0}/{1}) ".format(score, row['Weight'])
             total += score
-            feedback.append(feedback_str)
+
+            feedback.append(score_msg + feedback_str)
+
         return feedback, total
 
-    def mark_file(self, filename):  # TODO
-        return
 
-    def mark_object(self, obj):  # TODO
-        return
-
-
-def grade_submissions(lab, path):
+def grade_submissions(milestone_num, sub_path):
     """
     - Loops through submissions directory.
     - Compiles and executes each python file.
@@ -260,7 +250,7 @@ def grade_submissions(lab, path):
     import os
     import sys
     system_info = sys.stdout  # To enable and disable print()
-    autograder = Autograder(lab)
+    autograder = Autograder(milestone_num)
     results = pd.DataFrame(columns=["Username", "File Name", "Grade", "Out of", "Comments"])
 
     # total points per student type (averaged over number of student types within test case sheet)
@@ -289,51 +279,11 @@ def grade_submissions(lab, path):
         username = "#" + filename_sections[0]  # Pound symbol is to match Avenue classlist format
         current_student_type = filename_sections[2].lstrip("Student").rstrip(".py")  # Student A / B, etc.
 
-        with open(path + filename, encoding="utf8") as f:
-            sys.stdout = open(os.devnull, 'w')  # Disable print()
+        feedback, score = autograder.run_tests(sub_path, filename, current_student_type)  # Run tests
 
-            try:
-                content = f.read()
-                code = compile(content, path + filename, 'exec')
-                code_globals = {"input": input}
-                exec(code, code_globals)
-
-            except SyntaxError:
-                compilation_error_msg = "Program does not compile. You have recieved a grade of zero"
-
-                if username in list(results.Username):  # Account for multiple submissions
-                    results.loc[results.Username == username, :] = [username, filename, 0, total, compilation_error_msg]
-                else:
-                    results.loc[len(results)] = [username, filename, 0, total, compilation_error_msg]
-
-                sys.stdout = system_info  # Enable print()
-                print(username[1:], "graded. (Recieved Zero)")
-                continue
-
-            except:
-                pass
-
-            funcs = []
-
-            relevant_functions = []
-            for func, student_type in student_funcs_dict.items():
-                if student_type == current_student_type:
-                    relevant_functions.append(func)
-
-            for func in relevant_functions:
-                try:
-                    funcs.append(code_globals[func])
-                except KeyError:  # Function Misspelled or Does not exist
-                    continue
-
-        feedback, score = autograder.mark_functions(*funcs)  # Test available functions
         sys.stdout = system_info  # Enable print()
 
         if feedback:
-            for func in relevant_functions:
-                if func not in code_globals.keys():
-                    feedback.append(func + ": Missing!")
-
             feedback_string = "\n".join(feedback)
         else:
             feedback_string = "No functions found!"
@@ -345,7 +295,7 @@ def grade_submissions(lab, path):
 
         print(username[1:], "graded.")
 
-    results.to_csv("Computing {} Raw Results.csv".format(lab), index=False)
+    results.to_csv("Computing {} Raw Results.csv".format(milestone_num), index=False)
     return results
 
 
