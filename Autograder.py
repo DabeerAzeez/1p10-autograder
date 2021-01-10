@@ -460,6 +460,9 @@ def main():
     lab = input("Please input mini-milestone number (e.g. MM04): ")
 
     sub_path = SUBMISSION_PATH.format(lab)
+    if not os.path.exists(sub_path):
+        raise NotADirectoryError("Missing directory: " + sub_path)
+
     feedback_path = FEEDBACK_PATH.format(lab)
     if not os.path.exists(feedback_path):
         os.makedirs(feedback_path)
