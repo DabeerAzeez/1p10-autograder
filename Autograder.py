@@ -23,7 +23,6 @@ This script will:
 
 import pandas as pd
 import os
-from utils import check_called, disable_print, enable_print  # TODO: Don't import all from utils
 import utils
 import time
 
@@ -103,7 +102,7 @@ class Autograder:
         feedback = []
 
         # Override built-in input() function to prevent program halt (students should avoid these within functions)
-        @check_called
+        @utils.check_called
         def input(string=""):
             return "You shouldn't have input statements!"
 
@@ -225,9 +224,9 @@ def grade_submissions(milestone_num, sub_path):
         username = "#" + filename_sections[0]  # Pound symbol is to match Avenue classlist format
         current_student_type = filename_sections[2].lstrip("Student").rstrip(".py")  # Student A / B, etc.
 
-        disable_print()
+        utils.disable_print()
         feedback, score = autograder.grade_submission(sub_path, filename, current_student_type)
-        enable_print()
+        utils.enable_print()
 
         if feedback:
             feedback_string = "\n".join(feedback)
