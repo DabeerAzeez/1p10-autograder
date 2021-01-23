@@ -146,6 +146,14 @@ def verify_testcase_sheet(testcases_df, chosen_sheet):
     except (AttributeError, ValueError):
         raise ValueError("Non-numeric character in Weight column of sheet " + chosen_sheet)
 
+    try:
+        # Check for numeric entries in the 'Command' column
+        if testcases_df["Command"].apply(lambda x: isinstance(x, (int, float))).any():
+            raise ValueError
+    except (AttributeError, ValueError):
+        raise ValueError("Numeric character (not a command!) in Command column of sheet " + chosen_sheet)
+
+
 
 def perform_tests(test_case_xl, chosen_sheet):
     """
