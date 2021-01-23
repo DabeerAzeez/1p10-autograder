@@ -267,6 +267,40 @@ class Autograder:
             print(username[1:], "graded.")
 
         self.results_df = results_df
+        self.append_feedback_to_student_files()
+
+    def append_feedback_to_student_files(self):
+        """
+        Loops through student submission and creates a copy with feedback inserted at the top.
+
+        Returns
+        -------
+        None
+
+        Inputs
+        -------
+        lab: Lab number.
+        results: Raw results dataframe.
+        path: Student submissions folder path.
+        feedbackPath: Student feedback folder path.
+        """
+        # Add 'First Name' and 'Last Name' columns for personalized messages
+        results_df_with_names = add_name(self.results_df)
+
+        # Loop over results data frame, compile feedback, and write it into each student's file
+        for i in range(len(results_df_with_names)):
+            name = results_df_with_names["First Name"][i]
+            feedback = results_df_with_names["Comments"][i]
+
+            msg = build_feedback(name, self.MILESTONE_NUM, feedback)
+
+            submission_file = self.SUBMISSION_PATH + results_df_with_names["File Name"][i]
+            with open(submission_file, "r", encoding="utf8") as f:
+                content = f.read()
+
+            submission_file_with_feedback = self.FEEDBACK_PATH + results_df_with_names["File Name"][i]
+            with open(submission_file_with_feedback, "w", encoding="utf8") as f:
+                f.write(msg + content)
 
 
 def build_grades_csv_for_brightspace(autograder):
@@ -345,40 +379,6 @@ def build_feedback(name, lab, feedback):
     return body
 
 
-def append_feedback_to_student_files(autograder):
-    """
-    Loops through student submission and creates a copy with feedback inserted at the top.
-    
-    Returns
-    -------
-    None
-
-    Inputs
-    -------
-    lab: Lab number.
-    results: Raw results dataframe.
-    path: Student submissions folder path.
-    feedbackPath: Student feedback folder path.
-    """
-    # Add 'First Name' and 'Last Name' columns for personalized messages
-    results_df_with_names = add_name(autograder.results_df)
-
-    # Loop over results data frame, compile feedback, and write it into each student's file
-    for i in range(len(results_df_with_names)):
-        name = results_df_with_names["First Name"][i]
-        feedback = results_df_with_names["Comments"][i]
-
-        msg = build_feedback(name, autograder.MILESTONE_NUM, feedback)
-
-        submission_file = autograder.SUBMISSION_PATH + results_df_with_names["File Name"][i]
-        with open(submission_file, "r", encoding="utf8") as f:
-            content = f.read()
-
-        submission_file_with_feedback = autograder.FEEDBACK_PATH + results_df_with_names["File Name"][i]
-        with open(submission_file_with_feedback, "w", encoding="utf8") as f:
-            f.write(msg + content)
-
-
 def main():
     milestone_num = input("Please input mini-milestone number (e.g. MM04): ")
     autograder = Autograder(milestone_num)
@@ -395,7 +395,6 @@ def main():
 
     autograder.grade_submissions()
     build_grades_csv_for_brightspace(autograder)
-    append_feedback_to_student_files(autograder)
 
     print("*" * 75)
     print("Grading complete")
