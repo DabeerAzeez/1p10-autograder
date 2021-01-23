@@ -289,7 +289,7 @@ def build_grades_csv_for_brightspace(autograder):
     brightspace_upload_df.to_csv(autograder.GRADES_CSV_FILENAME, index=False)
 
 
-def add_name(results):
+def add_name(results_df):
     """
     Adds student name to inputted dataframe based by performing an inner join with an extracted classlist.
     
@@ -302,12 +302,13 @@ def add_name(results):
     results: Raw results dataframe.
     """
     try:
-        classlist = pd.read_csv(Autograder.CLASSLIST_FILENAME)
+        classlist_df = pd.read_csv(Autograder.CLASSLIST_FILENAME)
     except FileNotFoundError:
         raise FileNotFoundError("Missing classlist CSV.")
 
-    name_added = pd.merge(classlist, results, on=['Username'])
-    return name_added
+    name_added_df = pd.merge(classlist_df, results_df, on=['Username'])
+
+    return name_added_df
 
 
 def build_feedback(name, lab, feedback):
@@ -338,6 +339,8 @@ def build_feedback(name, lab, feedback):
     body += "\nHave a wonderful day,\nYour Friendly Neighbourhood Bot"
 
     body += "\n'''"
+
+    body += "\n"*5
 
     return body
 
