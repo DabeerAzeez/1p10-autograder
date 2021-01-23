@@ -381,6 +381,8 @@ def build_feedback(name, lab, feedback):
 
 def main():
     milestone_num = input("Please input mini-milestone number (e.g. MM04): ")
+
+    start = time.time()
     autograder = Autograder(milestone_num)
 
     # Look for submissions directory
@@ -390,8 +392,6 @@ def main():
     # Make feedback directory if non-existent
     if not os.path.exists(autograder.FEEDBACK_PATH):
         os.makedirs(autograder.FEEDBACK_PATH)
-
-    start = time.time()
 
     autograder.grade_submissions()
     build_grades_csv_for_brightspace(autograder)
