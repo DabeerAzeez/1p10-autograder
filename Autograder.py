@@ -110,6 +110,8 @@ class Autograder:
             for index, row in self.testcases_sheet.iterrows():
                 test_score = 0
                 test_output = []  # List mutates more easily via exec()
+                feedback_str = ""
+
                 try:
                     dont_test = row['DontTest'] == "x"
                 except KeyError:
