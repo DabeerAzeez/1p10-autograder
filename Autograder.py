@@ -43,7 +43,8 @@ class Autograder:
 
         try:
             self.testcases_sheet = pd.read_excel(Autograder.TESTCASES_XL_PATH, sheet_name=milestone_num)
-            print("Found test cases excel file. Extracted sheet: " + milestone_num, flush=True)
+            print("Found test cases excel file.")
+            print("Extracted sheet: '" + milestone_num + "'")
             self.verify_testcases_sheet()
         except FileNotFoundError:
             raise FileNotFoundError("Missing test cases excel file.")
@@ -242,6 +243,9 @@ class Autograder:
 
             print(username[1:], "graded.")
 
+        print("-" * 20)
+        print("Grading complete.")
+
         self.results_df = results_df
         self.append_feedback_to_student_files()
 
@@ -260,6 +264,7 @@ class Autograder:
         path: Student submissions folder path.
         feedbackPath: Student feedback folder path.
         """
+        print("Generating feedback files for submissions...")
         self.add_student_names_to_results_df()
 
         # Loop over results data frame, compile feedback, and write it into each student's file
@@ -276,6 +281,8 @@ class Autograder:
             submission_file_with_feedback = self.FEEDBACK_PATH + self.results_df["File Name"][i]
             with open(submission_file_with_feedback, "w", encoding="utf8") as f:
                 f.write(msg + content)
+
+        print("Feedback file generation complete.")
 
     def add_student_names_to_results_df(self):
         """
