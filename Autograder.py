@@ -225,70 +225,68 @@ class Autograder:
         avenue_upload["End-of-Line Indicator"] = "#"
         avenue_upload.to_csv(self.GRADES_FILENAME.format(lab), index=False)
 
+    def grade_submissions(self):
+        """
+        - Loops through submissions directory.
+        - Compiles and executes each python file
+            - Each student submission is assumed to adhere to the following naming convention: MacID_MM##_StudentX.py
+                - MacID is a string of letters and possibly numbers
+                - ## represents an integer, depending on the milestone
+                - X represents any letter; it denotes the student 'type' (i.e. what objectives they must accomplish)
 
-def grade_submissions(milestone_num, submission_path):
-    """
-    - Loops through submissions directory.
-    - Compiles and executes each python file
-        - Each student submission is assumed to adhere to the following naming convention: MacID_MM##_StudentX.py
-            - MacID is a string of letters and possibly numbers
-            - ## represents an integer, depending on the milestone
-            - X represents any letter; it denotes the student 'type' (i.e. what objectives they must accomplish)
-    
-    Returns
-    -------
-    - Names, filenames, grades, maximum grade, and feedback in a dataframe
-    - Number of submissions graded
+        Returns
+        -------
+        - Names, filenames, grades, maximum grade, and feedback in a dataframe
+        - Number of submissions graded
 
-    Inputs
-    -------
-    milestone_num: milestone number (e.g. MM04).
-    submission_path: Student submissions folder path for the corresponding milestone_num
-    """
-    autograder = Autograder(milestone_num)
-    results_df = pd.DataFrame(columns=["Username", "File Name", "Grade", "Out of", "Comments"])
+        Inputs
+        -------
+        milestone_num: milestone number (e.g. MM04).
+        submission_path: Student submissions folder path for the corresponding milestone_num
+        """
+        results_df = pd.DataFrame(columns=["Username", "File Name", "Grade", "Out of", "Comments"])
 
-    max_student_points = autograder.get_max_student_points()
+        max_student_points = self.get_max_student_points()
 
-    print("*" * 75)
-    print("Beginning grading...")
-    print("-" * 20)
+        print("*" * 75)
+        print("Beginning grading...")
+        print("-" * 20)
 
-    # All python files in the submission directory count as submissions
-    submissions = [file for file in sorted(os.listdir(submission_path)) if file.endswith(".py")]
+        # All python files in the submission directory count as submissions
+        submissions = [file for file in sorted(os.listdir(self.SUBMISSION_PATH)) if file.endswith(".py")]
 
-    if len(submissions) == 0:
-        raise FileNotFoundError("No submission files found!")
+        if len(submissions) == 0:
+            raise FileNotFoundError("No submission files found!")
 
-    # Grade each submission and update results dataframe with the student grade
-    for submission in submissions:
-        filename_sections = submission.split("_")
-        if len(filename_sections) == 1:
-            raise ValueError("Submission file missing underscore separator: " + str(submission))
+        # Grade each submission and update results dataframe with the student grade
+        for submission in submissions:
+            filename_sections = submission.split("_")
+            if len(filename_sections) == 1:
+                raise ValueError("Submission file missing underscore separator: " + str(submission))
 
-        # TODO: Add more error handling for student file names
-        username = "#" + filename_sections[0]  # Pound symbol is to match Avenue classlist format
-        current_student_type = filename_sections[2].lstrip("Student").rstrip(".py")  # Student A / B, etc.
+            # TODO: Add more error handling for student file names
+            username = "#" + filename_sections[0]  # Pound symbol is to match Avenue classlist format
+            current_student_type = filename_sections[2].lstrip("Student").rstrip(".py")  # Student A / B, etc.
 
-        utils.disable_print()
-        feedback, score = autograder.grade_submission(submission_path, submission, current_student_type)
-        utils.enable_print()
+            utils.disable_print()
+            feedback, score = self.grade_submission(self.SUBMISSION_PATH, submission, current_student_type)
+            utils.enable_print()
 
-        if feedback:
-            feedback_string = "\n".join(feedback)
-        else:
-            feedback_string = "No functions found!"
+            if feedback:
+                feedback_string = "\n".join(feedback)
+            else:
+                feedback_string = "No functions found!"
 
-        if username in list(results_df.Username):  # Account for multiple submissions
-            results_df.loc[results_df.Username == username, :] = [username, submission, score, max_student_points,
-                                                                  feedback_string]
-        else:
-            results_df.loc[len(results_df)] = [username, submission, score, max_student_points, feedback_string]
+            if username in list(results_df.Username):  # Account for multiple submissions
+                results_df.loc[results_df.Username == username, :] = [username, submission, score, max_student_points,
+                                                                      feedback_string]
+            else:
+                results_df.loc[len(results_df)] = [username, submission, score, max_student_points, feedback_string]
 
-        print(username[1:], "graded.")
+            print(username[1:], "graded.")
 
-    results_df.to_csv("Computing {} Raw Results.csv".format(milestone_num), index=False)
-    return results_df, len(submissions)
+        results_df.to_csv("Computing {} Raw Results.csv".format(self.MILESTONE_NUM), index=False)
+        return results_df, len(submissions)
 
 
 def add_name(results):
@@ -387,7 +385,7 @@ def main():
 
     start = time.time()
 
-    results_df, num_submissions = grade_submissions(milestone_num, autograder.SUBMISSION_PATH)
+    results_df, num_submissions = autograder.grade_submissions()
     autograder.build_grades_csv_for_avenue(results_df, milestone_num)
     append_feedback_to_student_files(milestone_num, results_df, autograder.SUBMISSION_PATH, autograder.FEEDBACK_PATH)
 
