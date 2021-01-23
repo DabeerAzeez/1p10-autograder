@@ -114,6 +114,8 @@ class Autograder:
                 feedback_list.append("You shouldn't have input statements!")
             else:
                 feedback_list.append("Unknown error occurred while running your program...attempting to test functions.")
+        except Exception as e:
+            feedback_list.append("Unexpected error occurred when running the file: " + str(e))
 
         for index, row in self.testcases_sheet.iterrows():
             test_score = 0
