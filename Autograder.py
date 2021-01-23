@@ -203,21 +203,24 @@ class Autograder:
         return max(student_weights)
 
 
-def grade_submissions(milestone_num, sub_path):
+def grade_submissions(milestone_num, submission_path):
     """
     - Loops through submissions directory.
-    - Compiles and executes each python file.
-    - Returns names, filenames, grades, and feedback in a dataframe
+    - Compiles and executes each python file
+        - Each student submission is assumed to adhere to the following naming convention: MacID_MM##_StudentX.py
+            - MacID is a string of letters and possibly numbers
+            - ## represents an integer, depending on the milestone
+            - X represents any letter; it denotes the student 'type' (i.e. what objectives they must accomplish)
     
     Returns
     -------
-    - Raw results dataframe in the format, Name|File Name|Grade|Out of|Comments
+    - Names, filenames, grades, maximum grade, and feedback in a dataframe
     - Number of submissions graded
 
     Inputs
     -------
-    lab: lab number.
-    path: Student submissions folder path.
+    milestone_num: milestone number (e.g. MM04).
+    submission_path: Student submissions folder path for the corresponding milestone_num
     """
     autograder = Autograder(milestone_num)
     results_df = pd.DataFrame(columns=["Username", "File Name", "Grade", "Out of", "Comments"])
@@ -228,23 +231,24 @@ def grade_submissions(milestone_num, sub_path):
     print("Beginning grading...")
     print("-" * 20)
 
-    # Go through all python files in submission directory
-    python_files = [file for file in sorted(os.listdir(sub_path)) if file.endswith(".py")]
-    if len(python_files) == 0:
+    # All python files in the submission directory count as submissions
+    submissions = [file for file in sorted(os.listdir(submission_path)) if file.endswith(".py")]
+
+    if len(submissions) == 0:
         raise FileNotFoundError("No submission files found!")
 
-    for filename in python_files:  # Sample filename: abdulazd_MM04_StudentA.py
-
-        filename_sections = filename.split("_")
+    # Grade each submission and update results dataframe with the student grade
+    for submission in submissions:
+        filename_sections = submission.split("_")
         if len(filename_sections) == 1:
-            raise ValueError("Submission file missing underscore separator: " + str(filename))
+            raise ValueError("Submission file missing underscore separator: " + str(submission))
 
         # TODO: Add more error handling for student file names
         username = "#" + filename_sections[0]  # Pound symbol is to match Avenue classlist format
         current_student_type = filename_sections[2].lstrip("Student").rstrip(".py")  # Student A / B, etc.
 
         utils.disable_print()
-        feedback, score = autograder.grade_submission(sub_path, filename, current_student_type)
+        feedback, score = autograder.grade_submission(submission_path, submission, current_student_type)
         utils.enable_print()
 
         if feedback:
@@ -253,14 +257,15 @@ def grade_submissions(milestone_num, sub_path):
             feedback_string = "No functions found!"
 
         if username in list(results_df.Username):  # Account for multiple submissions
-            results_df.loc[results_df.Username == username, :] = [username, filename, score, max_points, feedback_string]
+            results_df.loc[results_df.Username == username, :] = [username, submission, score, max_student_points,
+                                                                  feedback_string]
         else:
-            results_df.loc[len(results_df)] = [username, filename, score, max_points, feedback_string]
+            results_df.loc[len(results_df)] = [username, submission, score, max_student_points, feedback_string]
 
         print(username[1:], "graded.")
 
     results_df.to_csv("Computing {} Raw Results.csv".format(milestone_num), index=False)
-    return results_df, len(python_files)
+    return results_df, len(submissions)
 
 
 def add_name(results):
@@ -367,27 +372,27 @@ def append_feedback_to_student_files(lab, results, path, feedback_path):
             content = f.read()
 
         with open(feedback_file, "w", encoding="utf8") as f:
-            f.write(msg + "\n"*5 + content)
+            f.write(msg + "\n" * 5 + content)
 
 
 def main():
-    lab = input("Please input mini-milestone number (e.g. MM04): ")
+    milestone_num = input("Please input mini-milestone number (e.g. MM04): ")
 
     # Look for submissions directory
-    submission_path = SUBMISSION_PATH.format(lab)
+    submission_path = SUBMISSION_PATH.format(milestone_num)
     if not os.path.exists(submission_path):
-        raise NotADirectoryError("Mini-Milestone " + lab + " submission directory not found.")
+        raise NotADirectoryError("Mini-Milestone " + milestone_num + " submission directory not found.")
 
     # Make feedback directory if non-existent
-    feedback_path = FEEDBACK_PATH.format(lab)
+    feedback_path = FEEDBACK_PATH.format(milestone_num)
     if not os.path.exists(feedback_path):
         os.makedirs(feedback_path)
 
     start = time.time()
 
-    results_df, num_submissions = grade_submissions(lab, submission_path)
-    build_grades_csv_for_avenue(results_df, lab)
-    append_feedback_to_student_files(lab, results_df, submission_path, feedback_path)
+    results_df, num_submissions = grade_submissions(milestone_num, submission_path)
+    build_grades_csv_for_avenue(results_df, milestone_num)
+    append_feedback_to_student_files(milestone_num, results_df, submission_path, feedback_path)
 
     print("*" * 75)
     print("Grading complete")
