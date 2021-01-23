@@ -29,9 +29,9 @@ import time
 
 CLASSLIST_FILENAME = "Classlist.csv"
 GRADES_FILENAME = "Computing {} Grades.csv"
-TESTCASES_PATH = "TestCases/MiniMilestone_TestCases.xlsx"
-SUBMISSION_PATH = "./Computing {} Submission Files/"  # {} to be replaced by specific Mini-Milestone (e.g. MM04)
-FEEDBACK_PATH = "./Computing {} Feedback Files/"
+TESTCASES_XL_PATH = "TestCases/MiniMilestone_TestCases.xlsx"
+SUBMISSION_DIR = "./Computing {} Submission Files/"  # {} to be replaced by specific Mini-Milestone (e.g. MM04)
+FEEDBACK_DIR = "./Computing {} Feedback Files/"
 
 
 class Autograder:
@@ -64,7 +64,7 @@ class Autograder:
         self.milestone_num = milestone_num
 
         try:
-            self.testcases_sheet = pd.read_excel(TESTCASES_PATH, sheet_name=milestone_num)
+            self.testcases_sheet = pd.read_excel(TESTCASES_XL_PATH, sheet_name=milestone_num)
             print("Found test cases excel file. Extracted sheet: " + milestone_num, flush=True)
             self.verify_testcases_sheet()
         except FileNotFoundError:
@@ -104,8 +104,6 @@ class Autograder:
         @utils.check_called
         def override_input(string=""):
             return "You shouldn't have input statements!"
-
-        # TODO: Fix int(input()) causing all tests to fail
 
         error_flag = False
 
@@ -377,11 +375,11 @@ def append_feedback(lab, results, path, feedback_path):
 def main():
     lab = input("Please input mini-milestone number (e.g. MM04): ")
 
-    sub_path = SUBMISSION_PATH.format(lab)
+    sub_path = SUBMISSION_DIR.format(lab)
     if not os.path.exists(sub_path):
         raise NotADirectoryError("Mini-Milestone " + lab + " submission directory not found.")
 
-    feedback_path = FEEDBACK_PATH.format(lab)
+    feedback_path = FEEDBACK_DIR.format(lab)
     if not os.path.exists(feedback_path):
         os.makedirs(feedback_path)
 
