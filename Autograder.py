@@ -38,6 +38,7 @@ class Autograder:
 
         self.results_df = pd.DataFrame(columns=[''])
         self.num_submissions = 0
+        self.max_student_points = 0
 
         try:
             self.testcases_sheet = pd.read_excel(Autograder.TESTCASES_XL_PATH, sheet_name=milestone_num)
@@ -45,6 +46,8 @@ class Autograder:
             self.verify_testcases_sheet()
         except FileNotFoundError:
             raise FileNotFoundError("Missing test cases excel file.")
+
+        self.update_max_student_points()
 
     def verify_testcases_sheet(self):
         utils.verify_testcases_sheet(self.testcases_sheet, self.MILESTONE_NUM)
@@ -163,7 +166,7 @@ class Autograder:
 
         return feedback_list, total_score
 
-    def get_max_student_points(self):
+    def update_max_student_points(self):
         student_types = list(self.testcases_sheet.Student.drop_duplicates())
         student_weights = set()
 
@@ -177,7 +180,7 @@ class Autograder:
                   " The highest maximum points among all students will be set as the maximum points for this run.")
             input("Press enter to continue. ")
 
-        return max(student_weights)
+        self.max_student_points = max(student_weights)
 
     def grade_submissions(self):
         """
@@ -200,9 +203,6 @@ class Autograder:
         """
         results_df = pd.DataFrame(columns=["Username", "File Name", "Grade", "Out of", "Comments"])
 
-        max_student_points = self.get_max_student_points()
-
-        print("*" * 75)
         print("Beginning grading...")
         print("-" * 20)
 
