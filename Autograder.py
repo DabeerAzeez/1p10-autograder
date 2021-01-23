@@ -96,10 +96,10 @@ class Autograder:
         total: lab score
         """
         with open(sub_path + filename, encoding="utf8") as f:
-            content = f.read()
+            student_code = f.read()
 
-        total = 0
-        feedback = []
+        total_score = 0
+        feedback_list = []
 
         # Override built-in input() function to prevent program halt (students should avoid these within functions)
         @utils.check_called
@@ -107,65 +107,72 @@ class Autograder:
             return "You shouldn't have input statements!"
 
         try:
-            exec(content)  # Execute student code to import objects into local namespace
-            # TODO: Deal with syntax errors
-        # except SyntaxError:
-        #     compilation_error_msg = "Program does not compile. You have received a grade of zero"
-        #
-        #     if username in list(results.Username):  # Account for multiple submissions
-        #         results.loc[results.Username == username, :] = [username, filename, 0, total, compilation_error_msg]
-        #     else:
-        #         results.loc[len(results)] = [username, filename, 0, total, compilation_error_msg]
-        #
-        #     sys.stdout = system_info  # Enable print()
-        #     print(username[1:], "graded. (Received Zero)")
-        #     continue
+            exec(student_code)  # Preliminary check
+        except SyntaxError:
+            feedback_list.append("Program does not compile. You have received a grade of zero")
         except ValueError:  # In case input statement results in ValueError
             if input.called:
-                feedback.append("You shouldn't have input statements!")
+                feedback_list.append("You shouldn't have input statements!")
             else:
-                feedback.append("Unknown error occurred while running your program...attempting to test functions.")
+                feedback_list.append("Unknown error occurred while running your program...attempting to test functions.")
 
         for index, row in self.testcases_sheet.iterrows():
-            score = 0
-            output = []  # List works more easily with exec() variable modification
+            test_score = 0
+            test_output = []  # List mutates more easily via exec()
+            try:
+                dont_test = row['DontTest'] == "x"
+            except KeyError:
+                dont_test = False
+
+            if dont_test:
+                test_code = row['Command']
+            else:
+                test_code = "test_output.insert(0,str(" + row['Command'] + "))"  # TODO: Parameterize variable name
 
             if row['Student'] != student_type:  # Only perform a test case if the student is the right type
                 continue
 
-            test_code = "output.insert(0,str(" + row['Command'] + "))"
             correct_output = row['Outputs']
 
             try:
-                exec(test_code)
-                student_output = output[0]
-                if student_output == correct_output:
-                    score = row['Weight']
-                    feedback_str = "Correct!"
-                else:
-                    try:
-                        # Account for floating point errors if output should be numeric
-                        correct_output = float(correct_output)
-                        student_output = float(student_output)
-                    except ValueError:
-                        feedback_str = "Testcase: " + row['Command'] + " gives an incorrect output."
-
-                    if Autograder.within_tol(student_output, correct_output):
-                        score = row['Weight']
-                        feedback_str = "Correct!"
-                    else:
-                        feedback_str = "Testcase: " + row['Command'] + " gives an incorrect output."
+                exec(student_code + "\n" + test_code)
             except NameError:
-                feedback_str = "Testcase: " + row['Command'] + " results in a name error. Function not defined."
+                feedback_str = "Testcase: " + row['Command'] + " results in a name error. Something is not defined."
             except Exception as e:  # Bare except necessary to catch whatever error might occur in the student file
                 feedback_str = "Testcase: " + row['Command'] + " outputs an error: " + str(e)
+            else:
+                if dont_test:
+                    feedback_str = "Testcase: " + row['Command'] + " ran with no errors."
+                else:
+                    # Calculate score
+                    student_output = test_output[0] if len(test_output) else "No student output"
 
-            score_msg = "({0}/{1}) ".format(score, row['Weight'])
-            total += score
+                    if student_output == correct_output:
+                        test_score = row['Weight']
+                        feedback_str = "Correct!"
+                    else:
+                        try:
+                            # Account for floating point errors if output should be numeric
+                            correct_output = float(correct_output)
+                            student_output = float(student_output)
+                        except ValueError:
+                            feedback_str = "Testcase: " + row['Command'] + " gives an incorrect output."
+                        else:
+                            if Autograder.within_tol(student_output, correct_output):
+                                test_score = row['Weight']
+                                feedback_str = "Correct!"
+                            else:
+                                feedback_str = "Testcase: " + row['Command'] + " gives an incorrect output."
+            finally:
+                if dont_test:
+                    feedback_list.append(feedback_str)
+                else:
+                    score_msg = "({0}/{1}) ".format(test_score, row['Weight'])
+                    feedback_list.append(score_msg + feedback_str)
 
-            feedback.append(score_msg + feedback_str)
+                total_score += test_score
 
-        return feedback, total
+        return feedback_list, total_score
 
 
 def check_student_weights(autograder):
