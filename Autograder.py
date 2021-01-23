@@ -267,7 +267,7 @@ class Autograder:
             name = self.results_df["First Name"][i]
             feedback = self.results_df["Comments"][i]
 
-            msg = self.build_feedback(name, self.MILESTONE_NUM, feedback)
+            msg = self.build_feedback(name, feedback)
 
             submission_file = self.SUBMISSION_PATH + self.results_df["File Name"][i]
             with open(submission_file, "r", encoding="utf8") as f:
@@ -298,8 +298,7 @@ class Autograder:
 
         self.results_df = pd.merge(classlist_df, self.results_df, on=['Username'])
 
-    @staticmethod
-    def build_feedback(name, lab, feedback):
+    def build_feedback(self, name, feedback):
         """
         Building feedback string to be inserted in student submissions.
 
@@ -315,7 +314,8 @@ class Autograder:
         """
         body = "'''\n"
 
-        body += "Hello " + name + ",\n\nHere is Computing Lab {} feedback given by the autograder:\n\n".format(lab)
+        body += "Hello " + name + ",\n\nHere is Computing Lab {} feedback given by the autograder:\n\n"\
+            .format(self.MILESTONE_NUM)
 
         body += feedback  # Insert feedback here
 
