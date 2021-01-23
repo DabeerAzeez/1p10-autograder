@@ -105,6 +105,10 @@ class Autograder:
         def input(string=""):
             return "You shouldn't have input statements!"
 
+        # TODO: Fix checking for bare input calls
+        # TODO: Fix int(input()) causing all tests to fail
+        # TODO: Remove all other feedback strings if program doesn't compile (SyntaxError, NameError, Unexpected errors)
+
         try:
             exec(student_code)  # Preliminary check
         except SyntaxError:
