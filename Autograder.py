@@ -235,10 +235,10 @@ class Autograder:
                 feedback_string = "No functions found!"
 
             if username in list(results_df.Username):  # Account for multiple submissions
-                results_df.loc[results_df.Username == username, :] = [username, submission, score, max_student_points,
-                                                                      feedback_string]
+                results_df.loc[results_df.Username == username, :] = [username, submission, score,
+                                                                      self.max_student_points, feedback_string]
             else:
-                results_df.loc[len(results_df)] = [username, submission, score, max_student_points, feedback_string]
+                results_df.loc[len(results_df)] = [username, submission, score, self.max_student_points, feedback_string]
 
             print(username[1:], "graded.")
 
