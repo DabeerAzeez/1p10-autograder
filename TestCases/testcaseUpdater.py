@@ -34,6 +34,7 @@ import importlib
 import openpyxl
 import sys
 import os
+import utils
 
 TEST_CASE_FILENAME = "MiniMilestone_TestCases.xlsx"
 SOLN_FILENAME_SUFFIX = "_SOLUTION"  # E.g. MM04_SOLUTION.py
