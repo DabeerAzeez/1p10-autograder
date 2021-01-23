@@ -146,11 +146,11 @@ def perform_tests(test_case_xl, chosen_sheet):
     for index, row in test_cases_df.iterrows():  # iterrows generator should not be used for large dataframes
         test_code = ""
 
-        if "DontTest" in list(row.index):
+        try:
             if row["DontTest"] == "x":
                 test_code = row['Command']  # Run the command, but don't treat it like a test (don't record output)
-            else:
-                test_code = "row['Outputs'] = str(" + row['Command'] + ")"
+        except KeyError:
+            test_code = "row['Outputs'] = str(" + row['Command'] + ")"
 
         exec(test_code)
         test_cases_df.loc[index] = row  # Update test_cases dataframe with local row Series
