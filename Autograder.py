@@ -100,18 +100,17 @@ class Autograder:
         total_score = 0
         feedback_list = []
 
-        # Override built-in input() function to prevent program halt (students should avoid these within functions)
         @utils.check_called
-        def input(string=""):
+        def override_input(string=""):
             return "You shouldn't have input statements!"
 
         # TODO: Fix int(input()) causing all tests to fail
-        # TODO: Check for nested input statements
 
         error_flag = False
 
         try:
-            exec(student_code)  # Preliminary check
+            # Override built-in input() function to prevent program halt (students should avoid these within functions
+            exec(student_code, {'input': override_input})  # Preliminary check
         except SyntaxError:
             feedback_list.append("A SyntaxError is preventing your file from being compiled")
             error_flag = True
@@ -122,9 +121,9 @@ class Autograder:
             feedback_list.append("An unexpected error is preventing your file from being compiled: " + str(e))
             error_flag = True
 
-        if input.called:
+        if override_input.called:
             feedback_list.append("You shouldn't have input statements!")
-        
+
         if error_flag:
             # Compilation errors result in a zero
             feedback_list.append("You have received a grade of zero.")
@@ -149,7 +148,7 @@ class Autograder:
                 correct_output = row['Outputs']
 
                 try:
-                    exec(student_code + "\n" + test_code)
+                    exec(student_code + "\n" + test_code, {'input': override_input})
                 except NameError:
                     feedback_str = "Testcase: " + row['Command'] + " results in a name error. Something is not defined."
                 except Exception as e:  # Bare except necessary to catch whatever error might occur in the student file
