@@ -57,7 +57,6 @@ class Autograder:
         Runs tests from test case workbook on student code. Returns feedback strings and total score.
     """
 
-
     TOLERANCE = 0.0000001
 
     def __init__(self, milestone_num):
