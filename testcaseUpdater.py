@@ -34,7 +34,7 @@ import importlib
 import openpyxl
 import utils
 
-TEST_CASE_FILENAME = "MiniMilestone_TestCases.xlsx"
+TCWB_PATH = "TestCases/MiniMilestone_TestCases.xlsx"
 SOLN_FILENAME_SUFFIX = "_SOLUTION"  # E.g. MM04_SOLUTION.py
 INSTRUCTIONS_SHEETNAME = "Instructions"  # Name of sheet within TEST_CASE_FILENAME containing instructions
 DELIMITER = ";"
@@ -136,7 +136,7 @@ def perform_tests(test_case_xl, chosen_sheet):
     chosen_sheet: Chosen sheet of test cases workbook
     """
     test_cases_df = pd.read_excel(test_case_xl, sheet_name=chosen_sheet)  # Read chosen sheet
-    import_solution(chosen_sheet + SOLN_FILENAME_SUFFIX, "global")  # Import appropriate solution module # TODO: test local version
+    import_solution("TestCases." + chosen_sheet + SOLN_FILENAME_SUFFIX, "global")  # Import appropriate solution module # TODO: test local version
 
     verify_columns(test_cases_df.columns)
 
@@ -153,9 +153,9 @@ def perform_tests(test_case_xl, chosen_sheet):
         exec(test_code)
         test_cases_df.loc[index] = row  # Update test_cases dataframe with local row Series
 
-    writer = pd.ExcelWriter(TEST_CASE_FILENAME, engine='openpyxl', mode='a')
+    writer = pd.ExcelWriter(TCWB_PATH, engine='openpyxl', mode='a')
 
-    book = openpyxl.load_workbook(TEST_CASE_FILENAME)
+    book = openpyxl.load_workbook(TCWB_PATH)
     book.remove(book[chosen_sheet])  # Remove original sheet to prevent duplicates
     writer.book = book
 
@@ -170,11 +170,11 @@ def perform_tests(test_case_xl, chosen_sheet):
 
     # Sort worksheets alphabetically
     book._sheets.sort(key=lambda ws: ws.title)
-    book.save(TEST_CASE_FILENAME)
+    book.save(TCWB_PATH)
 
 
 def main():
-    test_case_xl = pd.ExcelFile(TEST_CASE_FILENAME)
+    test_case_xl = pd.ExcelFile(TCWB_PATH)
     sheet_names_df = pd.DataFrame(test_case_xl.sheet_names, columns=['Sheet Name'])
 
     print("Welcome to the testcaseUpdater. Below are the extracted sheets from the test case spreadsheet.\n")
@@ -189,7 +189,7 @@ def main():
     utils.enable_print()
 
     print("*" * 75)
-    print(f"Update complete. Check {TEST_CASE_FILENAME}. Press enter to quit.")
+    print(f"Update complete. Check {TCWB_PATH}. Press enter to quit.")
     input()
 
 
