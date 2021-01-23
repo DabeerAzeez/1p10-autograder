@@ -375,7 +375,6 @@ def append_feedback(lab, results, path, feedback_path):
 
 
 def main():
-    start = time.time()
     lab = input("Please input mini-milestone number (e.g. MM04): ")
 
     sub_path = SUBMISSION_PATH.format(lab)
@@ -385,6 +384,8 @@ def main():
     feedback_path = FEEDBACK_PATH.format(lab)
     if not os.path.exists(feedback_path):
         os.makedirs(feedback_path)
+
+    start = time.time()
 
     results = grade_submissions(lab, sub_path)
     build_for_avenue(results, lab)
