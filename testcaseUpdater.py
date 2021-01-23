@@ -116,15 +116,16 @@ def verify_testcase_sheet(testcases_df, chosen_sheet):
     -------
     String representing whether the function or object (or both) columns are present in 'columns'
     """
-    # TODO: Check for missing items in required columns
 
+    # Check that required columns exist
     REQ_COLUMNS = ["Command", "Student", "Weight", "Outputs"]
 
     for col in REQ_COLUMNS:
         if col not in testcases_df.columns:
             raise SyntaxError("Missing " + col + " column in sheet " + chosen_sheet)
 
-    REQ_FULL_COLUMNS = ["Command", "Student", "Weight"]  # Columns must be full before running this script
+    # Check that relevant columns are completely filled
+    REQ_FULL_COLUMNS = ["Command", "Student", "Weight"]
 
     for col in REQ_FULL_COLUMNS:
         if testcases_df[col].isna().any():
