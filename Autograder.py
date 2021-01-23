@@ -20,6 +20,7 @@ This script will:
 """
 # TODO: Parameterize test case workbook column headers
 # TODO: Test an object-oriented lab
+# TODO: Start another thread to check for timeouts
 
 import pandas as pd
 import os
@@ -386,7 +387,8 @@ def main():
     results = grade_submissions(lab, sub_path)
     build_for_avenue(results, lab)
     append_feedback(lab, results, sub_path, feedback_path)
-    num_subs = sum(filename.endswith(".py") for filename in sorted(os.listdir(sub_path)))  # TODO: Count submissions more accurately
+    num_subs = sum(filename.endswith(".py") for filename in
+                   sorted(os.listdir(sub_path)))  # TODO: Count submissions more accurately
 
     print("*" * 75)
     print("Grading complete")
