@@ -124,7 +124,7 @@ class Autograder:
 
         if error_flag:
             # Compilation errors result in a zero
-            feedback_list.append("You have received a grade of zero.")
+            feedback_list.append("An error occurred while compiling your code, so you have received a grade of zero.")
         else:
             # If the program compiled, run test cases
             for index, row in self.testcases_sheet.iterrows():
