@@ -190,20 +190,22 @@ class Autograder:
         return feedback_list, total_score
 
 
-def check_student_weights(autograder):
+def get_max_student_points(autograder):
     # total points per student type (averaged over number of student types within test case sheet)
     student_types = list(autograder.testcases_sheet.Student.drop_duplicates())
     student_weights = set()
 
     for student_type in student_types:
-        student_weight = sum(autograder.testcases_sheet[autograder.testcases_sheet.Student == student_type]['Weight'])
+        student_weight = sum(autograder.testcases_sheet[autograder.testcases_sheet.Student == student_type]['Weight']
+                             .dropna())  # Sum all non-empty 'weight' entries with the correct student type
         student_weights.add(student_weight)
 
     if len(student_weights) > 1:
-        print("Warning: Student Types have unequal weighting in testcases, so they will have different maximum points.")
+        print("Warning: Student Types have unequal weighting in testcases, so they will have different maximum points. "
+              "The highest maximum points among all students will be set as the maximum points for this run.")
         input("Press enter to continue. ")
 
-    return student_weights
+    return max(student_weights)
 
 
 def grade_submissions(milestone_num, sub_path):
@@ -224,8 +226,7 @@ def grade_submissions(milestone_num, sub_path):
     autograder = Autograder(milestone_num)
     results = pd.DataFrame(columns=["Username", "File Name", "Grade", "Out of", "Comments"])
 
-    student_weights = check_student_weights(autograder)
-    total = max(student_weights)
+    max_points = get_max_student_points(autograder)
 
     print("*" * 75)
     print("Beginning grading...")
@@ -256,9 +257,9 @@ def grade_submissions(milestone_num, sub_path):
             feedback_string = "No functions found!"
 
         if username in list(results.Username):  # Account for multiple submissions
-            results.loc[results.Username == username, :] = [username, filename, score, total, feedback_string]
+            results.loc[results.Username == username, :] = [username, filename, score, max_points, feedback_string]
         else:
-            results.loc[len(results)] = [username, filename, score, total, feedback_string]
+            results.loc[len(results)] = [username, filename, score, max_points, feedback_string]
 
         print(username[1:], "graded.")
 
