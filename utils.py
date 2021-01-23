@@ -28,7 +28,7 @@ def verify_testcases_sheet(testcases_sheet, sheet_name):
     -------
     True if all tests are passed.
     """
-    print("Verifying test case worksheet " + sheet_name + " is set up properly...",
+    print("Verifying test case worksheet '" + sheet_name + "' is set up properly...",
           flush=True)  # Flush prevents errors printing first
 
     testcases_columns = testcases_sheet.columns
@@ -55,5 +55,5 @@ def verify_testcases_sheet(testcases_sheet, sheet_name):
 
     # TODO: If outputs are (the only thing) missing from the required columns, attempt to run testcaseUpdater
 
-    print("Test case worksheet verified.")
+    print("Test case worksheet is properly set up.")
     return True

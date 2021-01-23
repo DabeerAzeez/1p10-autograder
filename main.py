@@ -49,6 +49,9 @@ def build_grades_csv_for_brightspace(autograder):
 def main():
     milestone_num = input("Please input mini-milestone number (e.g. MM04): ")
 
+    print("*" * 75)
+    print("Program start")
+
     start = time.time()
     autograder = Autograder(milestone_num)
 
@@ -64,7 +67,6 @@ def main():
     build_grades_csv_for_brightspace(autograder)
 
     print("*" * 75)
-    print("Grading complete")
     print("Program took {} seconds for {} submissions".format(time.time() - start, autograder.num_submissions))
 
 
