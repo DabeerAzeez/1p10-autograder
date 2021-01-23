@@ -183,12 +183,12 @@ def main():
 
     chosen_sheet_names = select_sheets(sheet_names_df)
 
-    sys.stdout = open(os.devnull, 'w')  # Disable print  # TODO: Take print functions from utils
+    utils.disable_print()
 
     for sheet_name in chosen_sheet_names:
         perform_tests(test_case_xl, sheet_name)
 
-    sys.stdout = sys.__stdout__  # Enable print
+    utils.enable_print()
 
     print("*" * 75)
     print(f"Update complete. Check {TEST_CASE_FILENAME}. Press enter to quit.")
