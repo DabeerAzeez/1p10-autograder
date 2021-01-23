@@ -105,77 +105,86 @@ class Autograder:
         def input(string=""):
             return "You shouldn't have input statements!"
 
-        # TODO: Fix checking for bare input calls
         # TODO: Fix int(input()) causing all tests to fail
-        # TODO: Remove all other feedback strings if program doesn't compile (SyntaxError, NameError, Unexpected errors)
+        # TODO: Check for nested input statements
+
+        error_flag = False
 
         try:
             exec(student_code)  # Preliminary check
         except SyntaxError:
-            feedback_list.append("Program does not compile. You have received a grade of zero")
+            feedback_list.append("A SyntaxError is preventing your file from being compiled")
+            error_flag = True
         except ValueError:  # In case input statement results in ValueError
-            if input.called:
-                feedback_list.append("You shouldn't have input statements!")
-            else:
-                feedback_list.append("Unknown error occurred while running your program...attempting to test functions.")
+            feedback_list.append("A ValueError is preventing your file from being compiled")
+            error_flag = True
         except Exception as e:
-            feedback_list.append("Unexpected error occurred when running the file: " + str(e))
+            feedback_list.append("An unexpected error is preventing your file from being compiled: " + str(e))
+            error_flag = True
 
-        for index, row in self.testcases_sheet.iterrows():
-            test_score = 0
-            test_output = []  # List mutates more easily via exec()
-            try:
-                dont_test = row['DontTest'] == "x"
-            except KeyError:
-                dont_test = False
+        if input.called:
+            feedback_list.append("You shouldn't have input statements!")
+        
+        if error_flag:
+            # Compilation errors result in a zero
+            feedback_list.append("You have received a grade of zero.")
+        else:
+            # If the program compiled, run test cases
+            for index, row in self.testcases_sheet.iterrows():
+                test_score = 0
+                test_output = []  # List mutates more easily via exec()
+                try:
+                    dont_test = row['DontTest'] == "x"
+                except KeyError:
+                    dont_test = False
 
-            if dont_test:
-                test_code = row['Command']
-            else:
-                test_code = "test_output.insert(0,str(" + row['Command'] + "))"  # TODO: Parameterize variable name
-
-            if row['Student'] != student_type:  # Only perform a test case if the student is the right type
-                continue
-
-            correct_output = row['Outputs']
-
-            try:
-                exec(student_code + "\n" + test_code)
-            except NameError:
-                feedback_str = "Testcase: " + row['Command'] + " results in a name error. Something is not defined."
-            except Exception as e:  # Bare except necessary to catch whatever error might occur in the student file
-                feedback_str = "Testcase: " + row['Command'] + " outputs an error: " + str(e)
-            else:
                 if dont_test:
-                    feedback_str = "Testcase: " + row['Command'] + " ran with no errors."
+                    test_code = row['Command']
                 else:
-                    # Calculate score
-                    student_output = test_output[0] if len(test_output) else "No student output"
+                    test_code = "test_output.insert(0,str(" + row['Command'] + "))"  # TODO: Parameterize variable name
 
-                    if student_output == correct_output:
-                        test_score = row['Weight']
-                        feedback_str = "Correct!"
+                if row['Student'] != student_type:  # Only perform a test case if the student is the right type
+                    continue
+
+                correct_output = row['Outputs']
+
+                try:
+                    exec(student_code + "\n" + test_code)
+                except NameError:
+                    feedback_str = "Testcase: " + row['Command'] + " results in a name error. Something is not defined."
+                except Exception as e:  # Bare except necessary to catch whatever error might occur in the student file
+                    feedback_str = "Testcase: " + row['Command'] + " outputs an error: " + str(e)
+                else:
+                    if dont_test:
+                        feedback_str = "Testcase: " + row['Command'] + " ran with no errors."
                     else:
-                        try:
-                            # Account for floating point errors if output should be numeric
-                            correct_output = float(correct_output)
-                            student_output = float(student_output)
-                        except ValueError:
-                            feedback_str = "Testcase: " + row['Command'] + " gives an incorrect output."
-                        else:
-                            if Autograder.within_tol(student_output, correct_output):
-                                test_score = row['Weight']
-                                feedback_str = "Correct!"
-                            else:
-                                feedback_str = "Testcase: " + row['Command'] + " gives an incorrect output."
-            finally:
-                if dont_test:
-                    feedback_list.append(feedback_str)
-                else:
-                    score_msg = "({0}/{1}) ".format(test_score, row['Weight'])
-                    feedback_list.append(score_msg + feedback_str)
+                        # Calculate score
+                        student_output = test_output[0] if len(test_output) else "No student output"
 
-                total_score += test_score
+                        if student_output == correct_output:
+                            test_score = row['Weight']
+                            feedback_str = "Correct!"
+                        else:
+                            try:
+                                # Account for floating point errors if output should be numeric
+                                correct_output = float(correct_output)
+                                student_output = float(student_output)
+                            except ValueError:
+                                feedback_str = "Testcase: " + row['Command'] + " gives an incorrect output."
+                            else:
+                                if Autograder.within_tol(student_output, correct_output):
+                                    test_score = row['Weight']
+                                    feedback_str = "Correct!"
+                                else:
+                                    feedback_str = "Testcase: " + row['Command'] + " gives an incorrect output."
+                finally:
+                    if dont_test:
+                        feedback_list.append(feedback_str)
+                    else:
+                        score_msg = "({0}/{1}) ".format(test_score, row['Weight'])
+                        feedback_list.append(score_msg + feedback_str)
+
+                    total_score += test_score
 
         return feedback_list, total_score
 
