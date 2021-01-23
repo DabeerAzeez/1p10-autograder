@@ -61,6 +61,9 @@ class Autograder:
         self.FEEDBACK_PATH = "./Computing {} Feedback Files/".format(milestone_num)
         self.MILESTONE_NUM = milestone_num
 
+        self.results_df = pd.DataFrame(columns=[''])
+        self.num_submissions = 0
+
         try:
             self.testcases_sheet = pd.read_excel(Autograder.TESTCASES_XL_PATH, sheet_name=milestone_num)
             print("Found test cases excel file. Extracted sheet: " + milestone_num, flush=True)
@@ -234,6 +237,8 @@ class Autograder:
         if len(submissions) == 0:
             raise FileNotFoundError("No submission files found!")
 
+        self.num_submissions = len(submissions)
+
         # Grade each submission and update results dataframe with the student grade
         for submission in submissions:
             filename_sections = submission.split("_")
@@ -261,11 +266,10 @@ class Autograder:
 
             print(username[1:], "graded.")
 
-        results_df.to_csv("Computing {} Raw Results.csv".format(self.MILESTONE_NUM), index=False)
-        return results_df, len(submissions)
+        self.results_df = results_df
 
 
-def build_grades_csv_for_brightspace(results_df, autograder):
+def build_grades_csv_for_brightspace(autograder):
     """
     Reformats the inputted student results dataframe and outputs it to a csv file which can be uploaded to a
     D2L Brightspace class assignment.
@@ -279,7 +283,7 @@ def build_grades_csv_for_brightspace(results_df, autograder):
     grade_header = "Mini-Milestone {} - Objective Points Grade <Numeric MaxPoints:{}>"\
         .format(autograder.MILESTONE_NUM, autograder.get_max_student_points())
 
-    brightspace_upload_df = results_df.loc[:, ["Username", "Grade"]]
+    brightspace_upload_df = autograder.results_df.loc[:, ["Username", "Grade"]]
     brightspace_upload_df.rename(columns={"Grade": grade_header}, inplace=True)
     brightspace_upload_df["End-of-Line Indicator"] = "#"  # Brightspace requirement for grade upload csv files
     brightspace_upload_df.to_csv(autograder.GRADES_CSV_FILENAME, index=False)
@@ -338,7 +342,7 @@ def build_feedback(name, lab, feedback):
     return body
 
 
-def append_feedback_to_student_files(lab, results, path, feedback_path):
+def append_feedback_to_student_files(autograder):
     """
     Loops through student submission and creates a copy with feedback inserted at the top.
     
@@ -353,18 +357,23 @@ def append_feedback_to_student_files(lab, results, path, feedback_path):
     path: Student submissions folder path.
     feedbackPath: Student feedback folder path.
     """
-    results = add_name(results)  # Add 'First Name' and 'Last Name' columns for personalized messages
+    # Add 'First Name' and 'Last Name' columns for personalized messages
+    results_df_with_names = add_name(autograder.results_df)
 
-    for i in range(len(results)):
-        name, feedback = results["First Name"][i], results["Comments"][i]
-        msg = build_feedback(name, lab, feedback)
-        file = path + results["File Name"][i]
-        feedback_file = feedback_path + results["File Name"][i]
-        with open(file, "r", encoding="utf8") as f:
+    # Loop over results data frame, compile feedback, and write it into each student's file
+    for i in range(len(results_df_with_names)):
+        name = results_df_with_names["First Name"][i]
+        feedback = results_df_with_names["Comments"][i]
+
+        msg = build_feedback(name, autograder.MILESTONE_NUM, feedback)
+
+        submission_file = autograder.SUBMISSION_PATH + results_df_with_names["File Name"][i]
+        with open(submission_file, "r", encoding="utf8") as f:
             content = f.read()
 
-        with open(feedback_file, "w", encoding="utf8") as f:
-            f.write(msg + "\n" * 5 + content)
+        submission_file_with_feedback = autograder.FEEDBACK_PATH + results_df_with_names["File Name"][i]
+        with open(submission_file_with_feedback, "w", encoding="utf8") as f:
+            f.write(msg + content)
 
 
 def main():
@@ -381,13 +390,13 @@ def main():
 
     start = time.time()
 
-    results_df, num_submissions = autograder.grade_submissions()
-    build_grades_csv_for_brightspace(results_df, milestone_num)
-    append_feedback_to_student_files(milestone_num, results_df, autograder.SUBMISSION_PATH, autograder.FEEDBACK_PATH)
+    autograder.grade_submissions()
+    build_grades_csv_for_brightspace(autograder)
+    append_feedback_to_student_files(autograder)
 
     print("*" * 75)
     print("Grading complete")
-    print("Program took {} seconds for {} submissions".format(time.time() - start, num_submissions))
+    print("Program took {} seconds for {} submissions".format(time.time() - start, autograder.num_submissions))
 
 
 if __name__ == "__main__":
