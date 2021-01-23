@@ -152,7 +152,13 @@ def perform_tests(test_case_xl, chosen_sheet):
         except KeyError:
             test_code = "row['Outputs'] = str(" + row['Command'] + ")"
 
-        exec(test_code)
+        try:
+            exec(test_code)
+        except Exception as e:
+            row_num = index + 2  # Account for header row and zero-based array indexing
+            raise Exception(str(e) + " --> exception occurred in sheet " + chosen_sheet +
+                            " row " + str(row_num) + " of test cases excel file.")
+
         test_cases_df.loc[index] = row  # Update test_cases dataframe with local row Series
 
     writer = pd.ExcelWriter(TCWB_PATH, engine='openpyxl', mode='a')
