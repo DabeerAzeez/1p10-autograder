@@ -157,7 +157,7 @@ class Autograder:
                     feedback_str = "Testcase: " + row['Command'] + " outputs an error: " + str(e)
                 else:
                     if dont_test:
-                        feedback_str = "Testcase: " + row['Command'] + " ran with no errors."
+                        feedback_str = "Command: " + row['Command'] + " ran with no errors."
                     else:
                         # Calculate score
                         student_output = test_output[0] if len(test_output) else "No student output"
