@@ -152,7 +152,7 @@ class Autograder:
 
                     exec(student_code + "\n" + test_code, gdict)  # TODO: Avoid using newlines
                 except NameError as e:
-                    feedback_str = "Testcase: " + row['Command'] + " results in a name error. Something is not defined."
+                    feedback_str = "Testcase: " + row['Command'] + " results in a name error: " + str(e)
                 except Exception as e:  # Bare except necessary to catch whatever error might occur in the student file
                     feedback_str = "Testcase: " + row['Command'] + " outputs an error: " + str(e)
                 else:
