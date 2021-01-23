@@ -141,7 +141,7 @@ def verify_testcase_sheet(testcases_df, chosen_sheet):
 
     try:
         # Check for numeric entries in the 'Weight' column
-        if testcases_df["Weight"].apply(lambda x: x.isnumeric()):
+        if testcases_df["Weight"].apply(lambda x: not isinstance(x, (int, float))).any():
             raise SyntaxError
     except (AttributeError, ValueError, SyntaxError):
         raise ValueError("Non-numeric character in Weight column of sheet " + chosen_sheet)
