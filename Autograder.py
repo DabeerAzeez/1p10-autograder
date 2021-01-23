@@ -39,6 +39,7 @@ class Autograder:
         self.results_df = pd.DataFrame(columns=[''])
         self.num_submissions = 0
         self.max_student_points = 0
+        self.testcases_sheet_verified = False
 
         try:
             self.testcases_sheet = pd.read_excel(Autograder.TESTCASES_XL_PATH, sheet_name=milestone_num)
@@ -50,7 +51,7 @@ class Autograder:
         self.update_max_student_points()
 
     def verify_testcases_sheet(self):
-        utils.verify_testcases_sheet(self.testcases_sheet, self.MILESTONE_NUM)
+        self.testcases_sheet_verified = utils.verify_testcases_sheet(self.testcases_sheet, self.MILESTONE_NUM)
 
     @staticmethod
     def within_tol(actual_value, expected_value):
