@@ -83,6 +83,7 @@ class Autograder:
         total_score = 0
         feedback_list = []
 
+        # noinspection PyUnusedLocal
         @utils.check_called
         def override_input(string=""):
             return "You shouldn't have input statements!"
@@ -128,11 +129,11 @@ class Autograder:
                 correct_output = row['Outputs']
 
                 try:
-                    gdict = globals()  # Inputting globals allows objects to be saved for later tests
-                    gdict['input'] = override_input  # TODO: understand this
-                    gdict['test_output'] = test_output
+                    globals_dict = globals()  # Inputting globals allows objects to be saved for later tests
+                    globals_dict['input'] = override_input  # TODO: understand this
+                    globals_dict['test_output'] = test_output
 
-                    exec(student_code + "\n" + test_code, gdict)  # TODO: Avoid using newlines
+                    exec(student_code + "\n" + test_code, globals_dict)  # TODO: Avoid using newlines
                 except NameError as e:
                     feedback_str = "Testcase: " + row['Command'] + " results in a name error: " + str(e)
                 except Exception as e:  # Bare except necessary to catch whatever error might occur in the student file
@@ -242,7 +243,8 @@ class Autograder:
                 results_df.loc[results_df.Username == username, :] = [username, submission, score,
                                                                       self.max_student_points, feedback_string]
             else:
-                results_df.loc[len(results_df)] = [username, submission, score, self.max_student_points, feedback_string]
+                results_df.loc[len(results_df)] = [username, submission, score, self.max_student_points,
+                                                   feedback_string]
 
             print(username[1:], "graded.")
 
@@ -283,6 +285,7 @@ class Autograder:
 
             submission_file_with_feedback = self.FEEDBACK_PATH + self.results_df["File Name"][i]
             with open(submission_file_with_feedback, "w", encoding="utf8") as f:
+                # noinspection PyTypeChecker
                 f.write(msg + content)
 
         print("Feedback file generation complete.")
@@ -324,7 +327,7 @@ class Autograder:
         """
         body = "'''\n"
 
-        body += "Hello " + name + ",\n\nHere is Computing Lab {} feedback given by the autograder:\n\n"\
+        body += "Hello " + name + ",\n\nHere is Computing Lab {} feedback given by the autograder:\n\n" \
             .format(self.MILESTONE_NUM)
 
         body += feedback  # Insert feedback here

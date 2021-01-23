@@ -15,8 +15,8 @@ This script will:
 - Grade the listed functions in the test cases spreadsheet for all submissions in the submission directory
     - The autograder is intended to mark *helper* functions; *not* the main() function (that requires manual revision)
 - Add feedback as a multi-line comment within the submitted files
-- Generate a feedback folder wherein feedback-modified submissions will be stored (can be reuploaded to Avenue)
-- Create a grades csv file which can be uploaded to Avenue to update the gradebook
+- Generate a feedback folder wherein feedback-modified submissions will be stored (can be re-uploaded to Avenue)
+- Create a grades csv file which can be uploaded to Avenue to update the grade book
 """
 # TODO: Parameterize test case workbook column headers
 # TODO: Start another thread to check for timeouts
@@ -28,7 +28,7 @@ import time
 
 def build_grades_csv_for_brightspace(autograder):
     """
-    Reformats the inputted student results dataframe and outputs it to a csv file which can be uploaded to a
+    Re-formats the inputted student results dataframe and outputs it to a csv file which can be uploaded to a
     D2L Brightspace class assignment.
 
     Inputs

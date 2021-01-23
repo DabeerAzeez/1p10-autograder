@@ -35,8 +35,8 @@ import openpyxl
 import utils
 
 TCWB_PATH = "TestCases/MiniMilestone_TestCases.xlsx"
-SOLN_FILENAME_SUFFIX = "_SOLUTION"  # E.g. MM04_SOLUTION.py
-INSTRUCTIONS_SHEETNAME = "Instructions"  # Name of sheet within TEST_CASE_FILENAME containing instructions
+SOLUTION_FILENAME_SUFFIX = "_SOLUTION"  # E.g. MM04_SOLUTION.py
+INSTRUCTIONS_SHEET_NAME = "Instructions"  # Name of sheet within TEST_CASE_FILENAME containing instructions
 DELIMITER = ";"
 
 
@@ -84,7 +84,7 @@ def select_sheets(sheet_names_df):
     -------
     List of selected sheet names
     """
-    sheet_names_df = sheet_names_df[sheet_names_df['Sheet Name'] != INSTRUCTIONS_SHEETNAME]  # Remove instructions sheet
+    sheet_names_df = sheet_names_df[sheet_names_df['Sheet Name'] != INSTRUCTIONS_SHEET_NAME]  # Remove instruction sheet
     print(sheet_names_df, "\n")
 
     chosen_index = input("Please select the row number of the sheet you'd like to update. If you would like to "
@@ -136,7 +136,9 @@ def perform_tests(test_case_xl, chosen_sheet):
     chosen_sheet: Chosen sheet of test cases workbook
     """
     test_cases_df = pd.read_excel(test_case_xl, sheet_name=chosen_sheet)  # Read chosen sheet
-    import_solution("TestCases." + chosen_sheet + SOLN_FILENAME_SUFFIX, "global")  # Import appropriate solution module # TODO: test local version
+
+    # Import appropriate solution module
+    import_solution("TestCases." + chosen_sheet + SOLUTION_FILENAME_SUFFIX, "global")  # TODO: test local version
 
     verify_columns(test_cases_df.columns)
 
@@ -169,6 +171,8 @@ def perform_tests(test_case_xl, chosen_sheet):
     writer.close()
 
     # Sort worksheets alphabetically
+    # TODO: Sort sheets alphabetically without accessing a protected member
+    # noinspection PyProtectedMember
     book._sheets.sort(key=lambda ws: ws.title)
     book.save(TCWB_PATH)
 
