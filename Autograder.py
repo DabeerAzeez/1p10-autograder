@@ -164,7 +164,7 @@ class Autograder:
 
                         if student_output == correct_output:
                             test_score = row['Weight']
-                            feedback_str = "Correct!"
+                            feedback_str = "Testcase: " + row['Command'] + " gives the correct output!"
                         else:
                             try:
                                 # Account for floating point errors if output should be numeric
@@ -175,7 +175,7 @@ class Autograder:
                             else:
                                 if Autograder.within_tol(student_output, correct_output):
                                     test_score = row['Weight']
-                                    feedback_str = "Correct!"
+                                    feedback_str = "Testcase: " + row['Command'] + " gives the correct output!"
                                 else:
                                     feedback_str = "Testcase: " + row['Command'] + " gives an incorrect output."
                 finally:
