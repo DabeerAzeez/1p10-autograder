@@ -29,8 +29,8 @@ import time
 CLASSLIST_FILENAME = "Classlist.csv"
 GRADES_FILENAME = "Computing {} Grades.csv"
 TESTCASES_XL_PATH = "TestCases/MiniMilestone_TestCases.xlsx"
-SUBMISSION_DIR = "./Computing {} Submission Files/"  # {} to be replaced by specific Mini-Milestone (e.g. MM04)
-FEEDBACK_DIR = "./Computing {} Feedback Files/"
+SUBMISSION_PATH = "./Computing {} Submission Files/"  # {} to be replaced by specific Mini-Milestone (e.g. MM04)
+FEEDBACK_PATH = "./Computing {} Feedback Files/"
 
 
 class Autograder:
@@ -374,11 +374,11 @@ def append_feedback(lab, results, path, feedback_path):
 def main():
     lab = input("Please input mini-milestone number (e.g. MM04): ")
 
-    sub_path = SUBMISSION_DIR.format(lab)
+    sub_path = SUBMISSION_PATH.format(lab)
     if not os.path.exists(sub_path):
         raise NotADirectoryError("Mini-Milestone " + lab + " submission directory not found.")
 
-    feedback_path = FEEDBACK_DIR.format(lab)
+    feedback_path = FEEDBACK_PATH.format(lab)
     if not os.path.exists(feedback_path):
         os.makedirs(feedback_path)
 
