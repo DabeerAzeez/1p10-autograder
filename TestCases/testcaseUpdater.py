@@ -27,6 +27,7 @@ Notes:
 
 # TODO: Reset TCWB column widths
 # TODO: Don't rely on old xlrd (https://stackoverflow.com/questions/65250207/pandas-cannot-open-an-excel-xlsx-file)
+# TODO: Parameterize column names
 
 import pandas as pd
 import importlib
@@ -181,7 +182,7 @@ def main():
 
     chosen_sheet_names = select_sheets(sheet_names_df)
 
-    sys.stdout = open(os.devnull, 'w')  # Disable print
+    sys.stdout = open(os.devnull, 'w')  # Disable print  # TODO: Take print functions from utils
 
     for sheet_name in chosen_sheet_names:
         perform_tests(test_case_xl, sheet_name)
