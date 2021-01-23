@@ -336,7 +336,7 @@ def build_feedback(name, lab, feedback):
     body += "\n\n"
 
     body += "If you have any questions about your mark, please visit us \nduring " \
-            "office hours or email prof1p10@mcmaster.ca"
+            "office hours or email prof1p10@mcmaster.ca\n"
 
     body += "\nHave a wonderful day,\nYour Friendly Neighbourhood Bot"
 
@@ -371,7 +371,7 @@ def append_feedback(lab, results, path, feedback_path):
             content = f.read()
 
         with open(feedback_file, "w", encoding="utf8") as f:
-            f.write(msg + "\n\n\n\n\n" + content)
+            f.write(msg + "\n"*5 + content)
 
 
 def main():
