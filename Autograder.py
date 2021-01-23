@@ -186,23 +186,21 @@ class Autograder:
 
         return feedback_list, total_score
 
+    def get_max_student_points(self):
+        student_types = list(self.testcases_sheet.Student.drop_duplicates())
+        student_weights = set()
 
-def get_max_student_points(autograder):
-    # total points per student type (averaged over number of student types within test case sheet)
-    student_types = list(autograder.testcases_sheet.Student.drop_duplicates())
-    student_weights = set()
+        for student_type in student_types:
+            student_weight = sum(self.testcases_sheet[self.testcases_sheet.Student == student_type]['Weight']
+                                 .dropna())  # Sum all non-empty 'weight' entries with the correct student type
+            student_weights.add(student_weight)
 
-    for student_type in student_types:
-        student_weight = sum(autograder.testcases_sheet[autograder.testcases_sheet.Student == student_type]['Weight']
-                             .dropna())  # Sum all non-empty 'weight' entries with the correct student type
-        student_weights.add(student_weight)
+        if len(student_weights) > 1:
+            print("Warning: Student Types have unequal weighting in testcases; they will have different maximum points."
+                  " The highest maximum points among all students will be set as the maximum points for this run.")
+            input("Press enter to continue. ")
 
-    if len(student_weights) > 1:
-        print("Warning: Student Types have unequal weighting in testcases, so they will have different maximum points. "
-              "The highest maximum points among all students will be set as the maximum points for this run.")
-        input("Press enter to continue. ")
-
-    return max(student_weights)
+        return max(student_weights)
 
 
 def grade_submissions(milestone_num, sub_path):
@@ -224,7 +222,7 @@ def grade_submissions(milestone_num, sub_path):
     autograder = Autograder(milestone_num)
     results_df = pd.DataFrame(columns=["Username", "File Name", "Grade", "Out of", "Comments"])
 
-    max_points = get_max_student_points(autograder)
+    max_student_points = autograder.get_max_student_points()
 
     print("*" * 75)
     print("Beginning grading...")
