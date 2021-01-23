@@ -213,7 +213,8 @@ def grade_submissions(milestone_num, sub_path):
     
     Returns
     -------
-    results: Raw results dataframe in the format, Name|File Name|Grade|Out of|Comments.
+    - Raw results dataframe in the format, Name|File Name|Grade|Out of|Comments
+    - Number of submissions graded
 
     Inputs
     -------
@@ -221,7 +222,7 @@ def grade_submissions(milestone_num, sub_path):
     path: Student submissions folder path.
     """
     autograder = Autograder(milestone_num)
-    results = pd.DataFrame(columns=["Username", "File Name", "Grade", "Out of", "Comments"])
+    results_df = pd.DataFrame(columns=["Username", "File Name", "Grade", "Out of", "Comments"])
 
     max_points = get_max_student_points(autograder)
 
@@ -238,7 +239,7 @@ def grade_submissions(milestone_num, sub_path):
 
         filename_sections = filename.split("_")
         if len(filename_sections) == 1:
-            raise ValueError("No submission files with underscore separator found.")
+            raise ValueError("Submission file missing underscore separator: " + str(filename))
 
         # TODO: Add more error handling for student file names
         username = "#" + filename_sections[0]  # Pound symbol is to match Avenue classlist format
@@ -253,15 +254,15 @@ def grade_submissions(milestone_num, sub_path):
         else:
             feedback_string = "No functions found!"
 
-        if username in list(results.Username):  # Account for multiple submissions
-            results.loc[results.Username == username, :] = [username, filename, score, max_points, feedback_string]
+        if username in list(results_df.Username):  # Account for multiple submissions
+            results_df.loc[results_df.Username == username, :] = [username, filename, score, max_points, feedback_string]
         else:
-            results.loc[len(results)] = [username, filename, score, max_points, feedback_string]
+            results_df.loc[len(results_df)] = [username, filename, score, max_points, feedback_string]
 
         print(username[1:], "graded.")
 
-    results.to_csv("Computing {} Raw Results.csv".format(milestone_num), index=False)
-    return results
+    results_df.to_csv("Computing {} Raw Results.csv".format(milestone_num), index=False)
+    return results_df, len(python_files)
 
 
 def add_name(results):
@@ -285,7 +286,7 @@ def add_name(results):
     return name_added
 
 
-def build_for_avenue(final, lab):
+def build_grades_csv_for_avenue(final, lab):
     """
     Reformats the dataframe and outputs it to an uploadable csv file.
     
@@ -342,7 +343,7 @@ def build_feedback(name, lab, feedback):
     return body
 
 
-def append_feedback(lab, results, path, feedback_path):
+def append_feedback_to_student_files(lab, results, path, feedback_path):
     """
     Loops through student submission and creates a copy with feedback inserted at the top.
     
@@ -374,25 +375,25 @@ def append_feedback(lab, results, path, feedback_path):
 def main():
     lab = input("Please input mini-milestone number (e.g. MM04): ")
 
-    sub_path = SUBMISSION_PATH.format(lab)
-    if not os.path.exists(sub_path):
+    # Look for submissions directory
+    submission_path = SUBMISSION_PATH.format(lab)
+    if not os.path.exists(submission_path):
         raise NotADirectoryError("Mini-Milestone " + lab + " submission directory not found.")
 
+    # Make feedback directory if non-existent
     feedback_path = FEEDBACK_PATH.format(lab)
     if not os.path.exists(feedback_path):
         os.makedirs(feedback_path)
 
     start = time.time()
 
-    results = grade_submissions(lab, sub_path)
-    build_for_avenue(results, lab)
-    append_feedback(lab, results, sub_path, feedback_path)
-    num_subs = sum(filename.endswith(".py") for filename in
-                   sorted(os.listdir(sub_path)))  # TODO: Count submissions more accurately
+    results_df, num_submissions = grade_submissions(lab, submission_path)
+    build_grades_csv_for_avenue(results_df, lab)
+    append_feedback_to_student_files(lab, results_df, submission_path, feedback_path)
 
     print("*" * 75)
     print("Grading complete")
-    print("Autograder took {} seconds for {} submissions".format(time.time() - start, num_subs))
+    print("Program took {} seconds for {} submissions".format(time.time() - start, num_submissions))
 
 
 if __name__ == "__main__":
