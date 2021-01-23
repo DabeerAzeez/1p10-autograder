@@ -26,12 +26,6 @@ import os
 import utils
 import time
 
-CLASSLIST_FILENAME = "Classlist.csv"
-GRADES_FILENAME = "Computing {} Grades.csv"
-TESTCASES_XL_PATH = "TestCases/MiniMilestone_TestCases.xlsx"
-SUBMISSION_PATH = "./Computing {} Submission Files/"  # {} to be replaced by specific Mini-Milestone (e.g. MM04)
-FEEDBACK_PATH = "./Computing {} Feedback Files/"
-
 
 class Autograder:
     """
@@ -58,19 +52,24 @@ class Autograder:
     """
 
     TOLERANCE = 0.0000001
+    CLASSLIST_FILENAME = "Classlist.csv"
+    TESTCASES_XL_PATH = "TestCases/MiniMilestone_TestCases.xlsx"
 
     def __init__(self, milestone_num):
-        self.milestone_num = milestone_num
+        self.GRADES_FILENAME = "Computing {} Grades.csv".format(milestone_num)
+        self.SUBMISSION_PATH = "./Computing {} Submission Files/".format(milestone_num)
+        self.FEEDBACK_PATH = "./Computing {} Feedback Files/".format(milestone_num)
+        self.MILESTONE_NUM = milestone_num
 
         try:
-            self.testcases_sheet = pd.read_excel(TESTCASES_XL_PATH, sheet_name=milestone_num)
+            self.testcases_sheet = pd.read_excel(Autograder.TESTCASES_XL_PATH, sheet_name=milestone_num)
             print("Found test cases excel file. Extracted sheet: " + milestone_num, flush=True)
             self.verify_testcases_sheet()
         except FileNotFoundError:
             raise FileNotFoundError("Missing test cases excel file.")
 
     def verify_testcases_sheet(self):
-        utils.verify_testcases_sheet(self.testcases_sheet, self.milestone_num)
+        utils.verify_testcases_sheet(self.testcases_sheet, self.MILESTONE_NUM)
 
     @staticmethod
     def within_tol(actual_value, expected_value):
@@ -202,6 +201,30 @@ class Autograder:
 
         return max(student_weights)
 
+    def build_grades_csv_for_avenue(self, final, lab):
+        """
+        Reformats the dataframe and outputs it to an uploadable csv file.
+
+        Returns
+        -------
+        None
+
+        Inputs
+        -------
+        final: Dataframe in the format, Username|Name|Last Name|First Name|Grade|Out of|Comments.
+        lab: Lab number
+        """
+        if str(lab) in "234":
+            grade_item = "Computing Lab {0} Points Grade <Numeric MaxPoints:{1}>".format(lab, final["Out of"][0])
+        else:
+            grade_item = "Computing Lab {0} - Objective Points Grade <Numeric MaxPoints:{1}>".format(lab,
+                                                                                                     final["Out of"][0])
+
+        avenue_upload = final.loc[:, ["Username", "Grade"]]
+        avenue_upload.rename(columns={"Grade": grade_item}, inplace=True)
+        avenue_upload["End-of-Line Indicator"] = "#"
+        avenue_upload.to_csv(self.GRADES_FILENAME.format(lab), index=False)
+
 
 def grade_submissions(milestone_num, submission_path):
     """
@@ -281,37 +304,12 @@ def add_name(results):
     results: Raw results dataframe.
     """
     try:
-        classlist = pd.read_csv(CLASSLIST_FILENAME)  # csv from Avenue in the format Username|Last Name|First Name
+        classlist = pd.read_csv(Autograder.CLASSLIST_FILENAME)  # csv from Avenue in the format Username|Last Name|First Name
     except FileNotFoundError:
         raise FileNotFoundError("Missing classlist CSV.")
 
     name_added = pd.merge(classlist, results, on=['Username'])
     return name_added
-
-
-def build_grades_csv_for_avenue(final, lab):
-    """
-    Reformats the dataframe and outputs it to an uploadable csv file.
-    
-    Returns
-    -------
-    None
-
-    Inputs
-    -------
-    final: Dataframe in the format, Username|Name|Last Name|First Name|Grade|Out of|Comments.
-    lab: Lab number
-    """
-    if str(lab) in "234":
-        grade_item = "Computing Lab {0} Points Grade <Numeric MaxPoints:{1}>".format(lab, final["Out of"][0])
-    else:
-        grade_item = "Computing Lab {0} - Objective Points Grade <Numeric MaxPoints:{1}>".format(lab,
-                                                                                                 final["Out of"][0])
-
-    avenue_upload = final.loc[:, ["Username", "Grade"]]
-    avenue_upload.rename(columns={"Grade": grade_item}, inplace=True)
-    avenue_upload["End-of-Line Indicator"] = "#"
-    avenue_upload.to_csv(GRADES_FILENAME.format(lab), index=False)
 
 
 def build_feedback(name, lab, feedback):
@@ -377,22 +375,21 @@ def append_feedback_to_student_files(lab, results, path, feedback_path):
 
 def main():
     milestone_num = input("Please input mini-milestone number (e.g. MM04): ")
+    autograder = Autograder(milestone_num)
 
     # Look for submissions directory
-    submission_path = SUBMISSION_PATH.format(milestone_num)
-    if not os.path.exists(submission_path):
+    if not os.path.exists(autograder.SUBMISSION_PATH):
         raise NotADirectoryError("Mini-Milestone " + milestone_num + " submission directory not found.")
 
     # Make feedback directory if non-existent
-    feedback_path = FEEDBACK_PATH.format(milestone_num)
-    if not os.path.exists(feedback_path):
-        os.makedirs(feedback_path)
+    if not os.path.exists(autograder.FEEDBACK_PATH):
+        os.makedirs(autograder.FEEDBACK_PATH)
 
     start = time.time()
 
-    results_df, num_submissions = grade_submissions(milestone_num, submission_path)
-    build_grades_csv_for_avenue(results_df, milestone_num)
-    append_feedback_to_student_files(milestone_num, results_df, submission_path, feedback_path)
+    results_df, num_submissions = grade_submissions(milestone_num, autograder.SUBMISSION_PATH)
+    autograder.build_grades_csv_for_avenue(results_df, milestone_num)
+    append_feedback_to_student_files(milestone_num, results_df, autograder.SUBMISSION_PATH, autograder.FEEDBACK_PATH)
 
     print("*" * 75)
     print("Grading complete")
