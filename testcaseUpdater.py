@@ -137,14 +137,14 @@ def verify_testcase_sheet(testcases_df, chosen_sheet):
         if testcases_df["Student"].apply(lambda x: not x.isalpha()).any():
             raise SyntaxError
     except (AttributeError, ValueError, SyntaxError):
-        raise SyntaxError("Non alphabetic character in Student column of sheet " + chosen_sheet)
+        raise ValueError("Non alphabetic character in Student column of sheet " + chosen_sheet)
 
     try:
         # Check for numeric entries in the 'Weight' column
         if testcases_df["Weight"].apply(lambda x: x.isnumeric()):
             raise SyntaxError
     except (AttributeError, ValueError, SyntaxError):
-        raise SyntaxError("Non-numeric character in Weight column of sheet " + chosen_sheet)
+        raise ValueError("Non-numeric character in Weight column of sheet " + chosen_sheet)
 
 
 def perform_tests(test_case_xl, chosen_sheet):
