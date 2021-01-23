@@ -19,7 +19,6 @@ This script will:
 - Create a grades csv file which can be uploaded to Avenue to update the gradebook
 """
 # TODO: Parameterize test case workbook column headers
-# TODO: Test an object-oriented lab
 # TODO: Start another thread to check for timeouts
 
 import pandas as pd
