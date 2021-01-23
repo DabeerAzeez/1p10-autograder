@@ -115,9 +115,6 @@ class Autograder:
         except SyntaxError:
             feedback_list.append("A SyntaxError is preventing your file from being compiled")
             error_flag = True
-        except ValueError:  # In case input statement results in ValueError
-            feedback_list.append("A ValueError is preventing your file from being compiled")
-            error_flag = True
         except Exception as e:
             feedback_list.append("An unexpected error is preventing your file from being compiled: " + str(e))
             error_flag = True
