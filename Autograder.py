@@ -146,8 +146,12 @@ class Autograder:
                 correct_output = row['Outputs']
 
                 try:
-                    exec(student_code + "\n" + test_code, {'input': override_input})
-                except NameError:
+                    gdict = globals()  # Inputting globals allows objects to be saved for later tests
+                    gdict['input'] = override_input  # TODO: understand this
+                    gdict['test_output'] = test_output
+
+                    exec(student_code + "\n" + test_code, gdict)  # TODO: Avoid using newlines
+                except NameError as e:
                     feedback_str = "Testcase: " + row['Command'] + " results in a name error. Something is not defined."
                 except Exception as e:  # Bare except necessary to catch whatever error might occur in the student file
                     feedback_str = "Testcase: " + row['Command'] + " outputs an error: " + str(e)
