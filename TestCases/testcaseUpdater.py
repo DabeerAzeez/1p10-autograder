@@ -32,8 +32,6 @@ Notes:
 import pandas as pd
 import importlib
 import openpyxl
-import sys
-import os
 import utils
 
 TEST_CASE_FILENAME = "MiniMilestone_TestCases.xlsx"
