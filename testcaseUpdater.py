@@ -104,7 +104,7 @@ def select_sheets(sheet_names_df):
     return [sheet_names_df.loc[chosen_index].values[0]]
 
 
-def verify_columns(columns):
+def verify_testcase_sheet(testcases_df, chosen_sheet):
     """
     Verify required columns are present in inputted columns
 
@@ -121,8 +121,14 @@ def verify_columns(columns):
     REQ_COLUMNS = ["Command", "Student", "Weight", "Outputs"]
 
     for col in REQ_COLUMNS:
-        if col not in columns:
-            raise SyntaxError("Missing " + col + " column in test case worksheet")
+        if col not in testcases_df.columns:
+            raise SyntaxError("Missing " + col + " column in sheet " + chosen_sheet)
+
+    REQ_FULL_COLUMNS = ["Command", "Student", "Weight"]  # Columns must be full before running this script
+
+    for col in REQ_FULL_COLUMNS:
+        if testcases_df[col].isna().any():
+            raise SyntaxError("Missing at least one entry in " + col + " column of sheet " + chosen_sheet)
 
 
 def perform_tests(test_case_xl, chosen_sheet):
@@ -136,11 +142,10 @@ def perform_tests(test_case_xl, chosen_sheet):
     chosen_sheet: Chosen sheet of test cases workbook
     """
     test_cases_df = pd.read_excel(test_case_xl, sheet_name=chosen_sheet)  # Read chosen sheet
+    verify_testcase_sheet(test_cases_df, chosen_sheet)
 
     # Import appropriate solution module
     import_solution("TestCases." + chosen_sheet + SOLUTION_FILENAME_SUFFIX, "global")  # TODO: test local version
-
-    verify_columns(test_cases_df.columns)
 
     # Run test for each row
     for index, row in test_cases_df.iterrows():  # iterrows generator should not be used for large dataframes
