@@ -131,6 +131,13 @@ def verify_testcase_sheet(testcases_df, chosen_sheet):
         if testcases_df[col].isna().any():
             raise SyntaxError("Missing at least one entry in " + col + " column of sheet " + chosen_sheet)
 
+    # Check columns for appropriate types of inputs
+    try:
+        if testcases_df["Student"].apply(lambda x: not x.isalpha()).any():
+            raise SyntaxError("Non alphabetic character in Student column of sheet " + chosen_sheet)
+    except (AttributeError, ValueError):
+        raise SyntaxError("Non alphabetic character in Student column of sheet " + chosen_sheet)
+
 
 def perform_tests(test_case_xl, chosen_sheet):
     """
