@@ -138,6 +138,12 @@ def verify_testcase_sheet(testcases_df, chosen_sheet):
     except (AttributeError, ValueError):
         raise SyntaxError("Non alphabetic character in Student column of sheet " + chosen_sheet)
 
+    try:
+        if testcases_df["Weight"].apply(lambda x: x.isnumeric()):
+            raise SyntaxError("Non-numeric character in Weight column of sheet " + chosen_sheet)
+    except (AttributeError, ValueError):
+        raise SyntaxError("Non-numeric character in Weight column of sheet " + chosen_sheet)
+
 
 def perform_tests(test_case_xl, chosen_sheet):
     """
