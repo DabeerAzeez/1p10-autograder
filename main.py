@@ -54,15 +54,6 @@ def main():
 
     start = time.time()
     autograder = Autograder(milestone_num)
-
-    # Look for submissions directory
-    if not os.path.exists(autograder.SUBMISSION_PATH):
-        raise NotADirectoryError("Mini-Milestone " + milestone_num + " submission directory not found.")
-
-    # Make feedback directory if non-existent
-    if not os.path.exists(autograder.FEEDBACK_PATH):
-        os.makedirs(autograder.FEEDBACK_PATH)
-
     autograder.grade_submissions()
     build_grades_csv_for_brightspace(autograder)
 

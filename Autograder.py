@@ -37,6 +37,14 @@ class Autograder:
         self.FEEDBACK_PATH = "./Computing {} Feedback Files/".format(milestone_num)
         self.MILESTONE_NUM = milestone_num
 
+        # Look for submissions directory
+        if not os.path.exists(self.SUBMISSION_PATH):
+            raise NotADirectoryError("Mini-Milestone " + milestone_num + " submission directory not found.")
+
+        # Make feedback directory if non-existent
+        if not os.path.exists(self.FEEDBACK_PATH):
+            os.makedirs(self.FEEDBACK_PATH)
+
         self.results_df = pd.DataFrame(columns=[''])
         self.num_submissions = 0
         self.max_student_points = 0
