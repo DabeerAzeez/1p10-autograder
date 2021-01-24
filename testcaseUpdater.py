@@ -124,7 +124,6 @@ def perform_tests(test_cases_df, chosen_sheet):
 
     # Run test for each row
     for index, row in test_cases_df.iterrows():  # iterrows generator should not be used for large dataframes
-        test_code = "raise LookupError"
 
         try:
             if row["DontTest"] == "x":
@@ -136,8 +135,6 @@ def perform_tests(test_cases_df, chosen_sheet):
 
         try:
             exec(test_code)
-        except LookupError:
-            raise LookupError("Error retrieving test code from test case worksheet")
         except Exception as e:
             row_num = index + 2  # Account for header row and zero-based array indexing
             raise Exception(str(e) + " --> exception occurred in sheet " + chosen_sheet +
