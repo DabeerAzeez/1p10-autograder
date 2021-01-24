@@ -44,6 +44,7 @@ class Autograder:
         self.test_case_workbook = TestCaseWorkBook(Autograder.TESTCASES_XL_PATH)
         self.test_case_sheet = self.test_case_workbook.select_sheet(milestone_num)
 
+        # TODO: Extract directory work to a separate method
         # Look for submissions directory
         if os.path.exists(self.SUBMISSION_PATH):
             print("Submission directory found.")
