@@ -2,6 +2,7 @@ import utils
 import pandas as pd
 import os
 import re
+import shutil
 
 
 class Autograder:
@@ -42,9 +43,17 @@ class Autograder:
         if not os.path.exists(self.SUBMISSION_PATH):
             raise NotADirectoryError("Mini-Milestone " + milestone_num + " submission directory not found.")
 
-        # Make feedback directory if non-existent
-        if not os.path.exists(self.FEEDBACK_PATH):
-            os.makedirs(self.FEEDBACK_PATH)
+        # Make feedback directory (overwrite if already exists)
+        try:
+            if os.path.exists(self.FEEDBACK_PATH):
+                print("Old feedback directory found. Removing...")
+                shutil.rmtree(self.FEEDBACK_PATH)
+                print("Removed!")
+        except PermissionError:
+            raise PermissionError("Permission denied when removing feedback directory. "
+                                  "Close this directory in File Explorer")
+        os.makedirs(self.FEEDBACK_PATH)
+        print("New feedback directory created")
 
         self.results_df = pd.DataFrame(columns=[''])
         self.submissions = []
