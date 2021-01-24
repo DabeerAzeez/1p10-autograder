@@ -122,22 +122,23 @@ class Autograder:
             feedback_list.append("An error occurred while compiling your code, so you have received a grade of zero.")
         else:
             # If the program compiled, run test cases
-            for index, row in self.testcases_sheet.iterrows():
+            for index, row in self.test_case_sheet.sheet_df.iterrows():
                 test_score = 0
                 test_output = []  # List mutates more easily via exec()
                 feedback_str = ""
 
                 try:
-                    dont_test = row['DontTest'] == "x"
+                    dont_test = row[f'{self.test_case_sheet.DONT_TEST_COL}'] == "x"
                 except KeyError:
                     dont_test = False
 
                 if dont_test:
-                    test_code = row['Command']
+                    test_code = row[f'{self.test_case_sheet.COMMAND_COL}']
                 else:
-                    test_code = "test_output.insert(0,str(" + row['Command'] + "))"  # TODO: Parameterize variable name
+                    test_code = "test_output.insert(0,str(" + row[f'{self.test_case_sheet.COMMAND_COL}'] + "))"
 
-                if row['Student'] != student_type:  # Only perform a test case if the student is the right type
+                if row[f'{self.test_case_sheet.STUDENT_COL}'] != student_type:
+                    # Only perform a test case if the student is the right type
                     continue
 
                 correct_output = row['Outputs']
@@ -149,37 +150,43 @@ class Autograder:
 
                     exec(student_code + "\n" + test_code, globals_dict)  # TODO: Avoid using newlines
                 except NameError as e:
-                    feedback_str = "Testcase: " + row['Command'] + " results in a name error: " + str(e)
+                    feedback_str = "Testcase: " + row[
+                        f'{self.test_case_sheet.COMMAND_COL}'] + " results in a name error: " + str(e)
                 except Exception as e:  # Bare except necessary to catch whatever error might occur in the student file
-                    feedback_str = "Testcase: " + row['Command'] + " outputs an error: " + str(e)
+                    feedback_str = "Testcase: " + row[
+                        f'{self.test_case_sheet.COMMAND_COL}'] + " outputs an error: " + str(e)
                 else:
                     if dont_test:
-                        feedback_str = "Command: " + row['Command'] + " ran with no errors."
+                        feedback_str = "Command: " + row[f'{self.test_case_sheet.COMMAND_COL}'] + " ran with no errors."
                     else:
                         # Calculate score
                         student_output = test_output[0] if len(test_output) else "No student output"
 
                         if student_output == correct_output:
-                            test_score = row['Weight']
-                            feedback_str = "Testcase: " + row['Command'] + " gives the correct output!"
+                            test_score = row[f'{self.test_case_sheet.WEIGHT_COL}']
+                            feedback_str = "Testcase: " + row[
+                                f'{self.test_case_sheet.COMMAND_COL}'] + " gives the correct output!"
                         else:
                             try:
                                 # Account for floating point errors if output should be numeric
                                 correct_output = float(correct_output)
                                 student_output = float(student_output)
                             except ValueError:
-                                feedback_str = "Testcase: " + row['Command'] + " gives an incorrect output."
+                                feedback_str = "Testcase: " + row[
+                                    f'{self.test_case_sheet.COMMAND_COL}'] + " gives an incorrect output."
                             else:
                                 if Autograder.within_tol(student_output, correct_output):
-                                    test_score = row['Weight']
-                                    feedback_str = "Testcase: " + row['Command'] + " gives the correct output!"
+                                    test_score = row[f'{self.test_case_sheet.WEIGHT_COL}']
+                                    feedback_str = "Testcase: " + row[
+                                        f'{self.test_case_sheet.COMMAND_COL}'] + " gives the correct output!"
                                 else:
-                                    feedback_str = "Testcase: " + row['Command'] + " gives an incorrect output."
+                                    feedback_str = "Testcase: " + row[
+                                        f'{self.test_case_sheet.COMMAND_COL}'] + " gives an incorrect output."
                 finally:
                     if dont_test:
                         feedback_list.append(feedback_str)
                     else:
-                        score_msg = "({0}/{1}) ".format(test_score, row['Weight'])
+                        score_msg = "({0}/{1}) ".format(test_score, row[f'{self.test_case_sheet.WEIGHT_COL}'])
                         feedback_list.append(score_msg + feedback_str)
 
                     total_score += test_score
@@ -187,12 +194,15 @@ class Autograder:
         return feedback_list, total_score
 
     def update_max_student_points(self):
-        student_types = list(self.testcases_sheet.Student.drop_duplicates())
+        student_types = list(self.test_case_sheet.sheet_df.Student.drop_duplicates())
         student_weights = set()
 
         for student_type in student_types:
-            student_weight = sum(self.testcases_sheet[self.testcases_sheet.Student == student_type]['Weight']
-                                 .dropna())  # Sum all non-empty 'weight' entries with the correct student type
+            student_weight = sum(
+                self.test_case_sheet.sheet_df[
+                    self.test_case_sheet.sheet_df[f'{self.test_case_sheet.STUDENT_COL}'] == student_type][
+                    f'{self.test_case_sheet.WEIGHT_COL}']
+                    .dropna())  # Sum all non-empty 'weight' entries with the correct student type
             student_weights.add(student_weight)
 
         if len(student_weights) > 1:
