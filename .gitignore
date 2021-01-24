@@ -1,6 +1,3 @@
 *
-!main.py
-!Autograder.py
-!testcaseUpdater.py
-!utils.py
-!TestCases/
+!*.py
+!TestCases/MiniMilestone_TestCases.xlsx
