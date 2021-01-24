@@ -219,7 +219,6 @@ class TestCaseWorkBook:
             print("Found test cases excel file.")
 
         self.sheet_names_df = pd.DataFrame(self.WORKBOOK_XL.sheet_names, columns=['Sheet Name'])
-        self.selected_sheets = ""
 
         self.instructions_sheet = "Instructions"
         self.non_test_sheets = [self.instructions_sheet]  # TODO: Support multiple non_test_sheets
