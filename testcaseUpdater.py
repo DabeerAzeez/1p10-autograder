@@ -31,159 +31,29 @@ Notes:
 # TODO: Modularize instructions sheet names to include other excluded sheets
 # TODO: Only show sheets based on a RegEx match to the sheet name
 
-import pandas as pd
-import importlib
-import openpyxl
 import utils
+from TestCaseWorkbook import TestCaseWorksheet, TestCaseWorkBook
 
-TCWB_PATH = "TestCases/MiniMilestone_TestCases.xlsx"
+TEST_CASE_WORKBOOK_PATH = "TestCases/MiniMilestone_TestCases.xlsx"
 SOLUTION_FILENAME_SUFFIX = "_SOLUTION"  # E.g. MM04_SOLUTION.py
 
 
-def import_solution(module_name, level):
-    """
-    Imports given module's methods into selected namespace. Adapted from
-    https://stackoverflow.com/questions/43059267/how-to-do-from-module-import-using-importlib
-
-    Parameters
-    ----------
-    module_name: name of module to be imported
-    level: Namespace level, whether "global" or "local"
-    """
-    if level not in ["global", "local"]:
-        raise TypeError("Improper level chosen for importing solution module.")
-
-    # get a handle on the module
-    mdl = importlib.import_module(module_name)
-
-    # is there an __all__?  if so respect it
-    if "__all__" in mdl.__dict__:
-        names = mdl.__dict__["__all__"]
-    else:
-        # otherwise we import all names that don't begin with _
-        names = [x for x in mdl.__dict__ if not x.startswith("_")]
-
-    # now drag them in
-    if level == "global":
-        globals().update({k: getattr(mdl, k) for k in names})
-    elif level == "local":
-        locals().update({k: getattr(mdl, k) for k in names})
-    else:
-        raise TypeError("Error updating selected namespace.")
-
-
-def select_sheets(sheet_names_df):
-    """
-    Allows user to select a sheet from the TCWB for updating
-
-    Parameters
-    ----------
-    sheet_names_df: Dataframe containing names of sheets in TCWB
-
-    Returns
-    -------
-    List of selected sheet names
-    """
-    sheet_names_df = sheet_names_df[sheet_names_df['Sheet Name']
-                                    != utils.INSTRUCTIONS_SHEET_NAME]  # Remove instruction sheet
-    print(sheet_names_df, "\n")
-
-    chosen_index = input("Please select the row number of the sheet you'd like to update. If you would like to "
-                         "update ALL sheets, enter 'all': ").strip()
-
-    if chosen_index == "all":
-        return sheet_names_df.values.flatten()  # Return all sheet names; flattens numpy N-dimensional array
-
-    try:
-        chosen_index = int(chosen_index)
-        if chosen_index not in sheet_names_df.index and chosen_index != -1:
-            raise ValueError
-    except ValueError:
-        print("Please choose an appropriate option.\n")
-        return select_sheets(sheet_names_df)
-
-    return [sheet_names_df.loc[chosen_index].values[0]]
-
-
-def perform_tests(test_cases_df, chosen_sheet):
-    """
-    Auto-fills 'Outputs' column of selected sheet in test cases workbook by passing the inputs through
-    the appropriate functions from the appropriates Python solution file.
-
-    Parameters
-    ----------
-    test_cases_df: Pandas ExcelFile object of TCWB
-    chosen_sheet: Chosen sheet of test cases workbook
-    """
-
-    # Import appropriate solution module
-    try:
-        import_solution("TestCases." + chosen_sheet + SOLUTION_FILENAME_SUFFIX, "global")  # TODO: test local version
-    except ModuleNotFoundError as e:
-        raise ModuleNotFoundError(str(e) + " --> missing solution module for selected test case excel sheet")
-
-    # Run test for each row
-    for index, row in test_cases_df.iterrows():  # iterrows generator should not be used for large dataframes
-
-        try:
-            if row["DontTest"] == "x":
-                test_code = row['Command']  # Run the command, but don't treat it like a test (don't record output)
-            else:
-                test_code = "row['Outputs'] = str(" + row['Command'] + ")"
-        except KeyError:
-            test_code = "row['Outputs'] = str(" + row['Command'] + ")"
-
-        try:
-            exec(test_code)
-        except Exception as e:
-            row_num = index + 2  # Account for header row and zero-based array indexing
-            raise Exception(str(e) + " --> exception occurred in sheet " + chosen_sheet +
-                            " row " + str(row_num) + " of test cases excel file.")
-
-        test_cases_df.loc[index] = row  # Update test_cases dataframe with local row Series
-
-    writer = pd.ExcelWriter(TCWB_PATH, engine='openpyxl', mode='a')
-
-    book = openpyxl.load_workbook(TCWB_PATH)
-    book.remove(book[chosen_sheet])  # Remove original sheet to prevent duplicates
-    writer.book = book
-
-    test_cases_df.to_excel(writer, chosen_sheet, index=False)  # Write updated test case sheet to excel file
-
-    try:
-        writer.save()
-    except PermissionError:
-        raise PermissionError("Access denied when writing to excel file; try closing all excel files and restarting.")
-
-    writer.close()
-
-    # Sort worksheets alphabetically
-    # TODO: Sort sheets alphabetically without accessing a protected member
-    # noinspection PyProtectedMember
-    book._sheets.sort(key=lambda ws: ws.title)
-    book.save(TCWB_PATH)
-
-
 def main():
-    test_case_xl = pd.ExcelFile(TCWB_PATH)
-    sheet_names_df = pd.DataFrame(test_case_xl.sheet_names, columns=['Sheet Name'])
+    test_case_workbook = TestCaseWorkBook(TEST_CASE_WORKBOOK_PATH)
 
     print("Welcome to the testcaseUpdater. Below are the extracted sheets from the test case spreadsheet.\n")
 
-    utils.verify_testcases_sheets(sheet_names_df)
-    chosen_sheet_names = select_sheets(sheet_names_df)
+    test_case_workbook.select_sheets()
 
     utils.disable_print()
 
-    for chosen_sheet_name in chosen_sheet_names:
-        test_cases_df = pd.read_excel(test_case_xl, sheet_name=chosen_sheet_name)  # Read chosen sheet
-        utils.verify_testcase_sheet(test_cases_df, chosen_sheet_name)
-        perform_tests(test_cases_df, chosen_sheet_name)
+    for selected_sheet in test_case_workbook.selected_sheets:
+        test_case_workbook.perform_tests(selected_sheet)
 
     utils.enable_print()
 
     print("*" * 75)
-    print(f"Update complete. Check {TCWB_PATH}. Press enter to quit.")
+    print(f"Update complete. Check {TEST_CASE_WORKBOOK_PATH}. Press enter to quit.")
     input()
 
 
