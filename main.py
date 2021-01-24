@@ -54,6 +54,7 @@ def main():
 
     start = time.time()
     autograder = Autograder(milestone_num)
+    autograder.find_submissions()
     autograder.grade_submissions()
     build_grades_csv_for_brightspace(autograder)
     end = time.time()

@@ -46,6 +46,7 @@ class Autograder:
             os.makedirs(self.FEEDBACK_PATH)
 
         self.results_df = pd.DataFrame(columns=[''])
+        self.submissions = []
         self.num_submissions = 0
         self.max_student_points = 0
         self.testcases_sheet_verified = False
@@ -196,6 +197,16 @@ class Autograder:
 
         self.max_student_points = max(student_weights)
 
+    def find_submissions(self):
+        # All python files in the submission directory count as submissions
+        submissions = [file for file in sorted(os.listdir(self.SUBMISSION_PATH)) if file.endswith(".py")]
+
+        if len(submissions) == 0:
+            raise FileNotFoundError("No submission files found!")
+
+        self.submissions = submissions
+        self.num_submissions = len(submissions)
+
     def grade_submissions(self):
         """
         - Loops through submissions directory.
@@ -220,16 +231,8 @@ class Autograder:
         print("Beginning grading...")
         print("-" * 20)
 
-        # All python files in the submission directory count as submissions
-        submissions = [file for file in sorted(os.listdir(self.SUBMISSION_PATH)) if file.endswith(".py")]
-
-        if len(submissions) == 0:
-            raise FileNotFoundError("No submission files found!")
-
-        self.num_submissions = len(submissions)
-
         # Grade each submission and update results dataframe with the student grade
-        for submission in submissions:
+        for submission in self.submissions:
             filename_sections = submission.split("_")
             if len(filename_sections) == 1:
                 raise ValueError("Submission file missing underscore separator: " + str(submission))
