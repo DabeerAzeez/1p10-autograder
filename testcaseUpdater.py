@@ -28,6 +28,8 @@ Notes:
 # TODO: Reset TCWB column widths
 # TODO: Don't rely on old xlrd (https://stackoverflow.com/questions/65250207/pandas-cannot-open-an-excel-xlsx-file)
 # TODO: Parameterize column names
+# TODO: Modularize instructions sheet names to include other excluded sheets
+# TODO: Only show sheets based on a RegEx match to the sheet name
 
 import pandas as pd
 import importlib
@@ -37,7 +39,6 @@ import utils
 TCWB_PATH = "TestCases/MiniMilestone_TestCases.xlsx"
 SOLUTION_FILENAME_SUFFIX = "_SOLUTION"  # E.g. MM04_SOLUTION.py
 INSTRUCTIONS_SHEET_NAME = "Instructions"  # Name of sheet within TEST_CASE_FILENAME containing instructions
-# TODO: Modularize instructions sheet names to include other excluded sheets
 
 
 def import_solution(module_name, level):
@@ -154,6 +155,11 @@ def verify_testcase_sheet(testcases_df, chosen_sheet):
         raise ValueError("Numeric character (not a command!) in Command column of sheet " + chosen_sheet)
 
 
+def verify_testcases_sheets(sheet_names_df):
+    if INSTRUCTIONS_SHEET_NAME not in sheet_names_df.values:
+        print(">>>> Warning: Missing instructions sheet in test case excel file <<<<<< \n")
+
+
 def perform_tests(test_cases_df, chosen_sheet):
     """
     Auto-fills 'Outputs' column of selected sheet in test cases workbook by passing the inputs through
@@ -220,9 +226,7 @@ def main():
 
     print("Welcome to the testcaseUpdater. Below are the extracted sheets from the test case spreadsheet.\n")
 
-    if INSTRUCTIONS_SHEET_NAME not in sheet_names_df.values:
-        print(">>>> Warning: Missing instructions sheet in test case excel file <<<<<< \n")
-
+    verify_testcases_sheets(sheet_names_df)
     chosen_sheet_names = select_sheets(sheet_names_df)
 
     utils.disable_print()
