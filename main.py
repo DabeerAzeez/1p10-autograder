@@ -21,7 +21,6 @@ This script will:
 # TODO: Parameterize test case workbook column headers
 # TODO: Start another thread to check for timeouts
 
-import os
 from Autograder import Autograder
 import time
 import utils
