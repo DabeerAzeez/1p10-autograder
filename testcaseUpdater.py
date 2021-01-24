@@ -38,7 +38,6 @@ import utils
 
 TCWB_PATH = "TestCases/MiniMilestone_TestCases.xlsx"
 SOLUTION_FILENAME_SUFFIX = "_SOLUTION"  # E.g. MM04_SOLUTION.py
-INSTRUCTIONS_SHEET_NAME = "Instructions"  # Name of sheet within TEST_CASE_FILENAME containing instructions
 
 
 def import_solution(module_name, level):
@@ -85,7 +84,8 @@ def select_sheets(sheet_names_df):
     -------
     List of selected sheet names
     """
-    sheet_names_df = sheet_names_df[sheet_names_df['Sheet Name'] != INSTRUCTIONS_SHEET_NAME]  # Remove instruction sheet
+    sheet_names_df = sheet_names_df[sheet_names_df['Sheet Name']
+                                    != utils.INSTRUCTIONS_SHEET_NAME]  # Remove instruction sheet
     print(sheet_names_df, "\n")
 
     chosen_index = input("Please select the row number of the sheet you'd like to update. If you would like to "
@@ -103,11 +103,6 @@ def select_sheets(sheet_names_df):
         return select_sheets(sheet_names_df)
 
     return [sheet_names_df.loc[chosen_index].values[0]]
-
-
-def verify_testcases_sheets(sheet_names_df):
-    if INSTRUCTIONS_SHEET_NAME not in sheet_names_df.values:
-        print(">>>> Warning: Missing instructions sheet in test case excel file <<<<<< \n")
 
 
 def perform_tests(test_cases_df, chosen_sheet):
@@ -178,7 +173,7 @@ def main():
 
     print("Welcome to the testcaseUpdater. Below are the extracted sheets from the test case spreadsheet.\n")
 
-    verify_testcases_sheets(sheet_names_df)
+    utils.verify_testcases_sheets(sheet_names_df)
     chosen_sheet_names = select_sheets(sheet_names_df)
 
     utils.disable_print()

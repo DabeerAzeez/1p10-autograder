@@ -2,6 +2,8 @@ from unittest import mock
 import sys
 import os
 
+INSTRUCTIONS_SHEET_NAME = "Instructions"  # Name of Instructions sheet within test case excel file
+
 
 def check_called(func):
     """
@@ -109,4 +111,22 @@ def verify_testcase_sheet(testcases_df, chosen_sheet):
             raise ValueError("Missing items in \"Weight\" column for rows to be tested for grades")
 
     print("Test case worksheet is properly set up.")
+    return True
+
+
+def verify_testcases_sheets(sheet_names_df):
+    """
+    Verify that a Dataframe representing the names of the sheets in the test cases Excel file is correctly set up.
+
+    Parameters
+    ----------
+    sheet_names_df: Dataframe to be tested
+
+    Returns
+    -------
+    True if all tests pass
+    """
+    if INSTRUCTIONS_SHEET_NAME not in sheet_names_df.values:
+        print(">>>> Warning: Missing instructions sheet in test case excel file <<<<<< \n")
+
     return True
