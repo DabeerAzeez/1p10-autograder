@@ -1,6 +1,7 @@
 import utils
 import pandas as pd
 import os
+import re
 
 
 class Autograder:
@@ -197,15 +198,35 @@ class Autograder:
 
         self.max_student_points = max(student_weights)
 
+    @staticmethod
+    def verify_file_name_scheme(submission):
+        return True if re.match("\w*_MM\d\d_Student[A-Z]", submission) else False
+
     def find_submissions(self):
-        # All python files in the submission directory count as submissions
-        submissions = [file for file in sorted(os.listdir(self.SUBMISSION_PATH)) if file.endswith(".py")]
+        print("Finding valid Python script submissions...")
+        print("-"*25)
+        submissions = []
+
+        for file in sorted(os.listdir(self.SUBMISSION_PATH)):
+            if file.endswith(".py") and self.verify_file_name_scheme(file):
+                print("Found valid submission: " + str(file))
+                submissions.append(file)
+            elif not file.endswith(".py"):
+                raise TypeError("Non-python file found in submission directory.")
+            elif not self.verify_file_name_scheme(file):
+                print("Submission '" + str(file) + "' does not follow the verified naming scheme and"
+                                                   " will not be graded.", flush=True)
+                # Flush to prevent subsequent errors from displaying in console first
 
         if len(submissions) == 0:
-            raise FileNotFoundError("No Python script submissions found!")
+            raise FileNotFoundError("No valid submissions found!")
 
         self.submissions = submissions
         self.num_submissions = len(submissions)
+
+        print("-" * 25)
+        print("Found total of " + str(self.num_submissions) +
+              " submission{} in submission directory.".format('s' if self.num_submissions > 1 else ''))
 
     def grade_submissions(self):
         """
@@ -234,10 +255,7 @@ class Autograder:
         # Grade each submission and update results dataframe with the student grade
         for submission in self.submissions:
             filename_sections = submission.split("_")
-            if len(filename_sections) == 1:
-                raise ValueError("Submission file missing underscore separator: " + str(submission))
 
-            # TODO: Add more error handling for student file names
             username = "#" + filename_sections[0]  # Pound symbol is to match Avenue classlist format
             current_student_type = filename_sections[2].lstrip("Student").rstrip(".py")  # Student A / B, etc.
 
