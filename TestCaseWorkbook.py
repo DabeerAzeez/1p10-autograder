@@ -39,9 +39,10 @@ def import_solution(module_name, level):
 
 class TestCaseWorksheet:
     def __init__(self, test_case_workbook, chosen_sheet_name):
-        self.chosen_sheet_name = chosen_sheet_name
+        self.name = chosen_sheet_name
         self.test_case_workbook = test_case_workbook
-        self.sheet_df = pd.read_excel(self.test_case_workbook.WORKBOOK_PATH, sheet_name=self.chosen_sheet_name)
+        self.sheet_df = pd.read_excel(self.test_case_workbook.WORKBOOK_PATH, sheet_name=self.name)
+        print("Extracted sheet: '" + chosen_sheet_name + "'")
 
         self.COMMAND_COL = "Command"
         self.DONT_TEST_COL = "DontTest"
@@ -60,11 +61,11 @@ class TestCaseWorksheet:
         writer = pd.ExcelWriter(self.test_case_workbook.WORKBOOK_PATH, engine='openpyxl', mode='a')
 
         book = openpyxl.load_workbook(self.test_case_workbook.WORKBOOK_PATH)
-        book.remove(book[self.chosen_sheet_name])  # Remove original sheet to prevent duplicates
+        book.remove(book[self.name])  # Remove original sheet to prevent duplicates
         writer.book = book
 
         # Write updated test case sheet to excel file
-        self.sheet_df.to_excel(writer, self.chosen_sheet_name, index=False)
+        self.sheet_df.to_excel(writer, self.name, index=False)
 
         try:
             writer.save()
@@ -87,16 +88,16 @@ class TestCaseWorksheet:
         -------
         True if all tests pass
         """
-        print("Verifying test case worksheet '" + self.chosen_sheet_name + "' is set up properly...",
+        print("Verifying test case worksheet '" + self.name + "' is set up properly...",
               flush=True)  # Flush prevents errors printing first
 
         for col in self.REQ_COLUMNS:
             if col not in self.sheet_df.columns:
-                raise SyntaxError("Missing " + col + " column or column header in sheet " + self.chosen_sheet_name)
+                raise SyntaxError("Missing " + col + " column or column header in sheet " + self.name)
 
         for col in self.REQ_FULL_COLUMNS:
             if self.sheet_df[col].isna().any():
-                raise SyntaxError("Missing at least one entry in " + col + " column of sheet " + self.chosen_sheet_name)
+                raise SyntaxError("Missing at least one entry in " + col + " column of sheet " + self.name)
 
         # Check columns for appropriate types of inputs
         try:
@@ -104,21 +105,21 @@ class TestCaseWorksheet:
             if self.sheet_df[self.STUDENT_COL].apply(lambda x: not x.isalpha()).any():
                 raise ValueError
         except (AttributeError, ValueError):
-            raise ValueError("Non alphabetic character in Student column of sheet " + self.chosen_sheet_name)
+            raise ValueError("Non alphabetic character in Student column of sheet " + self.name)
 
         try:
             # Check for non-numeric entries in the 'Weight' column
             if self.sheet_df[self.WEIGHT_COL].apply(lambda x: not isinstance(x, (int, float))).any():
                 raise ValueError
         except (AttributeError, ValueError):
-            raise ValueError("Non-numeric character in Weight column of sheet " + self.chosen_sheet_name)
+            raise ValueError("Non-numeric character in Weight column of sheet " + self.name)
 
         try:
             # Check for numeric entries in the 'Command' column
             if self.sheet_df[self.COMMAND_COL].apply(lambda x: isinstance(x, (int, float))).any():
                 raise ValueError
         except (AttributeError, ValueError):
-            raise ValueError("Numeric character (not a command!) in Command column of sheet " + self.chosen_sheet_name)
+            raise ValueError("Numeric character (not a command!) in Command column of sheet " + self.name)
 
         for col in self.sheet_df.columns:
             if col not in self.REQ_COLUMNS and col not in self.OPTIONAL_COLUMNS:
