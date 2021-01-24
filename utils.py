@@ -15,6 +15,11 @@ def enable_print():
     sys.stdout = sys.__stdout__
 
 
+def print_message_in_characters(message, character, total_characters=50):
+    NUM_DELIMITERS_ON_EACH_SIDE = int((total_characters - len(message))/2)
+    print((character * NUM_DELIMITERS_ON_EACH_SIDE) + message + (character * NUM_DELIMITERS_ON_EACH_SIDE))
+
+
 def verify_testcases_sheet(testcases_sheet, sheet_name):
     """
     Verify test cases excel sheet for valid column headers and data within cells.

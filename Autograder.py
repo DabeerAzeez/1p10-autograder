@@ -203,8 +203,7 @@ class Autograder:
         return True if re.match("\w*_MM\d\d_Student[A-Z]", submission) else False
 
     def find_submissions(self):
-        print("Finding valid Python script submissions...")
-        print("-"*25)
+        utils.print_message_in_characters("FINDING VALID SUBMISSIONS", "-")
         submissions = []
 
         for file in sorted(os.listdir(self.SUBMISSION_PATH)):
@@ -224,7 +223,7 @@ class Autograder:
         self.submissions = submissions
         self.num_submissions = len(submissions)
 
-        print("-" * 25)
+        utils.print_message_in_characters("", "-")
         print("Found total of " + str(self.num_submissions) +
               " submission{} in submission directory.".format('s' if self.num_submissions > 1 else ''))
 
@@ -249,8 +248,7 @@ class Autograder:
         """
         results_df = pd.DataFrame(columns=["Username", "File Name", "Grade", "Out of", "Comments"])
 
-        print("Beginning grading...")
-        print("-" * 20)
+        utils.print_message_in_characters("GRADING", "-")
 
         # Grade each submission and update results dataframe with the student grade
         for submission in self.submissions:
@@ -277,7 +275,7 @@ class Autograder:
 
             print(username[1:], "graded.")
 
-        print("-" * 20)
+        utils.print_message_in_characters("", "-")
         print("Grading complete.")
 
         self.results_df = results_df
