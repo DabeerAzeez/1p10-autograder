@@ -35,7 +35,7 @@ Notes:
 import utils
 from TestCaseWorkbook import TestCaseWorkBook
 
-TEST_CASE_WORKBOOK_PATH = "TestCases/MiniMilestone_TestCases.xlsx"
+TEST_CASE_WORKBOOK_PATH = "../TestCases/MiniMilestone_TestCases.xlsx"
 SOLUTION_FILENAME_SUFFIX = "_SOLUTION"  # E.g. MM04_SOLUTION.py
 
 

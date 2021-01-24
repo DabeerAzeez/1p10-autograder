@@ -4,6 +4,7 @@ import os
 import re
 import shutil
 
+from TestCaseWorkbook import TestCaseWorkBook
 
 class Autograder:
     """
@@ -30,14 +31,17 @@ class Autograder:
     """
 
     TOLERANCE = 0.0000001
-    CLASSLIST_FILENAME = "Classlist.csv"
-    TESTCASES_XL_PATH = "TestCases/MiniMilestone_TestCases.xlsx"
+    CLASSLIST_FILENAME = "../Classlist.csv"
+    TESTCASES_XL_PATH = "../TestCases/MiniMilestone_TestCases.xlsx"
 
     def __init__(self, milestone_num):
         self.GRADES_CSV_FILENAME = "Computing {} Grades.csv".format(milestone_num)
         self.SUBMISSION_PATH = "./Computing {} Submission Files/".format(milestone_num)
         self.FEEDBACK_PATH = "./Computing {} Feedback Files/".format(milestone_num)
         self.MILESTONE_NUM = milestone_num
+
+        self.test_case_workbook = TestCaseWorkBook(Autograder.TESTCASES_XL_PATH)
+        self.test_case_sheet = self.test_case_workbook.select_sheet(milestone_num)
 
         # Look for submissions directory
         if os.path.exists(self.SUBMISSION_PATH):
