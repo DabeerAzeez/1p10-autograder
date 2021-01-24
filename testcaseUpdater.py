@@ -46,14 +46,16 @@ def main():
 
     selected_sheets = test_case_workbook.select_sheets()
 
+    utils.print_message_in_characters("BEGIN WORKSHEET UPDATES", "*", 75)
+
     for selected_sheet in selected_sheets:
         utils.disable_print()
         selected_sheet.perform_tests()
         utils.enable_print()
         print("Test sheet " + str(selected_sheet.name) + " updated!")
 
-    print("*" * 75)
-    print(f"Update complete. Check {TEST_CASE_WORKBOOK_PATH}. Press enter to quit.")
+    utils.print_message_in_characters("WORKSHEET UPDATE COMPLETE", "*", 75)
+    print(f"Check {TEST_CASE_WORKBOOK_PATH}. Press enter to quit.")
     input()
 
 
