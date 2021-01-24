@@ -247,9 +247,11 @@ class TestCaseWorkBook:
 
         chosen_index = input("Please select the row number of the sheet you'd like to update. If you would like to "
                              "update ALL sheets, enter 'all': ").strip()
+        print("")
 
         if chosen_index == "all":
             # Select all sheet names; flattens numpy N-dimensional array
+            utils.print_message_in_characters("EXTRACTING AND VERIFYING SHEETS...", "*", 75)
             for selected_sheet_name in self.test_sheet_names_df.values.flatten():
                 selected_sheets.append(TestCaseWorksheet(self, selected_sheet_name))
             return selected_sheets
@@ -263,6 +265,7 @@ class TestCaseWorkBook:
             return self.select_sheets()
 
             selected_sheet_name = self.sheet_names_df.loc[chosen_index].values[0]
+            utils.print_message_in_characters("EXTRACTING AND VERIFYING SHEETS...", "*", 75)
             return TestCaseWorksheet(self, selected_sheet_name)
 
     def display_test_sheets(self):
