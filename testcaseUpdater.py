@@ -44,14 +44,13 @@ def main():
 
     print("Welcome to the testcaseUpdater. Below are the extracted sheets from the test case spreadsheet.\n")
 
-    test_case_workbook.select_sheets()
+    selected_sheets = test_case_workbook.select_sheets()
 
-    utils.disable_print()
-
-    for selected_sheet in test_case_workbook.selected_sheets:
-        test_case_workbook.perform_tests(selected_sheet)
-
-    utils.enable_print()
+    for selected_sheet in selected_sheets:
+        utils.disable_print()
+        selected_sheet.perform_tests()
+        utils.enable_print()
+        print("Test sheet " + str(selected_sheet.name) + " updated!")
 
     print("*" * 75)
     print(f"Update complete. Check {TEST_CASE_WORKBOOK_PATH}. Press enter to quit.")
