@@ -45,45 +45,68 @@ def print_message_in_characters(message, characters, total_characters=50):
     NUM_DELIMITERS_ON_EACH_SIDE = int((total_characters - len(message))/(2*len(characters)))
     print((characters * NUM_DELIMITERS_ON_EACH_SIDE) + message + (characters * NUM_DELIMITERS_ON_EACH_SIDE))
 
-def verify_testcases_sheet(testcases_sheet, sheet_name):
+
+def verify_testcase_sheet(testcases_df, chosen_sheet):
     """
-    Verify test cases excel sheet for valid column headers and data within cells.
+    Verify required columns are present in inputted columns
 
     Parameters
     ----------
-    testcases_sheet: testcases excel sheet to be verified
-    sheet_name: name of sheet being verified
+    columns: Columns to be checked for required columns
 
     Returns
     -------
-    True if all tests are passed.
+    String representing whether the function or object (or both) columns are present in 'columns'
     """
-    print("Verifying test case worksheet '" + sheet_name + "' is set up properly...",
+    print("Verifying test case worksheet '" + chosen_sheet + "' is set up properly...",
           flush=True)  # Flush prevents errors printing first
 
-    testcases_columns = testcases_sheet.columns
-
-    REQ_COLUMNS = ["Command", "Student"]
-    OPTIONAL_COLUMNS = ["DontTest", "Weight", "Outputs"]
-
-    if "DontTest" in testcases_columns:
-        # Make sure 'test' rows have appropriate data in columns
-        test_rows = testcases_sheet[testcases_sheet["DontTest"].isnull()]
-        if test_rows["Weight"].isna().any():
-            raise SyntaxError("Missing items in \"Weight\" column")
+    # Check that required columns exist
+    REQ_COLUMNS = ["Command", "Student", "Weight", "Outputs"]
+    OPTIONAL_COLUMNS = ["DontTest"]
 
     for col in REQ_COLUMNS:
-        if col not in testcases_columns:
-            raise SyntaxError("Missing required column \"" + col + "\" in test case worksheet.")
+        if col not in testcases_df.columns:
+            raise SyntaxError("Missing " + col + " column or column header in sheet " + chosen_sheet)
 
-        if True in list(testcases_sheet[col].isna()):
-            raise SyntaxError("Column \"" + col + "\" is missing some entries.")
+    # Check that relevant columns are completely filled
+    REQ_FULL_COLUMNS = ["Command", "Student"]
 
-    for col in testcases_columns:
+    for col in REQ_FULL_COLUMNS:
+        if testcases_df[col].isna().any():
+            raise SyntaxError("Missing at least one entry in " + col + " column of sheet " + chosen_sheet)
+
+    # Check columns for appropriate types of inputs
+    try:
+        # Check for non-alphabetic entries in the 'Student' column
+        if testcases_df["Student"].apply(lambda x: not x.isalpha()).any():
+            raise ValueError
+    except (AttributeError, ValueError):
+        raise ValueError("Non alphabetic character in Student column of sheet " + chosen_sheet)
+
+    try:
+        # Check for non-numeric entries in the 'Weight' column
+        if testcases_df["Weight"].apply(lambda x: not isinstance(x, (int, float))).any():
+            raise ValueError
+    except (AttributeError, ValueError):
+        raise ValueError("Non-numeric character in Weight column of sheet " + chosen_sheet)
+
+    try:
+        # Check for numeric entries in the 'Command' column
+        if testcases_df["Command"].apply(lambda x: isinstance(x, (int, float))).any():
+            raise ValueError
+    except (AttributeError, ValueError):
+        raise ValueError("Numeric character (not a command!) in Command column of sheet " + chosen_sheet)
+
+    for col in testcases_df.columns:
         if col not in REQ_COLUMNS and col not in OPTIONAL_COLUMNS:
-            raise SyntaxError("Unknown column \"" + str(col) + "\" found in test case worksheet.")
+            raise ValueError("Unknown column \"" + str(col) + "\" found in test case worksheet.")
 
-    # TODO: If outputs are (the only thing) missing from the required columns, attempt to run testcaseUpdater
+    if "DontTest" in testcases_df.columns:
+        # Make sure 'test' rows have appropriate data in columns
+        test_rows = testcases_df[testcases_df["DontTest"].isnull()]
+        if test_rows["Weight"].isna().any():
+            raise ValueError("Missing items in \"Weight\" column for rows to be tested for grades")
 
     print("Test case worksheet is properly set up.")
     return True

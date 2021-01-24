@@ -105,56 +105,6 @@ def select_sheets(sheet_names_df):
     return [sheet_names_df.loc[chosen_index].values[0]]
 
 
-def verify_testcase_sheet(testcases_df, chosen_sheet):
-    """
-    Verify required columns are present in inputted columns
-
-    Parameters
-    ----------
-    columns: Columns to be checked for required columns
-
-    Returns
-    -------
-    String representing whether the function or object (or both) columns are present in 'columns'
-    """
-
-    # Check that required columns exist
-    REQ_COLUMNS = ["Command", "Student", "Weight", "Outputs"]
-
-    for col in REQ_COLUMNS:
-        if col not in testcases_df.columns:
-            raise SyntaxError("Missing " + col + " column or column header in sheet " + chosen_sheet)
-
-    # Check that relevant columns are completely filled
-    REQ_FULL_COLUMNS = ["Command", "Student", "Weight"]
-
-    for col in REQ_FULL_COLUMNS:
-        if testcases_df[col].isna().any():
-            raise SyntaxError("Missing at least one entry in " + col + " column of sheet " + chosen_sheet)
-
-    # Check columns for appropriate types of inputs
-    try:
-        # Check for non-alphabetic entries in the 'Student' column
-        if testcases_df["Student"].apply(lambda x: not x.isalpha()).any():
-            raise ValueError
-    except (AttributeError, ValueError):
-        raise ValueError("Non alphabetic character in Student column of sheet " + chosen_sheet)
-
-    try:
-        # Check for non-numeric entries in the 'Weight' column
-        if testcases_df["Weight"].apply(lambda x: not isinstance(x, (int, float))).any():
-            raise ValueError
-    except (AttributeError, ValueError):
-        raise ValueError("Non-numeric character in Weight column of sheet " + chosen_sheet)
-
-    try:
-        # Check for numeric entries in the 'Command' column
-        if testcases_df["Command"].apply(lambda x: isinstance(x, (int, float))).any():
-            raise ValueError
-    except (AttributeError, ValueError):
-        raise ValueError("Numeric character (not a command!) in Command column of sheet " + chosen_sheet)
-
-
 def verify_testcases_sheets(sheet_names_df):
     if INSTRUCTIONS_SHEET_NAME not in sheet_names_df.values:
         print(">>>> Warning: Missing instructions sheet in test case excel file <<<<<< \n")
@@ -233,7 +183,7 @@ def main():
 
     for chosen_sheet_name in chosen_sheet_names:
         test_cases_df = pd.read_excel(test_case_xl, sheet_name=chosen_sheet_name)  # Read chosen sheet
-        verify_testcase_sheet(test_cases_df, chosen_sheet_name)
+        utils.verify_testcase_sheet(test_cases_df, chosen_sheet_name)
         perform_tests(test_cases_df, chosen_sheet_name)
 
     utils.enable_print()
