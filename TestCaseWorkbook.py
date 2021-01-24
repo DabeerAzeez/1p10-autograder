@@ -209,8 +209,14 @@ class TestCaseWorkBook:
         self.WORKBOOK_PATH = path
         self.WORKBOOK_XL = pd.ExcelFile(path)
 
-        self.openpyxl_workbook = openpyxl.load_workbook(self.WORKBOOK_PATH)
-        self.excel_writer = pd.ExcelWriter(self.WORKBOOK_PATH, engine='openpyxl', mode='a')
+        try:
+            self.openpyxl_workbook = openpyxl.load_workbook(self.WORKBOOK_PATH)
+            self.excel_writer = pd.ExcelWriter(self.WORKBOOK_PATH, engine='openpyxl', mode='a')
+        except FileNotFoundError:
+            raise FileNotFoundError("Missing test cases excel file.")
+        else:
+            print("Found test cases excel file.")
+
         self.sheet_names_df = pd.DataFrame(self.WORKBOOK_XL.sheet_names, columns=['Sheet Name'])
         self.selected_sheets = ""
 
