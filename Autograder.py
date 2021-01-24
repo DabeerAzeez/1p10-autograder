@@ -202,7 +202,7 @@ class Autograder:
         submissions = [file for file in sorted(os.listdir(self.SUBMISSION_PATH)) if file.endswith(".py")]
 
         if len(submissions) == 0:
-            raise FileNotFoundError("No submission files found!")
+            raise FileNotFoundError("No Python script submissions found!")
 
         self.submissions = submissions
         self.num_submissions = len(submissions)
