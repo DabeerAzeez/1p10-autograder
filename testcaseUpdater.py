@@ -37,7 +37,7 @@ import utils
 TCWB_PATH = "TestCases/MiniMilestone_TestCases.xlsx"
 SOLUTION_FILENAME_SUFFIX = "_SOLUTION"  # E.g. MM04_SOLUTION.py
 INSTRUCTIONS_SHEET_NAME = "Instructions"  # Name of sheet within TEST_CASE_FILENAME containing instructions
-DELIMITER = ";"
+# TODO: Modularize instructions sheet names to include other excluded sheets
 
 
 def import_solution(module_name, level):
