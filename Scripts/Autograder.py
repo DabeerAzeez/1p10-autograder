@@ -6,6 +6,7 @@ import shutil
 
 from TestCaseWorkbook import TestCaseWorkBook
 
+
 class Autograder:
     """
     Autograder Class to mark individual submissions
@@ -67,7 +68,6 @@ class Autograder:
         self.max_student_points = 0
 
         self.update_max_student_points()
-
 
     @staticmethod
     def within_tol(actual_value, expected_value):
