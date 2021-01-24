@@ -48,19 +48,20 @@ def print_message_in_characters(message, characters, total_characters=50):
     print((characters * NUM_DELIMITERS_ON_EACH_SIDE) + message + (characters * NUM_DELIMITERS_ON_EACH_SIDE))
 
 
-def verify_testcase_sheet(testcases_df, chosen_sheet):
+def verify_testcase_sheet(testcases_df, chosen_sheet_name):
     """
-    Verify required columns are present in inputted columns
+    Verify that a Dataframe representing the test cases Excel sheet has data in the appropriate cells.
 
     Parameters
     ----------
-    columns: Columns to be checked for required columns
+    testcases_df: Dataframe to be tested
+    chosen_sheet_name: name of chosen sheet
 
     Returns
     -------
-    String representing whether the function or object (or both) columns are present in 'columns'
+    True if all tests pass
     """
-    print("Verifying test case worksheet '" + chosen_sheet + "' is set up properly...",
+    print("Verifying test case worksheet '" + chosen_sheet_name + "' is set up properly...",
           flush=True)  # Flush prevents errors printing first
 
     # Check that required columns exist
@@ -69,14 +70,14 @@ def verify_testcase_sheet(testcases_df, chosen_sheet):
 
     for col in REQ_COLUMNS:
         if col not in testcases_df.columns:
-            raise SyntaxError("Missing " + col + " column or column header in sheet " + chosen_sheet)
+            raise SyntaxError("Missing " + col + " column or column header in sheet " + chosen_sheet_name)
 
     # Check that relevant columns are completely filled
     REQ_FULL_COLUMNS = ["Command", "Student"]
 
     for col in REQ_FULL_COLUMNS:
         if testcases_df[col].isna().any():
-            raise SyntaxError("Missing at least one entry in " + col + " column of sheet " + chosen_sheet)
+            raise SyntaxError("Missing at least one entry in " + col + " column of sheet " + chosen_sheet_name)
 
     # Check columns for appropriate types of inputs
     try:
@@ -84,21 +85,21 @@ def verify_testcase_sheet(testcases_df, chosen_sheet):
         if testcases_df["Student"].apply(lambda x: not x.isalpha()).any():
             raise ValueError
     except (AttributeError, ValueError):
-        raise ValueError("Non alphabetic character in Student column of sheet " + chosen_sheet)
+        raise ValueError("Non alphabetic character in Student column of sheet " + chosen_sheet_name)
 
     try:
         # Check for non-numeric entries in the 'Weight' column
         if testcases_df["Weight"].apply(lambda x: not isinstance(x, (int, float))).any():
             raise ValueError
     except (AttributeError, ValueError):
-        raise ValueError("Non-numeric character in Weight column of sheet " + chosen_sheet)
+        raise ValueError("Non-numeric character in Weight column of sheet " + chosen_sheet_name)
 
     try:
         # Check for numeric entries in the 'Command' column
         if testcases_df["Command"].apply(lambda x: isinstance(x, (int, float))).any():
             raise ValueError
     except (AttributeError, ValueError):
-        raise ValueError("Numeric character (not a command!) in Command column of sheet " + chosen_sheet)
+        raise ValueError("Numeric character (not a command!) in Command column of sheet " + chosen_sheet_name)
 
     for col in testcases_df.columns:
         if col not in REQ_COLUMNS and col not in OPTIONAL_COLUMNS:
