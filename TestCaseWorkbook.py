@@ -256,13 +256,14 @@ class TestCaseWorkBook:
                 selected_sheets.append(TestCaseWorksheet(self, selected_sheet_name))
             return selected_sheets
 
-        try:
-            chosen_index = int(chosen_index)
-            if chosen_index not in self.sheet_names_df.index and chosen_index != -1:
-                raise ValueError
-        except ValueError:
-            print("Please choose an appropriate option.\n")
-            return self.select_sheets()
+        else:
+            try:
+                chosen_index = int(chosen_index)
+                if chosen_index not in self.sheet_names_df.index:
+                    raise ValueError
+            except ValueError:
+                print("Please choose an appropriate option.\n")
+                return self.select_sheets()
 
             selected_sheet_name = self.sheet_names_df.loc[chosen_index].values[0]
             utils.print_message_in_characters("EXTRACTING AND VERIFYING SHEETS...", "*", 75)
