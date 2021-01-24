@@ -35,9 +35,9 @@ class Autograder:
     TESTCASES_XL_PATH = "../TestCases/MiniMilestone_TestCases.xlsx"
 
     def __init__(self, milestone_num):
-        self.GRADES_CSV_FILENAME = "Computing {} Grades.csv".format(milestone_num)
-        self.SUBMISSION_PATH = "./Computing {} Submission Files/".format(milestone_num)
-        self.FEEDBACK_PATH = "./Computing {} Feedback Files/".format(milestone_num)
+        self.GRADES_CSV_FILENAME = "../Computing {} Grades.csv".format(milestone_num)
+        self.SUBMISSION_PATH = "../Computing {} Submission Files/".format(milestone_num)
+        self.FEEDBACK_PATH = "../Computing {} Feedback Files/".format(milestone_num)
         self.MILESTONE_NUM = milestone_num
 
         self.test_case_workbook = TestCaseWorkBook(Autograder.TESTCASES_XL_PATH)
