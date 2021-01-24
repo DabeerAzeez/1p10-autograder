@@ -4,14 +4,30 @@ import os
 
 
 def check_called(func):
+    """
+    Creates a unittest Mock object which allows for checking whether a given function has been called.
+
+    Usage: Use the @check_called decorator on a function of interest. From then on, the func.check_called attribute
+           will denote whether the function has been called or not.
+
+    Parameters
+    ----------
+    func: Function to check
+
+    Returns
+    -------
+    Boolean indicating whether the function has been called or not
+    """
     return mock.Mock(side_effect=func)
 
 
 def disable_print():
+    """Disable printing to the console"""
     sys.stdout = open(os.devnull, 'w')
 
 
 def enable_print():
+    """Enable printing to the console"""
     sys.stdout = sys.__stdout__
 
 
