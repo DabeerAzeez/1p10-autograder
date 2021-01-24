@@ -1,6 +1,7 @@
 import pandas as pd
 import openpyxl
 import importlib
+import utils
 
 SOLUTION_FILENAME_SUFFIX = "_SOLUTION"  # E.g. MM04_SOLUTION.py
 
@@ -228,7 +229,7 @@ class TestCaseWorkBook:
         self.verify_testcases_sheets()
 
     def select_sheet(self, chosen_sheet_name):
-        self.selected_sheets = TestCaseWorksheet(self, chosen_sheet_name)
+        return TestCaseWorksheet(self, chosen_sheet_name)
 
     def select_sheets(self):
         """
@@ -242,6 +243,7 @@ class TestCaseWorkBook:
         -------
         List of selected sheet names
         """
+        selected_sheets = []
         self.display_test_sheets()
 
         chosen_index = input("Please select the row number of the sheet you'd like to update. If you would like to "
@@ -249,8 +251,9 @@ class TestCaseWorkBook:
 
         if chosen_index == "all":
             # Select all sheet names; flattens numpy N-dimensional array
-            self.selected_sheets = self.test_sheet_names_df.values.flatten()
-            return
+            for selected_sheet_name in self.test_sheet_names_df.values.flatten():
+                selected_sheets.append(TestCaseWorksheet(self, selected_sheet_name))
+            return selected_sheets
 
         try:
             chosen_index = int(chosen_index)
@@ -261,7 +264,7 @@ class TestCaseWorkBook:
             return self.select_sheets()
 
             selected_sheet_name = self.sheet_names_df.loc[chosen_index].values[0]
-            return
+            return TestCaseWorksheet(self, selected_sheet_name)
 
     def display_test_sheets(self):
         print(self.test_sheet_names_df, "\n")
