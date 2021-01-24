@@ -40,7 +40,9 @@ class Autograder:
         self.MILESTONE_NUM = milestone_num
 
         # Look for submissions directory
-        if not os.path.exists(self.SUBMISSION_PATH):
+        if os.path.exists(self.SUBMISSION_PATH):
+            print("Submission directory found.")
+        else:
             raise NotADirectoryError("Mini-Milestone " + milestone_num + " submission directory not found.")
 
         # Make feedback directory (overwrite if already exists)
