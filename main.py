@@ -24,6 +24,7 @@ This script will:
 import os
 from Autograder import Autograder
 import time
+import utils
 
 
 def build_grades_csv_for_brightspace(autograder):
@@ -49,8 +50,7 @@ def build_grades_csv_for_brightspace(autograder):
 def main():
     milestone_num = input("Please input mini-milestone number (e.g. MM04): ")
 
-    print("*" * 75)
-    print("Program start")
+    utils.print_message_in_characters("PROGRAM START", "*", 75)
 
     start = time.time()
     autograder = Autograder(milestone_num)
@@ -59,7 +59,7 @@ def main():
     build_grades_csv_for_brightspace(autograder)
     end = time.time()
 
-    print("*" * 75)
+    utils.print_message_in_characters("PROGRAM END", "*", 75)
     print("Program took {} seconds for {} submissions".format(end - start, autograder.num_submissions))
 
 
