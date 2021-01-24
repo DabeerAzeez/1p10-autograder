@@ -169,7 +169,10 @@ def perform_tests(test_case_xl, chosen_sheet):
     verify_testcase_sheet(test_cases_df, chosen_sheet)
 
     # Import appropriate solution module
-    import_solution("TestCases." + chosen_sheet + SOLUTION_FILENAME_SUFFIX, "global")  # TODO: test local version
+    try:
+        import_solution("TestCases." + chosen_sheet + SOLUTION_FILENAME_SUFFIX, "global")  # TODO: test local version
+    except ModuleNotFoundError as e:
+        raise ModuleNotFoundError(str(e) + " --> missing solution module for selected test case excel sheet")
 
     # Run test for each row
     for index, row in test_cases_df.iterrows():  # iterrows generator should not be used for large dataframes
