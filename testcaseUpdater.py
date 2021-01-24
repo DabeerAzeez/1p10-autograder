@@ -220,6 +220,9 @@ def main():
 
     print("Welcome to the testcaseUpdater. Below are the extracted sheets from the test case spreadsheet.\n")
 
+    if INSTRUCTIONS_SHEET_NAME not in sheet_names_df.values:
+        print(">>>> Warning: Missing instructions sheet in test case excel file <<<<<< \n")
+
     chosen_sheet_names = select_sheets(sheet_names_df)
 
     utils.disable_print()
