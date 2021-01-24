@@ -33,7 +33,7 @@ Notes:
 # TODO: Test 'None' as an output
 
 import utils
-from TestCaseWorkbook import TestCaseWorksheet, TestCaseWorkBook
+from TestCaseWorkbook import TestCaseWorkBook
 
 TEST_CASE_WORKBOOK_PATH = "TestCases/MiniMilestone_TestCases.xlsx"
 SOLUTION_FILENAME_SUFFIX = "_SOLUTION"  # E.g. MM04_SOLUTION.py
