@@ -134,6 +134,8 @@ def perform_tests(test_cases_df, chosen_sheet):
         try:
             if row["DontTest"] == "x":
                 test_code = row['Command']  # Run the command, but don't treat it like a test (don't record output)
+            else:
+                test_code = "row['Outputs'] = str(" + row['Command'] + ")"
         except KeyError:
             test_code = "row['Outputs'] = str(" + row['Command'] + ")"
 
