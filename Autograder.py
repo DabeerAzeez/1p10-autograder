@@ -214,29 +214,34 @@ class Autograder:
         return True if re.match("\w*_MM\d\d_Student[A-Z]", submission) else False
 
     def find_submissions(self):
-        utils.print_message_in_characters("FINDING VALID SUBMISSIONS", "-")
-        submissions = []
+        utils.print_message_in_characters("FINDING SUBMISSIONS", "-")
+        valid_submissions = []
+        invalid_submissions = []
 
         for file in sorted(os.listdir(self.SUBMISSION_PATH)):
             if file.endswith(".py") and self.verify_file_name_scheme(file):
                 print("Found valid submission: " + str(file))
-                submissions.append(file)
+                valid_submissions.append(file)
             elif not file.endswith(".py"):
                 raise TypeError("Non-python file found in submission directory.")
             elif not self.verify_file_name_scheme(file):
-                print("Submission '" + str(file) + "' does not follow the verified naming scheme and"
-                                                   " will not be graded.", flush=True)
-                # Flush to prevent subsequent errors from displaying in console first
+                invalid_submissions.append(file)
 
-        if len(submissions) == 0:
+        if len(valid_submissions) == 0:
             raise FileNotFoundError("No valid submissions found!")
 
-        self.submissions = submissions
-        self.num_submissions = len(submissions)
+        if len(invalid_submissions) > 0:
+            print("")
+            for unverified_submission in invalid_submissions:
+                print("Found invalid submission: ", unverified_submission)
+            print("\n>>Invalid submissions do not follow the proper naming scheme and will NOT be graded")
+
+        self.submissions = valid_submissions
+        self.num_submissions = len(valid_submissions)
 
         utils.print_message_in_characters("", "-")
         print("Found total of " + str(self.num_submissions) +
-              " submission{} in submission directory.".format('s' if self.num_submissions > 1 else ''))
+              " valid submission{} in submission directory.".format('s' if self.num_submissions > 1 else ''))
 
     def grade_submissions(self):
         """
