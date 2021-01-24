@@ -56,9 +56,10 @@ def main():
     autograder = Autograder(milestone_num)
     autograder.grade_submissions()
     build_grades_csv_for_brightspace(autograder)
+    end = time.time()
 
     print("*" * 75)
-    print("Program took {} seconds for {} submissions".format(time.time() - start, autograder.num_submissions))
+    print("Program took {} seconds for {} submissions".format(end - start, autograder.num_submissions))
 
 
 if __name__ == "__main__":
