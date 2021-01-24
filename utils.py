@@ -31,10 +31,19 @@ def enable_print():
     sys.stdout = sys.__stdout__
 
 
-def print_message_in_characters(message, character, total_characters=50):
-    NUM_DELIMITERS_ON_EACH_SIDE = int((total_characters - len(message))/2)
-    print((character * NUM_DELIMITERS_ON_EACH_SIDE) + message + (character * NUM_DELIMITERS_ON_EACH_SIDE))
+def print_message_in_characters(message, characters, total_characters=50):
+    """
+    Print a message in the middle of a list of repeating characters such that the total string is approximately a
+    fixed length (some rounding errors occur to keep the string somewhat symmetrical).
 
+    Parameters
+    ----------
+    message: message to be printed within the list of repeating characters
+    characters: characters to repeat around the message when printed
+    total_characters: total length of printed statement
+    """
+    NUM_DELIMITERS_ON_EACH_SIDE = int((total_characters - len(message))/(2*len(characters)))
+    print((characters * NUM_DELIMITERS_ON_EACH_SIDE) + message + (characters * NUM_DELIMITERS_ON_EACH_SIDE))
 
 def verify_testcases_sheet(testcases_sheet, sheet_name):
     """
