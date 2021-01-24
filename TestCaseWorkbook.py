@@ -135,6 +135,73 @@ class TestCaseWorksheet:
         print("Test case worksheet is properly set up.")
         return True
 
+    def perform_tests(self):
+        """
+        Auto-fills 'Outputs' column of selected sheet in test cases workbook by passing the inputs through
+        the appropriate functions from the appropriates Python solution file.
+
+        Parameters
+        ----------
+        test_cases_df: Pandas ExcelFile object of TCWB
+        chosen_sheet: Chosen sheet of test cases workbook
+        """
+
+        # Import appropriate solution module
+        try:
+            # TODO: Parameterize TestCases folder name
+            import_solution("TestCases." + self.name + SOLUTION_FILENAME_SUFFIX, "global")
+            # TODO: test local version
+        except ModuleNotFoundError as e:
+            raise ModuleNotFoundError(str(e) + " --> missing solution module for selected test case excel sheet")
+
+        # Run test for each row
+        for index, row in self.sheet_df.iterrows():
+            # iterrows generator should not be used for large dataframes
+
+            try:
+                if row[self.DONT_TEST_COL] == "x":
+                    # Run the command, but don't treat it like a test (don't record output)
+                    test_code = row[self.COMMAND_COL]
+                else:
+                    test_code = f"row['{self.OUTPUTS_COL}'] " \
+                                f"= str(" + row[self.COMMAND_COL] + ")"
+
+            except KeyError:
+                test_code = f"row['{self.OUTPUTS_COL}'] " \
+                            f"= str(" + row[self.COMMAND_COL] + ")"
+
+            try:
+                exec(test_code)
+            except Exception as e:
+                row_num = index + 2  # Account for header row and zero-based array indexing
+                raise Exception(str(e) + " --> exception occurred in sheet " + self.name +
+                                " row " + str(row_num) + " of test cases excel file.")
+
+            self.sheet_df.loc[index] = row  # Update test_cases dataframe with local row Series
+
+        # TODO: Offload excel writing to another method
+
+        # Remove original sheet to prevent duplicates
+        self.test_case_workbook.openpyxl_workbook.remove(
+            self.test_case_workbook.openpyxl_workbook[self.name])
+        self.test_case_workbook.excel_writer.book = self.test_case_workbook.openpyxl_workbook
+
+        self.sheet_df.to_excel(self.test_case_workbook.excel_writer, self.name, index=False)
+
+        try:
+            self.test_case_workbook.excel_writer.save()  # Write updated test case sheet to excel file
+        except PermissionError:
+            raise PermissionError(
+                "Access denied when writing to excel file; try closing all excel files and restarting.")
+
+        self.test_case_workbook.excel_writer.close()
+
+        # Sort worksheets alphabetically
+        # TODO: Sort sheets alphabetically without accessing a protected member
+        # noinspection PyProtectedMember
+        self.test_case_workbook.openpyxl_workbook._sheets.sort(key=lambda ws: ws.title)
+        self.test_case_workbook.openpyxl_workbook.save(self.test_case_workbook.WORKBOOK_PATH)
+
 
 class TestCaseWorkBook:
 
@@ -187,75 +254,8 @@ class TestCaseWorkBook:
             print("Please choose an appropriate option.\n")
             return self.select_sheets()
 
-        self.selected_sheets = [self.sheet_names_df.loc[chosen_index].values[0]]
-        return
-
-    def perform_tests(self, chosen_sheet):
-        """
-        Auto-fills 'Outputs' column of selected sheet in test cases workbook by passing the inputs through
-        the appropriate functions from the appropriates Python solution file.
-
-        Parameters
-        ----------
-        test_cases_df: Pandas ExcelFile object of TCWB
-        chosen_sheet: Chosen sheet of test cases workbook
-        """
-        test_case_worksheet = TestCaseWorksheet(self, chosen_sheet)
-
-        # Import appropriate solution module
-        try:
-            # TODO: Parameterize TestCases folder name
-            import_solution("TestCases." + chosen_sheet + SOLUTION_FILENAME_SUFFIX, "global")
-            # TODO: test local version
-        except ModuleNotFoundError as e:
-            raise ModuleNotFoundError(str(e) + " --> missing solution module for selected test case excel sheet")
-
-        # Run test for each row
-        for index, row in test_case_worksheet.sheet_df.iterrows():
-            # iterrows generator should not be used for large dataframes
-
-            try:
-                if row[test_case_worksheet.DONT_TEST_COL] == "x":
-                    # Run the command, but don't treat it like a test (don't record output)
-                    test_code = row[test_case_worksheet.COMMAND_COL]
-                else:
-                    test_code = f"row['{test_case_worksheet.OUTPUTS_COL}'] " \
-                                f"= str(" + row[test_case_worksheet.COMMAND_COL] + ")"
-
-            except KeyError:
-                test_code = f"row['{test_case_worksheet.OUTPUTS_COL}'] " \
-                            f"= str(" + row[test_case_worksheet.COMMAND_COL] + ")"
-
-            try:
-                exec(test_code)
-            except Exception as e:
-                row_num = index + 2  # Account for header row and zero-based array indexing
-                raise Exception(str(e) + " --> exception occurred in sheet " + chosen_sheet +
-                                " row " + str(row_num) + " of test cases excel file.")
-
-            test_case_worksheet.sheet_df.loc[index] = row  # Update test_cases dataframe with local row Series
-
-        # TODO: Offload excel writing to another method
-
-        # Remove original sheet to prevent duplicates
-        self.openpyxl_workbook.remove(self.openpyxl_workbook[chosen_sheet])
-        self.excel_writer.book = self.openpyxl_workbook
-
-        test_case_worksheet.sheet_df.to_excel(self.excel_writer, chosen_sheet, index=False)
-
-        try:
-            self.excel_writer.save()  # Write updated test case sheet to excel file
-        except PermissionError:
-            raise PermissionError(
-                "Access denied when writing to excel file; try closing all excel files and restarting.")
-
-        self.excel_writer.close()
-
-        # Sort worksheets alphabetically
-        # TODO: Sort sheets alphabetically without accessing a protected member
-        # noinspection PyProtectedMember
-        self.openpyxl_workbook._sheets.sort(key=lambda ws: ws.title)
-        self.openpyxl_workbook.save(self.WORKBOOK_PATH)
+            selected_sheet_name = self.sheet_names_df.loc[chosen_index].values[0]
+            return
 
     def display_test_sheets(self):
         print(self.test_sheet_names_df, "\n")
