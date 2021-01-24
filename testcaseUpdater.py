@@ -122,7 +122,7 @@ def verify_testcase_sheet(testcases_df, chosen_sheet):
 
     for col in REQ_COLUMNS:
         if col not in testcases_df.columns:
-            raise SyntaxError("Missing " + col + " column in sheet " + chosen_sheet)
+            raise SyntaxError("Missing " + col + " column or column header in sheet " + chosen_sheet)
 
     # Check that relevant columns are completely filled
     REQ_FULL_COLUMNS = ["Command", "Student", "Weight"]
