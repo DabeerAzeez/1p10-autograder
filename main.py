@@ -35,6 +35,10 @@ def build_grades_csv_for_brightspace(autograder):
     -------
     autograder: An autograder which already has a populated results dataframe
     """
+    if autograder.results_df.empty:
+        raise ValueError("Autograder with empty results Dataframe detected; "
+                         "grade some submissions with the autograder before creating a Brightspace csv file")
+
     grade_header = "Mini-Milestone {} - Objective Points Grade <Numeric MaxPoints:{}>"\
         .format(autograder.MILESTONE_NUM, autograder.max_student_points)
 
