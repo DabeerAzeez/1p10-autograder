@@ -65,16 +65,16 @@ class Autograder:
 
         try:
             self.testcases_sheet = pd.read_excel(Autograder.TESTCASES_XL_PATH, sheet_name=milestone_num)
-            print("Found test cases excel file.")
-            print("Extracted sheet: '" + milestone_num + "'")
-            self.verify_testcases_sheet()
         except FileNotFoundError:
             raise FileNotFoundError("Missing test cases excel file.")
+        else:
+            print("Found test cases excel file.")
+            print("Extracted sheet: '" + milestone_num + "'")
+
+        self.testcases_sheet_verified = utils.verify_testcase_sheet(self.testcases_sheet, self.MILESTONE_NUM)
 
         self.update_max_student_points()
 
-    def verify_testcases_sheet(self):
-        self.testcases_sheet_verified = utils.verify_testcases_sheet(self.testcases_sheet, self.MILESTONE_NUM)
 
     @staticmethod
     def within_tol(actual_value, expected_value):
