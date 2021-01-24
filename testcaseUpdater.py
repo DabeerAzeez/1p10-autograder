@@ -154,19 +154,16 @@ def verify_testcase_sheet(testcases_df, chosen_sheet):
         raise ValueError("Numeric character (not a command!) in Command column of sheet " + chosen_sheet)
 
 
-
-def perform_tests(test_case_xl, chosen_sheet):
+def perform_tests(test_cases_df, chosen_sheet):
     """
     Auto-fills 'Outputs' column of selected sheet in test cases workbook by passing the inputs through
     the appropriate functions from the appropriates Python solution file.
 
     Parameters
     ----------
-    test_case_xl: Pandas ExcelFile object of TCWB
+    test_cases_df: Pandas ExcelFile object of TCWB
     chosen_sheet: Chosen sheet of test cases workbook
     """
-    test_cases_df = pd.read_excel(test_case_xl, sheet_name=chosen_sheet)  # Read chosen sheet
-    verify_testcase_sheet(test_cases_df, chosen_sheet)
 
     # Import appropriate solution module
     try:
@@ -227,8 +224,10 @@ def main():
 
     utils.disable_print()
 
-    for sheet_name in chosen_sheet_names:
-        perform_tests(test_case_xl, sheet_name)
+    for chosen_sheet_name in chosen_sheet_names:
+        test_cases_df = pd.read_excel(test_case_xl, sheet_name=chosen_sheet_name)  # Read chosen sheet
+        verify_testcase_sheet(test_cases_df, chosen_sheet_name)
+        perform_tests(test_cases_df, chosen_sheet_name)
 
     utils.enable_print()
 
