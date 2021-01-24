@@ -1,9 +1,10 @@
-import utils
-import pandas as pd
 import os
 import re
 import shutil
 
+import pandas as pd
+
+import utils
 from TestCaseWorkbook import TestCaseWorkBook
 
 

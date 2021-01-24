@@ -21,9 +21,10 @@ This script will:
 # TODO: Parameterize test case workbook column headers
 # TODO: Start another thread to check for timeouts
 
-from Autograder import Autograder
 import time
+
 import utils
+from Autograder import Autograder
 
 
 def build_grades_csv_for_brightspace(autograder):
@@ -39,7 +40,7 @@ def build_grades_csv_for_brightspace(autograder):
         raise ValueError("Autograder with empty results Dataframe detected; "
                          "grade some submissions with the autograder before creating a Brightspace csv file")
 
-    grade_header = "Mini-Milestone {} - Objective Points Grade <Numeric MaxPoints:{}>"\
+    grade_header = "Mini-Milestone {} - Objective Points Grade <Numeric MaxPoints:{}>" \
         .format(autograder.MILESTONE_NUM, autograder.max_student_points)
 
     brightspace_upload_df = autograder.results_df.loc[:, ["Username", "Grade"]]
