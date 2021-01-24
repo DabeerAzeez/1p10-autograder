@@ -44,12 +44,21 @@ class Autograder:
         self.test_case_workbook = TestCaseWorkBook(Autograder.TESTCASES_XL_PATH)
         self.test_case_sheet = self.test_case_workbook.select_sheet(milestone_num)
 
-        # TODO: Extract directory work to a separate method
+        self.setup_and_verify_directories()
+
+        self.results_df = pd.DataFrame(columns=[''])
+        self.submissions = []
+        self.num_submissions = 0
+        self.max_student_points = 0
+
+        self.update_max_student_points()
+
+    def setup_and_verify_directories(self):
         # Look for submissions directory
         if os.path.exists(self.SUBMISSION_PATH):
             print("Submission directory found.")
         else:
-            raise NotADirectoryError("Mini-Milestone " + milestone_num + " submission directory not found.")
+            raise NotADirectoryError("Mini-Milestone " + self.MILESTONE_NUM + " submission directory not found.")
 
         # Make feedback directory (overwrite if already exists)
         try:
@@ -62,13 +71,6 @@ class Autograder:
                                   "Close this directory in File Explorer")
         os.makedirs(self.FEEDBACK_PATH)
         print("New feedback directory created")
-
-        self.results_df = pd.DataFrame(columns=[''])
-        self.submissions = []
-        self.num_submissions = 0
-        self.max_student_points = 0
-
-        self.update_max_student_points()
 
     @staticmethod
     def within_tol(actual_value, expected_value):
