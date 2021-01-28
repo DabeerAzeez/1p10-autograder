@@ -20,6 +20,7 @@ This script will:
 """
 # TODO: Parameterize test case workbook column headers
 # TODO: Start another thread to check for timeouts
+# TODO: Put each mini milestone in separate directory
 
 import time
 
