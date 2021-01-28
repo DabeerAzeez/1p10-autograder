@@ -9,9 +9,9 @@ class TestCaseWorkBook:
 
     def __init__(self, path):
         self.WORKBOOK_PATH = path
-        self.WORKBOOK_XL = pd.ExcelFile(path)
 
         try:
+            self.WORKBOOK_XL = pd.ExcelFile(self.WORKBOOK_PATH)
             self.openpyxl_workbook = openpyxl.load_workbook(self.WORKBOOK_PATH)
             self.excel_writer = pd.ExcelWriter(self.WORKBOOK_PATH, engine='openpyxl', mode='a')
         except FileNotFoundError:
