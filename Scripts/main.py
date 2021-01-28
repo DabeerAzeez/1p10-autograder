@@ -41,7 +41,7 @@ def build_grades_csv_for_brightspace(autograder):
                          "grade some submissions with the autograder before creating a Brightspace csv file")
 
     grade_header = "Mini-Milestone {} - Objective Points Grade <Numeric MaxPoints:{}>" \
-        .format(autograder.MILESTONE_NUM, autograder.max_student_points)
+        .format(autograder.LAB_NUM, autograder.max_student_points)
 
     brightspace_upload_df = autograder.results_df.loc[:, ["Username", "Grade"]]
     brightspace_upload_df.rename(columns={"Grade": grade_header}, inplace=True)

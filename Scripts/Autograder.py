@@ -40,7 +40,7 @@ class Autograder:
         self.GRADES_CSV_FILENAME = "../Computing {} Grades.csv".format(milestone_num)
         self.SUBMISSION_PATH = "../Computing {} Submission Files/".format(milestone_num)
         self.FEEDBACK_PATH = "../Computing {} Feedback Files/".format(milestone_num)
-        self.MILESTONE_NUM = milestone_num
+        self.LAB_NUM = milestone_num
 
         self.test_case_workbook = TestCaseWorkBook(Autograder.TESTCASES_XL_PATH)
         self.test_case_sheet = self.test_case_workbook.select_sheet(milestone_num)
@@ -59,7 +59,7 @@ class Autograder:
         if os.path.exists(self.SUBMISSION_PATH):
             print("Submission directory found.")
         else:
-            raise NotADirectoryError("Mini-Milestone " + self.MILESTONE_NUM + " submission directory not found.")
+            raise NotADirectoryError("Mini-Milestone " + self.LAB_NUM + " submission directory not found.")
 
         # Make feedback directory (overwrite if already exists)
         try:
@@ -302,9 +302,9 @@ class Autograder:
         print("Grading complete.")
 
         self.results_df = results_df
-        self.append_feedback_to_student_files()
+        self.generate_feedback_files()
 
-    def append_feedback_to_student_files(self):
+    def generate_feedback_files(self):
         """
         Loops through student submission and creates a copy with feedback inserted at the top.
 
@@ -378,7 +378,7 @@ class Autograder:
         body = "'''\n"
 
         body += "Hello " + name + ",\n\nHere is Computing Lab {} feedback given by the autograder:\n\n" \
-            .format(self.MILESTONE_NUM)
+            .format(self.LAB_NUM)
 
         body += feedback  # Insert feedback here
 
