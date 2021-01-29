@@ -22,6 +22,12 @@ class Workbook:
         self.sheet_names_df = pd.DataFrame(self.WORKBOOK_XL.sheet_names, columns=['Sheet Name'])
         self.worksheets = [Worksheet(self, sheet_name) for sheet_name in self.sheet_names_df.values.flatten()]
 
+    def get_worksheet_list(self):
+        return self.worksheets
+
+    def get_worksheet_dict(self):
+        return {sheet.name: sheet for sheet in self.worksheets}
+
     def display_sheets(self):
         print(self.sheet_names_df, "\n")
 
