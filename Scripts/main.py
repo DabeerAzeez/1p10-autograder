@@ -25,7 +25,7 @@ This script will:
 import time
 
 import utils
-from Autograder import Autograder
+from Classes.Autograder import Autograder
 
 
 def build_grades_csv_for_brightspace(autograder):

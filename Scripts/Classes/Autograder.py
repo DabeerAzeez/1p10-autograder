@@ -33,8 +33,8 @@ class Autograder:
     """
 
     TOLERANCE = 0.0000001
-    CLASSLIST_FILENAME = "../Classlist.csv"
-    TESTCASES_XL_PATH = "../TestCases/MiniMilestone_TestCases.xlsx"
+    CLASSLIST_FILENAME = "../../Classlist.csv"
+    TESTCASES_XL_PATH = "../../TestCases/MiniMilestone_TestCases.xlsx"
 
     def __init__(self, milestone_num):
         self.GRADES_CSV_FILENAME = "../Computing {} Grades.csv".format(milestone_num)

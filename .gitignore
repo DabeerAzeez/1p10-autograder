@@ -1,4 +1,5 @@
 */
 *.csv
 !Scripts/
+!Scripts/Classes/
 !TestCases/MiniMilestone_TestCases.xlsx
