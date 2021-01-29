@@ -15,6 +15,10 @@ class TestCaseWorkBook(Workbook):
 
         self.verify_testcases_sheets()
 
+    def setup_worksheet_dict(self):
+        self.worksheets = {sheet_name: TestCaseWorksheet(self, sheet_name)
+                           for sheet_name in self.sheet_names_df.values.flatten()}
+
     def select_sheets(self):
         """
         Allows user to select a sheet from the TCWB for updating
