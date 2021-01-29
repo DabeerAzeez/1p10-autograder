@@ -1,7 +1,5 @@
-import utils
 from TestCaseWorksheet import TestCaseWorksheet
 from Workbook import Workbook
-from Worksheet import Worksheet
 
 
 class TestCaseWorkBook(Workbook):
