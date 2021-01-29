@@ -1,6 +1,7 @@
 import utils
 from TestCaseWorksheet import TestCaseWorksheet
 from Workbook import Workbook
+from Worksheet import Worksheet
 
 
 class TestCaseWorkBook(Workbook):
@@ -8,16 +9,21 @@ class TestCaseWorkBook(Workbook):
     def __init__(self, path):
         super().__init__(path)
 
+        self.worksheets = {}
+
         self.instructions_sheet = "Instructions"
         self.non_test_sheets = [self.instructions_sheet]  # TODO: Support multiple non_test_sheets
-
         self.test_sheet_names_df = self.sheet_names_df[self.sheet_names_df['Sheet Name'] != self.instructions_sheet]
 
+        self.setup_worksheet_dict()
         self.verify_testcases_sheets()
 
     def setup_worksheet_dict(self):
-        self.worksheets = {sheet_name: TestCaseWorksheet(self, sheet_name)
-                           for sheet_name in self.sheet_names_df.values.flatten()}
+        for sheet_name in self.sheet_names_df.values.flatten():
+            if sheet_name in self.test_sheet_names_df.values.flatten():
+                self.worksheets[sheet_name] = TestCaseWorksheet(self, sheet_name)
+            else:
+                self.worksheets[sheet_name] = Worksheet(self, sheet_name)
 
     def select_sheets(self):
         """
