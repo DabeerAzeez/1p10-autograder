@@ -13,7 +13,6 @@ class Workbook:
         self.worksheets = []
 
         self.load_excel_file()
-        self.setup_worksheet_dict()
 
     def load_excel_file(self):
         self.WORKBOOK_XL = pd.ExcelFile(self.path)
