@@ -43,7 +43,7 @@ class TestCaseWorksheet:
         self.name = chosen_sheet_name
         self.test_case_workbook = test_case_workbook
         self.sheet_df = pd.read_excel(self.test_case_workbook.path, sheet_name=self.name)
-        print("Extracted sheet: '" + chosen_sheet_name + "'")
+        print("Extracted test case sheet: '" + chosen_sheet_name + "'")
 
         self.COMMAND_COL = "Command"
         self.DONT_TEST_COL = "DontTest"
