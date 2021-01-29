@@ -42,7 +42,7 @@ class TestCaseWorksheet:
     def __init__(self, test_case_workbook, chosen_sheet_name):
         self.name = chosen_sheet_name
         self.test_case_workbook = test_case_workbook
-        self.sheet_df = pd.read_excel(self.test_case_workbook.WORKBOOK_PATH, sheet_name=self.name)
+        self.sheet_df = pd.read_excel(self.test_case_workbook.path, sheet_name=self.name)
         print("Extracted sheet: '" + chosen_sheet_name + "'")
 
         self.COMMAND_COL = "Command"
@@ -59,9 +59,9 @@ class TestCaseWorksheet:
         self.verify_self()
 
     def write_to_workbook(self):
-        writer = pd.ExcelWriter(self.test_case_workbook.WORKBOOK_PATH, engine='openpyxl', mode='a')
+        writer = pd.ExcelWriter(self.test_case_workbook.path, engine='openpyxl', mode='a')
 
-        book = openpyxl.load_workbook(self.test_case_workbook.WORKBOOK_PATH)
+        book = openpyxl.load_workbook(self.test_case_workbook.path)
         book.remove(book[self.name])  # Remove original sheet to prevent duplicates
         writer.book = book
 
@@ -201,4 +201,4 @@ class TestCaseWorksheet:
         # TODO: Sort sheets alphabetically without accessing a protected member
         # noinspection PyProtectedMember
         self.test_case_workbook.openpyxl_workbook._sheets.sort(key=lambda ws: ws.title)
-        self.test_case_workbook.openpyxl_workbook.save(self.test_case_workbook.WORKBOOK_PATH)
+        self.test_case_workbook.openpyxl_workbook.save(self.test_case_workbook.path)

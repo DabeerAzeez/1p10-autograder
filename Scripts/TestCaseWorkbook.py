@@ -3,23 +3,13 @@ import pandas as pd
 
 import utils
 from TestCaseWorksheet import TestCaseWorksheet
+from Workbook import Workbook
 
 
-class TestCaseWorkBook:
+class TestCaseWorkBook(Workbook):
 
     def __init__(self, path):
-        self.WORKBOOK_PATH = path
-
-        try:
-            self.WORKBOOK_XL = pd.ExcelFile(self.WORKBOOK_PATH)
-            self.openpyxl_workbook = openpyxl.load_workbook(self.WORKBOOK_PATH)
-            self.excel_writer = pd.ExcelWriter(self.WORKBOOK_PATH, engine='openpyxl', mode='a')
-        except FileNotFoundError:
-            raise FileNotFoundError("Missing test cases excel file.")
-        else:
-            print("Found test cases excel file.")
-
-        self.sheet_names_df = pd.DataFrame(self.WORKBOOK_XL.sheet_names, columns=['Sheet Name'])
+        super().__init__(path)
 
         self.instructions_sheet = "Instructions"
         self.non_test_sheets = [self.instructions_sheet]  # TODO: Support multiple non_test_sheets
