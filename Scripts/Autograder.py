@@ -296,7 +296,7 @@ class Autograder:
                 results_df.loc[len(results_df)] = [username, submission, score, self.max_student_points,
                                                    feedback_string]
 
-            print(username[1:], "graded.")
+            print(username[1:], "graded.", "(received zero)" if score == 0 else "")
 
         utils.print_message_in_characters("", "-")
         print("Grading complete.")
