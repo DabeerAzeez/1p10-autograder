@@ -42,17 +42,15 @@ SOLUTION_FILENAME_SUFFIX = "_SOLUTION"  # E.g. MM04_SOLUTION.py
 def main():
     test_case_workbook = TestCaseWorkBook(TEST_CASE_WORKBOOK_PATH)
 
-    print("Welcome to the testcaseUpdater. Below are the extracted sheets from the test case spreadsheet.\n")
-
-    selected_sheets = test_case_workbook.select_sheets()
+    selected_test_case_sheets = test_case_workbook.select_testcase_sheets()
 
     utils.print_message_in_characters("BEGIN WORKSHEET UPDATES", "*", 75)
 
-    for selected_sheet in selected_sheets:
+    for test_case_sheet in selected_test_case_sheets:
         utils.disable_print()
-        selected_sheet.perform_tests()
+        test_case_sheet.perform_tests()
         utils.enable_print()
-        print("Test sheet " + str(selected_sheet.name) + " updated!")
+        print("Test sheet " + str(test_case_sheet.name) + " updated!")
 
     utils.print_message_in_characters("WORKSHEET UPDATE COMPLETE", "*", 75)
     print(f"Check {TEST_CASE_WORKBOOK_PATH}. Press enter to quit.")
