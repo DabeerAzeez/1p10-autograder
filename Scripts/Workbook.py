@@ -9,7 +9,7 @@ class Workbook:
         self.WORKBOOK_XL = ""
         self.openpyxl_workbook = ""
         self.excel_writer = ""
-        self.sheet_names_df = ""
+        self.sheet_names_df = pd.DataFrame()
         self.worksheets = []
 
         self.load_excel_file()
