@@ -1,3 +1,5 @@
+import warnings
+
 from TestCaseWorksheet import TestCaseWorksheet
 from Workbook import Workbook
 
@@ -72,6 +74,6 @@ class TestCaseWorkBook(Workbook):
         True if all tests pass
         """
         if self.instructions_sheet not in self.sheet_names_df.values:
-            print(">>>> Warning: Missing instructions sheet in test case excel file <<<<<< \n")
+            warnings.warn(">>>> Warning: Missing instructions sheet in test case excel file <<<<<< \n")
 
         return True

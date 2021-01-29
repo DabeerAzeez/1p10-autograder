@@ -1,6 +1,7 @@
 import os
 import re
 import shutil
+import warnings
 
 import pandas as pd
 
@@ -210,8 +211,9 @@ class Autograder:
             student_weights.add(student_weight)
 
         if len(student_weights) > 1:
-            print("Warning: Student Types have unequal weighting in testcases; they will have different maximum points."
-                  " The highest maximum points among all students will be set as the maximum points for this run.")
+            warnings.warn("Warning: Student Types have unequal weighting in testcases; they will have different "
+                          "maximum points. The highest maximum points among all students will be set as the maximum "
+                          "points for this run.")
             input("Press enter to continue. ")
 
         self.max_student_points = max(student_weights)
