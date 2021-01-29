@@ -6,12 +6,20 @@ from Worksheet import Worksheet
 class Workbook:
     def __init__(self, path):
         self.path = path
+        self.WORKBOOK_XL = ""
+        self.openpyxl_workbook = ""
+        self.excel_writer = ""
+        self.sheet_names_df = ""
+        self.worksheets = []
+
+        self.load_excel_file()
+
+    def load_excel_file(self):
         self.WORKBOOK_XL = pd.ExcelFile(self.path)
         self.openpyxl_workbook = openpyxl.load_workbook(self.path)
         self.excel_writer = pd.ExcelWriter(self.path, engine='openpyxl', mode='a')
 
         self.sheet_names_df = pd.DataFrame(self.WORKBOOK_XL.sheet_names, columns=['Sheet Name'])
-
         self.worksheets = {sheet_name: Worksheet(self, sheet_name)
                            for sheet_name in self.sheet_names_df.values.flatten()}
 
