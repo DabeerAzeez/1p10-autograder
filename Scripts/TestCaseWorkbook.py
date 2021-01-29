@@ -1,6 +1,3 @@
-import openpyxl
-import pandas as pd
-
 import utils
 from TestCaseWorksheet import TestCaseWorksheet
 from Workbook import Workbook
