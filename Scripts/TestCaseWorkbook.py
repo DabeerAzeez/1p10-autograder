@@ -33,7 +33,6 @@ class TestCaseWorkBook(Workbook):
         -------
         List of selected sheet names
         """
-        selected_sheets = []
         self.display_test_sheets()
 
         chosen_index = input("Please select the row number of the sheet you'd like to update. If you would like to "
@@ -42,10 +41,7 @@ class TestCaseWorkBook(Workbook):
 
         if chosen_index == "all":
             # Select all sheet names; flattens numpy N-dimensional array
-            utils.print_message_in_characters("EXTRACTING AND VERIFYING SHEETS...", "*", 75)
-            for selected_sheet_name in self.test_sheet_names_df.values.flatten():
-                selected_sheets.append(TestCaseWorksheet(self, selected_sheet_name))
-            return selected_sheets
+            return self.get_test_case_worksheets()
 
         else:
             try:
@@ -57,8 +53,7 @@ class TestCaseWorkBook(Workbook):
                 return self.select_sheets()
 
             selected_sheet_name = self.sheet_names_df.loc[chosen_index].values[0]
-            utils.print_message_in_characters("EXTRACTING AND VERIFYING SHEETS...", "*", 75)
-            return TestCaseWorksheet(self, selected_sheet_name)
+            return [self.test_cases_worksheets[selected_sheet_name]]
 
     def display_test_sheets(self):
         print(self.test_sheet_names_df, "\n")
