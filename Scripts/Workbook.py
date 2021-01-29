@@ -24,7 +24,7 @@ class Workbook:
                            for sheet_name in self.sheet_names_df.values.flatten()}
 
     def display_sheets(self):
-        print(self.sheet_names_df)
+        print(self.sheet_names_df, "\n")
 
     def get_sheet_by_name(self, sheet_name):
         return self.worksheets[sheet_name]
