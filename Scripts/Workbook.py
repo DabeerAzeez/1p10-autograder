@@ -32,7 +32,7 @@ class Workbook:
         print(self.sheet_names_df, "\n")
 
     def get_sheet_by_name(self, sheet_name):
-        return self.worksheets[sheet_name]
+        return self.get_worksheet_dict()[sheet_name]
 
     def get_sheets(self):
         return self.worksheets
