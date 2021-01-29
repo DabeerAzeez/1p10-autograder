@@ -43,7 +43,7 @@ class Autograder:
         self.LAB_NUM = milestone_num
 
         self.test_case_workbook = TestCaseWorkBook(Autograder.TESTCASES_XL_PATH)
-        self.test_case_sheet = self.test_case_workbook.select_sheet(milestone_num)
+        self.test_case_sheet = self.test_case_workbook.get_sheet_by_name(milestone_num)
 
         self.setup_and_verify_directories()
 
