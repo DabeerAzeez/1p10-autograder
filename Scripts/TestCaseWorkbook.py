@@ -15,9 +15,6 @@ class TestCaseWorkBook(Workbook):
 
         self.verify_testcases_sheets()
 
-    def select_sheet(self, chosen_sheet_name):
-        return TestCaseWorksheet(self, chosen_sheet_name)
-
     def select_sheets(self):
         """
         Allows user to select a sheet from the TCWB for updating
