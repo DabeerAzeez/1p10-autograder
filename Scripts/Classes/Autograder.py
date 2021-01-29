@@ -36,14 +36,14 @@ class Autograder:
     CLASSLIST_FILENAME = "../../Classlist.csv"
     TESTCASES_XL_PATH = "../../TestCases/MiniMilestone_TestCases.xlsx"
 
-    def __init__(self, milestone_num):
-        self.GRADES_CSV_FILENAME = "../Computing {} Grades.csv".format(milestone_num)
-        self.SUBMISSION_PATH = "../Computing {} Submission Files/".format(milestone_num)
-        self.FEEDBACK_PATH = "../Computing {} Feedback Files/".format(milestone_num)
-        self.LAB_NUM = milestone_num
+    def __init__(self, lab_num):
+        self.GRADES_CSV_FILENAME = "../Computing {} Grades.csv".format(lab_num)
+        self.SUBMISSION_PATH = "../Computing {} Submission Files/".format(lab_num)
+        self.FEEDBACK_PATH = "../Computing {} Feedback Files/".format(lab_num)
+        self.LAB_NUM = lab_num
 
         self.test_case_workbook = TestCaseWorkBook(Autograder.TESTCASES_XL_PATH)
-        self.test_case_sheet = self.test_case_workbook.get_sheet_by_name(milestone_num)
+        self.test_case_sheet = self.test_case_workbook.get_sheet_by_name(lab_num)
 
         self.setup_and_verify_directories()
 
@@ -59,7 +59,7 @@ class Autograder:
         if os.path.exists(self.SUBMISSION_PATH):
             print("Submission directory found.")
         else:
-            raise NotADirectoryError("Mini-Milestone " + self.LAB_NUM + " submission directory not found.")
+            raise NotADirectoryError(self.LAB_NUM + " submission directory not found.")
 
         # Make feedback directory (overwrite if already exists)
         try:
