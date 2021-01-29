@@ -20,10 +20,7 @@ class Workbook:
         self.excel_writer = pd.ExcelWriter(self.path, engine='openpyxl', mode='a')
 
         self.sheet_names_df = pd.DataFrame(self.WORKBOOK_XL.sheet_names, columns=['Sheet Name'])
-
-    def setup_worksheet_dict(self):
-        self.worksheets = {sheet_name: Worksheet(self, sheet_name)
-                           for sheet_name in self.sheet_names_df.values.flatten()}
+        self.worksheets = [Worksheet(self, sheet_name) for sheet_name in self.sheet_names_df.values.flatten()]
 
     def display_sheets(self):
         print(self.sheet_names_df, "\n")
