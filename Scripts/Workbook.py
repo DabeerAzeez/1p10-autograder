@@ -44,11 +44,12 @@ class Workbook:
                              "update ALL sheets, enter 'all': ").strip()
 
         if chosen_index == "all":
-            return self.get_sheets()
+            return self.worksheets
         else:
             try:
                 if chosen_index in self.sheet_names_df.index:
-                    return self.sheet_names_df.loc[chosen_index].values[0]
+                    selected_sheet_name = self.sheet_names_df.loc[chosen_index].values[0]
+                    return [self.get_worksheet_dict()[selected_sheet_name]]
             except ValueError:
                 print("Please choose an appropriate option.\n")
                 return self.select_sheets()
