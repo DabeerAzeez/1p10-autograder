@@ -21,6 +21,9 @@ class TestCaseWorkBook(Workbook):
             if worksheet.name in self.test_sheet_names_df.values.flatten():
                 self.worksheets[index] = TestCaseWorksheet(self, worksheet.name)
 
+    def get_test_case_worksheets(self):
+        return [worksheet for worksheet in self.worksheets if isinstance(worksheet, TestCaseWorksheet)]
+
     def select_testcase_sheets(self):
         """
         Allows user to select a sheet from the TCWB for updating
