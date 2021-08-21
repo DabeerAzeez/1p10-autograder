@@ -23,7 +23,6 @@ CURRENT_PATH = pathlib.Path('.')
 
 
 # TODO: Add typing, add error handling
-# TODO: Comment code
 
 
 @click.command()
