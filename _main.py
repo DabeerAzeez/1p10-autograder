@@ -2,33 +2,38 @@
 1P10 Autograder, created by Dabeer Abdul-Azeez (abdulazd@mcmaster.ca) with help from Natalia Maximo
 (https://github.com/taliamax)
 
-Runs PyTest unit tests on student submissions, compiling the grades into a .csv file for easy uploading to a
-Brightspace Learning Management System. Also generates a .csv file in case the professor wants to send the grades in
-bulk via email (compatible with Mail Merge in Microsoft Outlook).
-"""
+Runs PyTest unit tests on student submissions, compiling the grades into a .csv file for easy
+uploading to a Brightspace Learning Management System. Also generates a .csv file in case the
+professor wants to send the grades in bulk via email (compatible with Mail Merge in Microsoft
+Outlook). """
 
 import importlib
 import pathlib
 import time
-import unittest.mock as mock
-import pytest
+from unittest import mock
 import sys
-import click
 import re
-import pandas as pd  # type: ignore
 from typing import Union, Tuple, Optional
+
+import pytest
+import click
+import pandas as pd  # type: ignore
 
 CLASSLIST_CSV_FILENAME = "_Classlist.csv"  # Name of class list downloaded from Brightspace class
 MAX_STUDENT_POINTS = 100
 CURRENT_PATH = pathlib.Path('.')
 
 
-# TODO: Add typing, add error handling
+# TODO: Add error handling
 
 
 @click.command()
 @click.argument('prefix')
 def main(prefix: str):
+    """
+    Runs the autograder
+    :param prefix: Prefix denoting the specific assignment being marked
+    """
     students_directory = f"{prefix}_submissions"
     solutions_module = f"{prefix}_solutions"
 
@@ -37,23 +42,26 @@ def main(prefix: str):
     print("Starting Autograder...")
     start_time = time.time()
 
-    for file in CURRENT_PATH.glob(f"{students_directory}/*.py"):
-        student_id, student_type = student_info_from_filestem(file.name)
+    for submission in CURRENT_PATH.glob(f"{students_directory}/*.py"):
+        student_id, student_type = student_info_from_filestem(submission.name)
 
         if student_id is False or student_type is False:
-            print("Filename does not match expected pattern and will not be graded: " + str(file))
+            print("Filename does not match expected pattern and will not be graded: " + str(
+                submission))
             continue
 
         if f"#{student_id}" not in classlist_df['Username'].values:
-            print("Unrecognized student ID: " + str(student_id) + " is not in the classlist and will not be graded.")
+            print("Unrecognized student ID: " + str(
+                student_id) + " is not in the classlist and will not be graded.")
             continue
 
         test_file = f"{prefix}_test_{student_type}" if student_type else f"{prefix}_test"
 
-        with open(f"{students_directory}/{file.stem}-out.txt", "w") as f:
+        with open(f"{students_directory}/{submission.stem}-out.txt", "w",
+                  encoding='UTF-8') as output_file:
             # Execute tests and write output into a text file for each student submission
-            sys.stdout = f
-            execute_tests(file.stem, test_file, students_directory, solutions_module)
+            sys.stdout = output_file
+            execute_tests(submission.stem, test_file, students_directory, solutions_module)
             sys.stdout = sys.__stdout__
 
     classlist_df_graded = process_outputs(students_directory, prefix, classlist_df)
@@ -89,7 +97,8 @@ def process_outputs(
         prefix: str,
         classlist_df):
     """
-    Processes the output files generated when executing the PyTest tests to determine and collect the student's grade.
+    Processes the output files generated when executing the PyTest tests to determine and collect
+    the student's grade.
     :param students_directory: Directory containing student submissions
     :param prefix: Prefix denoting the specific assignment being marked
     :param classlist_df: Dataframe containing the class list from Brightspace
@@ -97,10 +106,10 @@ def process_outputs(
     """
     classlist_df.insert(3, 'Grade', 0)
 
-    for file in CURRENT_PATH.glob(f"{students_directory}/*-out.txt"):
-        student_id, student_type = student_info_from_filestem(file.stem.rstrip('-out'))
-        with open(file) as f:
-            data = f.read().splitlines()
+    for output_file in CURRENT_PATH.glob(f"{students_directory}/*-out.txt"):
+        student_id, student_type = student_info_from_filestem(output_file.stem.rstrip('-out'))
+        with open(output_file, encoding='UTF-8') as file:
+            data = file.read().splitlines()
 
         test_result_regex = re.compile(r'\S+_GRADE([\d]+)(\[.+])? (PASSED|FAILED)')
         total_grade = unscaled_grade = 0
@@ -115,8 +124,8 @@ def process_outputs(
         scaled_grade = round(unscaled_grade / total_grade * MAX_STUDENT_POINTS)
         classlist_df.loc[classlist_df.Username == f"#{student_id}", 'Grade'] = scaled_grade
 
-        submission_file = f"{students_directory}/{prefix}_{student_id}_{student_type}.py" if student_type else \
-            f"{students_directory}/{prefix}_{student_id}.py"
+        submission_file = f"{students_directory}/{prefix}_{student_id}_{student_type}.py" \
+            if student_type else f"{students_directory}/{prefix}_{student_id}.py"
         add_feedback_to_submission(scaled_grade, submission_file)
 
     return classlist_df
@@ -124,15 +133,17 @@ def process_outputs(
 
 def add_feedback_to_submission(
         grade: int,
-        submission_file: str):
+        submission_filename: str):
     """
     Insert grade feedback to the top of a student Python submission using a multi-line comment
     :param grade: Student's assignment grade
-    :param submission_file: Student's submission file
+    :param submission_filename: Student's submission file
     """
-    with open(submission_file) as f:
-        content = f.read()
-        sys.stdout = open(submission_file, "w")
+    with open(submission_filename, encoding='UTF-8') as submission_file:
+        content = submission_file.read()
+
+    with open(submission_filename, "w", encoding='UTF-8') as submission_file:
+        sys.stdout = submission_file
         print("'''")
         print("Hello, this is your autograder score, see below.")
         print(f"Score: {grade}/{MAX_STUDENT_POINTS}")
@@ -164,8 +175,8 @@ def build_mail_merge_csv(
         prefix: str,
         classlist_graded_df):
     """
-    Create a .csv file with student names, emails, and grades, compatible for sending out the grades in bulk via
-    email (e.g., via a mail merge in Outlook)
+    Create a .csv file with student names, emails, and grades, compatible for sending out the grades
+    in bulk via email (e.g., via a mail merge in Outlook)
     :param prefix: Prefix denoting the specific assignment being marked
     :param classlist_graded_df: Class list dataframe with grades fully added
     :return:
@@ -174,7 +185,8 @@ def build_mail_merge_csv(
 
     del classlist_graded_df["End-of-Line Indicator"]
     classlist_graded_df['Username'] = classlist_graded_df['Username'].apply(lambda x: x.lstrip("#"))
-    classlist_graded_df['Grade'] = classlist_graded_df['Grade'].apply(lambda grade: f"{grade}/{MAX_STUDENT_POINTS}")
+    classlist_graded_df['Grade'] = classlist_graded_df['Grade'].apply(
+        lambda grade: f"{grade}/{MAX_STUDENT_POINTS}")
     classlist_graded_df.insert(1, 'Email', classlist_graded_df["Username"] + "@mcmaster.ca")
     classlist_graded_df.to_csv(mail_merge_csv_filename, index=False)
 
@@ -193,9 +205,5 @@ def student_info_from_filestem(stem: str) -> Tuple[Union[str, bool], Optional[Un
         student_id = match.group(1)
         student_type = match.group(2).lstrip('_') if match.group(2) else None
         return student_id, student_type
-    else:
-        return False, False
 
-
-if __name__ == "__main__":
-    main()
+    return False, False
