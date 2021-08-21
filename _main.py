@@ -17,14 +17,13 @@ MAX_STUDENT_POINTS = 100
 
 @click.command()
 @click.argument('prefix')
-def runtest(prefix):
+def main(prefix):
     current_path = pathlib.Path('.')
 
     students_directory = f"{prefix}_submissions"
     solutions_module = f"{prefix}_solutions"
 
     classlist_df = pd.read_csv(CLASSLIST_CSV_FILENAME)
-    # submissions_df = pd.DataFrame(columns=['Username'])
 
     for file in current_path.glob(f"{students_directory}/{prefix}_*[a-z0-9]_Student[A-Z].py"):
         student_id, student_type = student_info_from_filename(file)
@@ -129,4 +128,4 @@ def student_info_from_filename(filename):
 
 
 if __name__ == "__main__":
-    runtest()
+    main()
