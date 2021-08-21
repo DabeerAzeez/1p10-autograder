@@ -7,7 +7,7 @@ import click
 import re
 import pandas as pd
 
-CLASSLIST_CSV_FILENAME = "Classlist.csv"
+CLASSLIST_CSV_FILENAME = "_Classlist.csv"
 
 
 # TODO: Review code
