@@ -10,7 +10,6 @@ import pandas as pd
 CLASSLIST_CSV_FILENAME = "Classlist.csv"
 
 
-# TODO: Update the grades list and mail merge CSV to include names of those whose submissions were not graded
 # TODO: Review code
 # TODO: Comment code
 
