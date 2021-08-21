@@ -8,6 +8,7 @@ import re
 import pandas as pd
 
 CLASSLIST_CSV_FILENAME = "_Classlist.csv"
+MAX_STUDENT_POINTS = 100
 
 
 # TODO: Review code
@@ -42,9 +43,9 @@ def runtest(prefix, students_directory, solutions_module):
             sys.stdout = f
             execute_tests(file.stem, test_file, students_directory, solutions_module)
 
-    total_grade, submissions_df_graded = process_outputs(students_directory, prefix, classlist_df)
-    brightspace_df_with_grades_col = build_grades_csv_for_brightspace(prefix, total_grade, submissions_df_graded)
-    build_mail_merge_csv(prefix, total_grade, brightspace_df_with_grades_col)
+    submissions_df_graded = process_outputs(students_directory, prefix, classlist_df)
+    brightspace_df_with_grades_col = build_grades_csv_for_brightspace(prefix, submissions_df_graded)
+    build_mail_merge_csv(prefix, brightspace_df_with_grades_col)
 
 
 def execute_tests(stem, test_file, directory, solutions_module):
@@ -59,9 +60,7 @@ def execute_tests(stem, test_file, directory, solutions_module):
 
 
 def process_outputs(students_directory, prefix, submissions_df):
-    # TODO: Deal with different grade maximums for different student types
 
-    total_grade = 0
     submissions_df.insert(3, 'Grade', 0)
     submissions_df['Grade'] = 0
 
@@ -73,21 +72,16 @@ def process_outputs(students_directory, prefix, submissions_df):
 
         regex = re.compile(r'\S+_GRADE([\d]+)(\[.+])? (PASSED|FAILED)')
 
+        total_grade = 0
         current_grade = 0
-
-        if not total_grade:
-            #  If total grade has not been calculated yet
-            for line in data:
-                m = regex.search(line)
-                if m:
-                    total_grade += int(m.group(1))
 
         for line in data:
             m = regex.search(line)
             if m:
+                total_grade += int(m.group(1))
                 current_grade += int(m.group(1)) if m.group(3) == "PASSED" else 0
 
-        submissions_df.loc[submissions_df.Username == f"#{student_id}", 'Grade'] = current_grade
+        submissions_df.loc[submissions_df.Username == f"#{student_id}", 'Grade'] = round(current_grade/total_grade*MAX_STUDENT_POINTS)
 
         submission_file = f"{students_directory}/{prefix}_{student_id}_{student_type}.py"
         with open(submission_file) as f:
@@ -103,13 +97,13 @@ def process_outputs(students_directory, prefix, submissions_df):
 
     sys.stdout = sys.__stdout__
 
-    return total_grade, submissions_df
+    return submissions_df
 
 
-def build_grades_csv_for_brightspace(prefix, max_student_points, submissions_df_graded):
+def build_grades_csv_for_brightspace(prefix, submissions_df_graded):
     grades_csv_filename = f"{prefix}_grades.csv"
     grade_header = "Mini-Milestone {} - Objective Points Grade <Numeric MaxPoints:{}>" \
-        .format(prefix, max_student_points)
+        .format(prefix, MAX_STUDENT_POINTS)
 
     brightspace_upload_df = submissions_df_graded
 
@@ -121,12 +115,12 @@ def build_grades_csv_for_brightspace(prefix, max_student_points, submissions_df_
     return brightspace_df_with_grades_col
 
 
-def build_mail_merge_csv(prefix, max_student_points, classlist_graded_df):
+def build_mail_merge_csv(prefix, classlist_graded_df):
     mail_merge_csv_filename = f"{prefix}_mail_merge.csv"
 
     del classlist_graded_df["End-of-Line Indicator"]
     classlist_graded_df['Username'] = classlist_graded_df['Username'].apply(lambda x: x.lstrip("#"))
-    classlist_graded_df['Grade'] = classlist_graded_df['Grade'].apply(lambda x: f"{x}/{max_student_points}")
+    classlist_graded_df['Grade'] = classlist_graded_df['Grade'].apply(lambda x: f"{x}/{MAX_STUDENT_POINTS}")
     classlist_graded_df.insert(1, 'Email', classlist_graded_df["Username"] + "@mcmaster.ca")
     classlist_graded_df.to_csv(mail_merge_csv_filename, index=False)
 
