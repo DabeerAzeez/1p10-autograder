@@ -96,16 +96,15 @@ def process_outputs(students_directory, prefix, classlist_df):
             data = f.read().splitlines()
 
         test_result_regex = re.compile(r'\S+_GRADE([\d]+)(\[.+])? (PASSED|FAILED)')
-
-        total_grade = grade = 0
+        total_grade = unscaled_grade = 0
 
         for line in data:
             match = re.match(test_result_regex, line)
             if match:
                 total_grade += int(match.group(1))
-                grade += int(match.group(1)) if match.group(3) == "PASSED" else 0
+                unscaled_grade += int(match.group(1)) if match.group(3) == "PASSED" else 0
 
-        scaled_grade = round(grade / total_grade * MAX_STUDENT_POINTS)
+        scaled_grade = round(unscaled_grade / total_grade * MAX_STUDENT_POINTS)
         classlist_df.loc[classlist_df.Username == f"#{student_id}", 'Grade'] = scaled_grade
 
         submission_file = f"{students_directory}/{prefix}_{student_id}_{student_type}.py" if student_type else \
@@ -127,7 +126,7 @@ def add_feedback_to_submission(grade, submission_file, total_grade):
         sys.stdout = open(submission_file, "w")
         print("'''")
         print("Hello, this is your autograder score, see below.")
-        print(f"Score: {grade}/{total_grade}")
+        print(f"Score: {grade}/{MAX_STUDENT_POINTS}")
         print("If you would like to discuss your score, please contact prof1p10@mcmaster.ca")
         print("'''")
         print("\n")
