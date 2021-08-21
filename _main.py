@@ -12,6 +12,7 @@ MAX_STUDENT_POINTS = 100
 
 # TODO: Add support for only one type of student for an assignment
 # TODO: Review code
+# TODO: Add typing, add error handling
 # TODO: Comment code
 
 
