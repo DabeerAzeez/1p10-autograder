@@ -15,7 +15,8 @@ import pytest
 import sys
 import click
 import re
-import pandas as pd
+import pandas as pd  # type: ignore
+from typing import Union, Tuple, Optional
 
 CLASSLIST_CSV_FILENAME = "_Classlist.csv"  # Name of class list downloaded from Brightspace class
 MAX_STUDENT_POINTS = 100
@@ -27,7 +28,7 @@ CURRENT_PATH = pathlib.Path('.')
 
 @click.command()
 @click.argument('prefix')
-def main(prefix):
+def main(prefix: str):
     students_directory = f"{prefix}_submissions"
     solutions_module = f"{prefix}_solutions"
 
@@ -43,8 +44,9 @@ def main(prefix):
             print("Filename does not match expected pattern and will not be graded: " + str(file))
             continue
 
-        if not f"#{student_id}" in classlist_df['Username'].values:
-            print("Unrecognized student ID: " + student_id + " is not found in the classlist and will not be graded.")
+        if f"#{student_id}" not in classlist_df['Username'].values:
+            print("Unrecognized student ID: " + str(student_id) + " is not found in the classlist and will not be "
+                                                                "graded.")
             continue
 
         test_file = f"{prefix}_test_{student_type}" if student_type else f"{prefix}_test"
@@ -62,7 +64,11 @@ def main(prefix):
     print(f"Autograder completed in {time.time() - start_time} seconds.")
 
 
-def execute_tests(stem, test_file, directory, solutions_module):
+def execute_tests(
+        stem: str,
+        test_file: str,
+        directory: str,
+        solutions_module: str):
     """
     Executes PyTest tests for a student submission
     :param stem: File stem for the student Python submission in the submission directory
@@ -79,7 +85,10 @@ def execute_tests(stem, test_file, directory, solutions_module):
             pytest.main([__file__, f"{test_file}.py", "-vvl"])
 
 
-def process_outputs(students_directory, prefix, classlist_df):
+def process_outputs(
+        students_directory: str,
+        prefix: str,
+        classlist_df):
     """
     Processes the output files generated when executing the PyTest tests to determine and collect the student's grade.
     :param students_directory: Directory containing student submissions
@@ -109,12 +118,14 @@ def process_outputs(students_directory, prefix, classlist_df):
 
         submission_file = f"{students_directory}/{prefix}_{student_id}_{student_type}.py" if student_type else \
             f"{students_directory}/{prefix}_{student_id}.py"
-        add_feedback_to_submission(scaled_grade, submission_file, total_grade)
+        add_feedback_to_submission(scaled_grade, submission_file)
 
     return classlist_df
 
 
-def add_feedback_to_submission(grade, submission_file, total_grade):
+def add_feedback_to_submission(
+        grade: int,
+        submission_file: str):
     """
     Insert grade feedback to the top of a student Python submission using a multi-line comment
     :param grade: Student's assignment grade
@@ -134,7 +145,9 @@ def add_feedback_to_submission(grade, submission_file, total_grade):
         sys.stdout = sys.__stdout__
 
 
-def build_grades_csv_for_brightspace(prefix, classlist_df_graded):
+def build_grades_csv_for_brightspace(
+        prefix: str,
+        classlist_df_graded):
     """
     Build a grades .csv file for uploading to Brightspace
     :param prefix: Prefix denoting the specific assignment being marked
@@ -149,7 +162,9 @@ def build_grades_csv_for_brightspace(prefix, classlist_df_graded):
     brightspace_upload_df.to_csv(grades_csv_filename, index=False)
 
 
-def build_mail_merge_csv(prefix, classlist_graded_df):
+def build_mail_merge_csv(
+        prefix: str,
+        classlist_graded_df):
     """
     Create a .csv file with student names, emails, and grades, compatible for sending out the grades in bulk via
     email (e.g., via a mail merge in Outlook)
@@ -166,7 +181,7 @@ def build_mail_merge_csv(prefix, classlist_graded_df):
     classlist_graded_df.to_csv(mail_merge_csv_filename, index=False)
 
 
-def student_info_from_filestem(stem):
+def student_info_from_filestem(stem: str) -> Tuple[Union[str, bool], Optional[Union[str, bool]]]:
     """
     Extract student information from the filestem of a submission file
     :param stem: Stem of student submission file
