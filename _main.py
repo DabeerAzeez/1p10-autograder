@@ -10,13 +10,10 @@ import pandas as pd
 CLASSLIST_CSV_FILENAME = "_Classlist.csv"
 MAX_STUDENT_POINTS = 100
 
-# TODO: Add support for only one type of student for an assignment
 # TODO: Review code
 # TODO: Add typing, add error handling
 # TODO: Comment code
 
-
-def student_filestem_glob(prefix): return f"{prefix}_*[a-z0-9]_Student[A-Z]"
 
 @click.command()
 @click.argument('prefix')
@@ -28,15 +25,19 @@ def main(prefix):
 
     classlist_df = pd.read_csv(CLASSLIST_CSV_FILENAME)
 
-    for file in current_path.glob(f"{students_directory}/{student_filestem_glob(prefix)}.py"):
-        # Example file name: MM04_abdulazd_StudentA.py
+    for file in current_path.glob(f"{students_directory}/*.py"):
+        # Example file names: MM04_abdulazd_StudentA.py, MM04_awani3_StudentB.py, MM04_beshaj2.py
         student_id, student_type = student_info_from_filestem(file.name)
+
+        if student_id is False or student_type is False:
+            print("Filename does not match expected pattern and will not be graded: " + str(file))
+            continue
 
         if not f"#{student_id}" in classlist_df['Username'].values:
             print("Unrecognized student ID: " + student_id + " is not found in the classlist and will not be graded.")
             continue
 
-        test_file = f"{prefix}_test_{student_type}"
+        test_file = f"{prefix}_test_{student_type}" if student_type else f"{prefix}_test"
 
         with open(f"{students_directory}/{file.stem}-out.txt", "w") as f:
             sys.stdout = f
@@ -64,8 +65,8 @@ def process_outputs(students_directory, prefix, submissions_df):
     submissions_df['Grade'] = 0
 
     current_path = pathlib.Path('.')
-    for file in current_path.glob(f"{students_directory}/{student_filestem_glob(prefix)}-out.txt"):
-        student_id, student_type = student_info_from_filestem(file.stem.rstrip('out'))
+    for file in current_path.glob(f"{students_directory}/*-out.txt"):
+        student_id, student_type = student_info_from_filestem(file.stem.rstrip('-out'))
         with open(file) as f:
             data = f.read().splitlines()
 
@@ -82,7 +83,7 @@ def process_outputs(students_directory, prefix, submissions_df):
 
         submissions_df.loc[submissions_df.Username == f"#{student_id}", 'Grade'] = round(current_grade/total_grade*MAX_STUDENT_POINTS)
 
-        submission_file = f"{students_directory}/{prefix}_{student_id}_{student_type}.py"
+        submission_file = f"{students_directory}/{prefix}_{student_id}_{student_type}.py" if student_type else f"{students_directory}/{prefix}_{student_id}.py"
         with open(submission_file) as f:
             content = f.read()
 
@@ -125,10 +126,14 @@ def build_mail_merge_csv(prefix, classlist_graded_df):
 
 
 def student_info_from_filestem(filename):
-    filename_regex = re.compile(r'.*_([\d\w]*)_([\w]*)')
-    student_id = re.match(filename_regex, filename).group(1)
-    student_type = re.match(filename_regex, filename).group(2)
-    return student_id, student_type
+    filename_regex = re.compile(r'MM\d+_([a-z0-9]*)(_[\w]*)?')
+    match = re.match(filename_regex, filename)
+    if match:
+        student_id = match.group(1)
+        student_type = match.group(2).lstrip('_') if match.group(2) else None
+        return student_id, student_type
+    else:
+        return False, False
 
 
 if __name__ == "__main__":
