@@ -10,7 +10,7 @@ import pandas as pd
 CLASSLIST_CSV_FILENAME = "_Classlist.csv"
 MAX_STUDENT_POINTS = 100
 
-
+# TODO: Add support for only one type of student for an assignment
 # TODO: Review code
 # TODO: Comment code
 
