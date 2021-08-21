@@ -16,6 +16,8 @@ MAX_STUDENT_POINTS = 100
 # TODO: Comment code
 
 
+def student_filestem_glob(prefix): return f"{prefix}_*[a-z0-9]_Student[A-Z]"
+
 @click.command()
 @click.argument('prefix')
 def main(prefix):
@@ -26,7 +28,7 @@ def main(prefix):
 
     classlist_df = pd.read_csv(CLASSLIST_CSV_FILENAME)
 
-    for file in current_path.glob(f"{students_directory}/{prefix}_*[a-z0-9]_Student[A-Z].py"):
+    for file in current_path.glob(f"{students_directory}/{student_filestem_glob(prefix)}.py"):
         # Example file name: MM04_abdulazd_StudentA.py
         student_id, student_type = student_info_from_filestem(file.name)
 
@@ -62,7 +64,7 @@ def process_outputs(students_directory, prefix, submissions_df):
     submissions_df['Grade'] = 0
 
     current_path = pathlib.Path('.')
-    for file in current_path.glob(f"{students_directory}/{prefix}_*[a-z0-9]_Student[A-Z]-out.txt"):
+    for file in current_path.glob(f"{students_directory}/{student_filestem_glob(prefix)}-out.txt"):
         student_id, student_type = student_info_from_filestem(file.stem.rstrip('out'))
         with open(file) as f:
             data = f.read().splitlines()
