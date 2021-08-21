@@ -98,6 +98,7 @@ def process_outputs(students_directory, prefix, classlist_df):
         test_result_regex = re.compile(r'\S+_GRADE([\d]+)(\[.+])? (PASSED|FAILED)')
         total_grade = unscaled_grade = 0
 
+        # Extract the grade from the lines of the PyTest output, adding the grade if the test passed
         for line in data:
             match = re.match(test_result_regex, line)
             if match:
