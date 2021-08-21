@@ -16,16 +16,12 @@ MAX_STUDENT_POINTS = 100
 
 
 @click.command()
-@click.option('--student-dir', '-s', 'students_directory', default=None)
-@click.option('--solutions', 'solutions_module', default=None)
 @click.argument('prefix')
-def runtest(prefix, students_directory, solutions_module):
+def runtest(prefix):
     current_path = pathlib.Path('.')
 
-    if students_directory is None:
-        students_directory = f"{prefix}_submissions"
-    if solutions_module is None:
-        solutions_module = f"{prefix}_solutions"
+    students_directory = f"{prefix}_submissions"
+    solutions_module = f"{prefix}_solutions"
 
     classlist_df = pd.read_csv(CLASSLIST_CSV_FILENAME)
     # submissions_df = pd.DataFrame(columns=['Username'])
