@@ -26,18 +26,18 @@ def runtest(prefix, students_directory, solutions_module):
     if solutions_module is None:
         solutions_module = f"{prefix}_solutions"
 
-    submissions_df = pd.DataFrame(columns=['Username'])
+    classlist_df = pd.read_csv(CLASSLIST_CSV_FILENAME)
+    # submissions_df = pd.DataFrame(columns=['Username'])
 
     for file in current_path.glob(f"{students_directory}/{prefix}_*[a-z0-9]_Student[A-Z].py"):
         student_id, student_type = student_info_from_filename(file)
         test_file = f"{prefix}_test_{student_type}"
-        submissions_df = submissions_df.append({'Username': student_id}, ignore_index=True)
 
         with open(f"{students_directory}/{file.stem}-out.txt", "w") as f:
             sys.stdout = f
             execute_tests(file.stem, test_file, students_directory, solutions_module)
 
-    total_grade, submissions_df_graded = process_outputs(students_directory, prefix, submissions_df)
+    total_grade, submissions_df_graded = process_outputs(students_directory, prefix, classlist_df)
     brightspace_df_with_grades_col = build_grades_csv_for_brightspace(prefix, total_grade, submissions_df_graded)
     build_mail_merge_csv(prefix, total_grade, brightspace_df_with_grades_col)
 
@@ -57,7 +57,8 @@ def process_outputs(students_directory, prefix, submissions_df):
     # TODO: Deal with different grade maximums for different student types
 
     total_grade = 0
-    submissions_df['Grade'] = ''
+    submissions_df.insert(3, 'Grade', 0)
+    submissions_df['Grade'] = 0
 
     current_path = pathlib.Path('.')
     for file in current_path.glob(f"{students_directory}/{prefix}_*-out.txt"):
@@ -81,7 +82,7 @@ def process_outputs(students_directory, prefix, submissions_df):
             if m:
                 current_grade += int(m.group(1)) if m.group(3) == "PASSED" else 0
 
-        submissions_df.loc[submissions_df.Username == student_id, 'Grade'] = current_grade
+        submissions_df.loc[submissions_df.Username == f"#{student_id}", 'Grade'] = current_grade
 
         submission_file = f"{students_directory}/{prefix}_{student_id}_{student_type}.py"
         with open(submission_file) as f:
@@ -106,10 +107,6 @@ def build_grades_csv_for_brightspace(prefix, max_student_points, submissions_df_
         .format(prefix, max_student_points)
 
     brightspace_upload_df = submissions_df_graded
-
-    # Brightspace requirements, add # symbol to beginning of first column and add an EOL indicator column
-    brightspace_upload_df['Username'] = brightspace_upload_df['Username'].apply(lambda x: "#" + x)
-    brightspace_upload_df["End-of-Line Indicator"] = "#"
 
     brightspace_df_with_grades_col = brightspace_upload_df.copy()
     brightspace_upload_df.rename(columns={"Grade": grade_header}, inplace=True)
