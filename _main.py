@@ -26,7 +26,8 @@ def main(prefix):
     classlist_df = pd.read_csv(CLASSLIST_CSV_FILENAME)
 
     for file in current_path.glob(f"{students_directory}/{prefix}_*[a-z0-9]_Student[A-Z].py"):
-        student_id, student_type = student_info_from_filename(file)
+        # Example file name: MM04_abdulazd_StudentA.py
+        student_id, student_type = student_info_from_filestem(file.name)
 
         if not f"#{student_id}" in classlist_df['Username'].values:
             print("Unrecognized student ID: " + student_id + " is not found in the classlist and will not be graded.")
@@ -60,8 +61,8 @@ def process_outputs(students_directory, prefix, submissions_df):
     submissions_df['Grade'] = 0
 
     current_path = pathlib.Path('.')
-    for file in current_path.glob(f"{students_directory}/{prefix}_*-out.txt"):
-        student_id, student_type = student_info_from_filename(file)
+    for file in current_path.glob(f"{students_directory}/{prefix}_*[a-z0-9]_Student[A-Z]-out.txt"):
+        student_id, student_type = student_info_from_filestem(file.stem.rstrip('out'))
         with open(file) as f:
             data = f.read().splitlines()
 
@@ -120,10 +121,10 @@ def build_mail_merge_csv(prefix, classlist_graded_df):
     classlist_graded_df.to_csv(mail_merge_csv_filename, index=False)
 
 
-def student_info_from_filename(filename):
+def student_info_from_filestem(filename):
     filename_regex = re.compile(r'.*_([\d\w]*)_([\w]*)')
-    student_id = re.match(filename_regex, filename.stem).group(1)
-    student_type = re.match(filename_regex, filename.stem).group(2)
+    student_id = re.match(filename_regex, filename).group(1)
+    student_type = re.match(filename_regex, filename).group(2)
     return student_id, student_type
 
 
