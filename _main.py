@@ -1,3 +1,12 @@
+"""
+1P10 Autograder, created by Dabeer Abdul-Azeez (abdulazd@mcmaster.ca) with help from Natalia Maximo
+(https://github.com/taliamax)
+
+Runs PyTest unit tests on student submissions, compiling the grades into a .csv file for easy uploading to a
+Brightspace Learning Management System. Also generates a .csv file in case the professor wants to send the grades in
+bulk via email (compatible with Mail Merge in Microsoft Outlook).
+"""
+
 import importlib
 import pathlib
 import time
@@ -8,7 +17,7 @@ import click
 import re
 import pandas as pd
 
-CLASSLIST_CSV_FILENAME = "_Classlist.csv"
+CLASSLIST_CSV_FILENAME = "_Classlist.csv"  # Name of class list downloaded from Brightspace class
 MAX_STUDENT_POINTS = 100
 CURRENT_PATH = pathlib.Path('.')
 
@@ -42,6 +51,7 @@ def main(prefix):
         test_file = f"{prefix}_test_{student_type}" if student_type else f"{prefix}_test"
 
         with open(f"{students_directory}/{file.stem}-out.txt", "w") as f:
+            # Execute tests and write output into a text file for each student submission
             sys.stdout = f
             execute_tests(file.stem, test_file, students_directory, solutions_module)
             sys.stdout = sys.__stdout__
@@ -54,6 +64,13 @@ def main(prefix):
 
 
 def execute_tests(stem, test_file, directory, solutions_module):
+    """
+    Executes PyTest tests for a student submission
+    :param stem: File stem for the student Python submission in the submission directory
+    :param test_file: Python file containing boilerplate code and PyTest tests
+    :param directory: Directory containing student submissions
+    :param solutions_module: File stem for the Python file containing assignment solutions
+    """
     print(f"Running tests on file {stem}.py....")
 
     with mock.patch(f"{test_file}.solutions_module") as mock_solutions:
@@ -63,8 +80,15 @@ def execute_tests(stem, test_file, directory, solutions_module):
             pytest.main([__file__, f"{test_file}.py", "-vvl"])
 
 
-def process_outputs(students_directory, prefix, submissions_df):
-    submissions_df.insert(3, 'Grade', 0)
+def process_outputs(students_directory, prefix, classlist_df):
+    """
+    Processes the output files generated when executing the PyTest tests to determine and collect the student's grade.
+    :param students_directory: Directory containing student submissions
+    :param prefix: Prefix denoting the specific assignment being marked
+    :param classlist_df: Dataframe containing the class list from Brightspace
+    :return: Class list dataframe with grades added for all students
+    """
+    classlist_df.insert(3, 'Grade', 0)
 
     for file in CURRENT_PATH.glob(f"{students_directory}/*-out.txt"):
         student_id, student_type = student_info_from_filestem(file.stem.rstrip('-out'))
@@ -73,31 +97,37 @@ def process_outputs(students_directory, prefix, submissions_df):
 
         test_result_regex = re.compile(r'\S+_GRADE([\d]+)(\[.+])? (PASSED|FAILED)')
 
-        total_grade = current_grade = 0
+        total_grade = grade = 0
 
         for line in data:
             match = re.match(test_result_regex, line)
             if match:
                 total_grade += int(match.group(1))
-                current_grade += int(match.group(1)) if match.group(3) == "PASSED" else 0
+                grade += int(match.group(1)) if match.group(3) == "PASSED" else 0
 
-        submissions_df.loc[submissions_df.Username == f"#{student_id}", 'Grade'] = \
-            round(current_grade / total_grade * MAX_STUDENT_POINTS)
+        scaled_grade = round(grade / total_grade * MAX_STUDENT_POINTS)
+        classlist_df.loc[classlist_df.Username == f"#{student_id}", 'Grade'] = scaled_grade
 
         submission_file = f"{students_directory}/{prefix}_{student_id}_{student_type}.py" if student_type else \
             f"{students_directory}/{prefix}_{student_id}.py"
-        add_feedback_to_submission(current_grade, submission_file, total_grade)
+        add_feedback_to_submission(scaled_grade, submission_file, total_grade)
 
-    return submissions_df
+    return classlist_df
 
 
-def add_feedback_to_submission(current_grade, submission_file, total_grade):
+def add_feedback_to_submission(grade, submission_file, total_grade):
+    """
+    Insert grade feedback to the top of a student Python submission using a multi-line comment
+    :param grade: Student's assignment grade
+    :param submission_file: Student's submission file
+    :param total_grade: Total grade for the assignment
+    """
     with open(submission_file) as f:
         content = f.read()
         sys.stdout = open(submission_file, "w")
         print("'''")
         print("Hello, this is your autograder score, see below.")
-        print(f"Score: {current_grade}/{total_grade}")
+        print(f"Score: {grade}/{total_grade}")
         print("If you would like to discuss your score, please contact prof1p10@mcmaster.ca")
         print("'''")
         print("\n")
@@ -105,17 +135,29 @@ def add_feedback_to_submission(current_grade, submission_file, total_grade):
         sys.stdout = sys.__stdout__
 
 
-def build_grades_csv_for_brightspace(prefix, submissions_df_graded):
+def build_grades_csv_for_brightspace(prefix, classlist_df_graded):
+    """
+    Build a grades .csv file for uploading to Brightspace
+    :param prefix: Prefix denoting the specific assignment being marked
+    :param classlist_df_graded: Class list dataframe with grades fully added
+    """
     grades_csv_filename = f"{prefix}_grades.csv"
     grade_header = "Mini-Milestone {} - Objective Points Grade <Numeric MaxPoints:{}>" \
         .format(prefix, MAX_STUDENT_POINTS)
 
-    brightspace_upload_df = submissions_df_graded.copy()
+    brightspace_upload_df = classlist_df_graded.copy()
     brightspace_upload_df.rename(columns={"Grade": grade_header}, inplace=True)
     brightspace_upload_df.to_csv(grades_csv_filename, index=False)
 
 
 def build_mail_merge_csv(prefix, classlist_graded_df):
+    """
+    Create a .csv file with student names, emails, and grades, compatible for sending out the grades in bulk via
+    email (e.g., via a mail merge in Outlook)
+    :param prefix: Prefix denoting the specific assignment being marked
+    :param classlist_graded_df: Class list dataframe with grades fully added
+    :return:
+    """
     mail_merge_csv_filename = f"{prefix}_mail_merge.csv"
 
     del classlist_graded_df["End-of-Line Indicator"]
@@ -125,11 +167,16 @@ def build_mail_merge_csv(prefix, classlist_graded_df):
     classlist_graded_df.to_csv(mail_merge_csv_filename, index=False)
 
 
-def student_info_from_filestem(filename):
+def student_info_from_filestem(stem):
+    """
+    Extract student information from the filestem of a submission file
+    :param stem: Stem of student submission file
+    """
+
     filename_regex = re.compile(r'MM\d+_([a-z0-9]*)(_[\w]*)?')
     # Example file names: MM04_abdulazd_StudentA.py, MM04_awani3_StudentB.py, MM04_beshaj2.py
 
-    match = re.match(filename_regex, filename)
+    match = re.match(filename_regex, stem)
     if match:
         student_id = match.group(1)
         student_type = match.group(2).lstrip('_') if match.group(2) else None
