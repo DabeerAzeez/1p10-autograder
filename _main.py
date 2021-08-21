@@ -45,8 +45,7 @@ def main(prefix: str):
             continue
 
         if f"#{student_id}" not in classlist_df['Username'].values:
-            print("Unrecognized student ID: " + str(student_id) + " is not found in the classlist and will not be "
-                                                                "graded.")
+            print("Unrecognized student ID: " + str(student_id) + " is not in the classlist and will not be graded.")
             continue
 
         test_file = f"{prefix}_test_{student_type}" if student_type else f"{prefix}_test"
@@ -130,7 +129,6 @@ def add_feedback_to_submission(
     Insert grade feedback to the top of a student Python submission using a multi-line comment
     :param grade: Student's assignment grade
     :param submission_file: Student's submission file
-    :param total_grade: Total grade for the assignment
     """
     with open(submission_file) as f:
         content = f.read()
