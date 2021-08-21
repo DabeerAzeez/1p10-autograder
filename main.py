@@ -121,16 +121,14 @@ def build_grades_csv_for_brightspace(prefix, max_student_points, submissions_df_
     return brightspace_df_with_grades_col
 
 
-def build_mail_merge_csv(prefix, max_student_points, brightspace_df_with_grades_col):
+def build_mail_merge_csv(prefix, max_student_points, classlist_graded_df):
     mail_merge_csv_filename = f"{prefix}_mail_merge.csv"
-    classlist_df = pd.read_csv(CLASSLIST_CSV_FILENAME)
 
-    mail_merge_df = pd.merge(classlist_df, brightspace_df_with_grades_col, on=["Username", "End-of-Line Indicator"])
-    del mail_merge_df["End-of-Line Indicator"]
-    mail_merge_df['Username'] = mail_merge_df['Username'].apply(lambda x: x.lstrip("#"))
-    mail_merge_df['Grade'] = mail_merge_df['Grade'].apply(lambda x: f"{x}/{max_student_points}")
-    mail_merge_df.insert(1, 'Email', mail_merge_df["Username"] + "@mcmaster.ca")
-    mail_merge_df.to_csv(mail_merge_csv_filename, index=False)
+    del classlist_graded_df["End-of-Line Indicator"]
+    classlist_graded_df['Username'] = classlist_graded_df['Username'].apply(lambda x: x.lstrip("#"))
+    classlist_graded_df['Grade'] = classlist_graded_df['Grade'].apply(lambda x: f"{x}/{max_student_points}")
+    classlist_graded_df.insert(1, 'Email', classlist_graded_df["Username"] + "@mcmaster.ca")
+    classlist_graded_df.to_csv(mail_merge_csv_filename, index=False)
 
 
 def student_info_from_filename(filename):
