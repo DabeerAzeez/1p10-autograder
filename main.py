@@ -32,6 +32,11 @@ def runtest(prefix, students_directory, solutions_module):
 
     for file in current_path.glob(f"{students_directory}/{prefix}_*[a-z0-9]_Student[A-Z].py"):
         student_id, student_type = student_info_from_filename(file)
+
+        if not f"#{student_id}" in classlist_df['Username'].values:
+            print("Unrecognized student ID: " + student_id + " is not found in the classlist and will not be graded.")
+            continue
+
         test_file = f"{prefix}_test_{student_type}"
 
         with open(f"{students_directory}/{file.stem}-out.txt", "w") as f:
