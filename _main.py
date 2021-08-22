@@ -25,9 +25,6 @@ MAX_STUDENT_POINTS = 100
 CURRENT_PATH = pathlib.Path('.')
 
 
-# TODO: Add typing to variables
-
-
 @click.command()
 @click.argument('prefix')
 def main(prefix: str):
