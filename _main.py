@@ -226,12 +226,12 @@ def student_info_from_filestem(prefix: str,
     :param stem: Stem of student submission file
     """
 
-    filename_regex = re.compile(prefix + r'_([a-z0-9]*)(_[\w]*)?')
+    filename_regex = re.compile(prefix + r'_([a-zA-Z0-9]*)(_[\w]*)?')
     # Example file names: MM04_abdulazd_StudentA.py, MM04_awani3_StudentB.py, MM04_beshaj2.py
 
     match = re.match(filename_regex, stem)
     if match:
-        student_id = match.group(1)
+        student_id = match.group(1).lower()
         student_type = match.group(2).lstrip('_') if match.group(2) else None
         return student_id, student_type
 
