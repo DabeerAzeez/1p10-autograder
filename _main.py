@@ -52,6 +52,7 @@ def main(prefix: str):
     for submission in CURRENT_PATH.glob(f"{students_directory}/{prefix}_*.py"):
         student_id, student_type = student_info_from_filestem(prefix, submission.stem)
 
+        # Verify student file names
         if student_id is False or student_type is False:
             print("Submission name does not match expected pattern and will not be graded: " + str(
                 submission))
@@ -66,11 +67,11 @@ def main(prefix: str):
             print(f"Unrecognized student type for submission: {submission} cannot be graded.")
             continue
 
+        # Execute tests and write output into a text file for each student submission
         test_file = f"{prefix}_test_{student_type}" if student_type else f"{prefix}_test"
 
         with open(f"{students_directory}/{submission.stem}-out.txt", "w",
                   encoding='UTF-8') as output_file:
-            # Execute tests and write output into a text file for each student submission
             sys.stdout = output_file
             execute_tests(submission.stem, test_file, students_directory, solutions_module)
             sys.stdout = sys.__stdout__
