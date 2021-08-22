@@ -53,10 +53,10 @@ def main(prefix: str):
                                 f"directory.")
 
     for submission in CURRENT_PATH.glob(f"{students_directory}/*.py"):
-        student_id, student_type = student_info_from_filestem(submission.name)
+        student_id, student_type = student_info_from_filestem(prefix, submission.stem)
 
         if student_id is False or student_type is False:
-            print("Filename does not match expected pattern and will not be graded: " + str(
+            print("Submission name does not match expected pattern and will not be graded: " + str(
                 submission))
             continue
 
@@ -118,7 +118,8 @@ def process_outputs(
     classlist_df.insert(3, 'Grade', 0)
 
     for output_file in CURRENT_PATH.glob(f"{students_directory}/*-out.txt"):
-        student_id, student_type = student_info_from_filestem(output_file.stem.rstrip('-out'))
+        student_id, student_type = student_info_from_filestem(prefix, output_file.stem.rstrip(
+            '-out'))
         with open(output_file, encoding='UTF-8') as file:
             data = file.read().splitlines()
 
@@ -202,13 +203,15 @@ def build_mail_merge_csv(
     classlist_graded_df.to_csv(mail_merge_csv_filename, index=False)
 
 
-def student_info_from_filestem(stem: str) -> Tuple[Union[str, bool], Optional[Union[str, bool]]]:
+def student_info_from_filestem(prefix: str,
+                               stem: str) -> Tuple[Union[str, bool], Optional[Union[str, bool]]]:
     """
     Extract student information from the filestem of a submission file
+    :param prefix: Prefix denoting the specific assignment being marked
     :param stem: Stem of student submission file
     """
 
-    filename_regex = re.compile(r'MM\d+_([a-z0-9]*)(_[\w]*)?')
+    filename_regex = re.compile(prefix + r'_([a-z0-9]*)(_[\w]*)?')
     # Example file names: MM04_abdulazd_StudentA.py, MM04_awani3_StudentB.py, MM04_beshaj2.py
 
     match = re.match(filename_regex, stem)
