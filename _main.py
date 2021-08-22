@@ -59,6 +59,8 @@ def main(prefix: str):
     else:
         for test_file in CURRENT_PATH.glob(f"{prefix}_test_*.py"):
             allowed_student_types.add(test_file.stem.split("_")[-1])
+    if len(allowed_student_types) == 0:
+        raise FileNotFoundError("No test files found for the selected assignment.")
 
     for submission in CURRENT_PATH.glob(f"{students_directory}/{prefix}_*.py"):
         student_id, student_type = student_info_from_filestem(prefix, submission.stem)
