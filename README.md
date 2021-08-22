@@ -74,3 +74,4 @@ The Autograder will:
 2. Create a `<prefix>_grades.csv` file, calculating the grades for all students in the class list csv, assigning a grade of zero to those who did not submit files or did not submit files that were properly recognized by the autograder
 3. Create a `<prefix>_mail_merge.csv` file which can be used to send a mail merge email to all students (emails are generated from based on their Brightspace username) 
    1. Includes each student's grade for the assignment `<prefix>` as a fraction 
+4. Insert the student's grade as a multi-line comment in their original Python file
