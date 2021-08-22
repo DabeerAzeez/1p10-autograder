@@ -42,6 +42,7 @@ def main(prefix: str):
     classlist_df = pd.read_csv(CLASSLIST_CSV_FILENAME)
 
     print("Starting Autograder...")
+    print("*"*20)
     start_time = time.time()
 
     for submission in CURRENT_PATH.glob(f"{students_directory}/*.py"):
@@ -70,6 +71,7 @@ def main(prefix: str):
     build_grades_csv_for_brightspace(prefix, classlist_df_graded)
     build_mail_merge_csv(prefix, classlist_df_graded)
 
+    print("*" * 20)
     print(f"Autograder completed in {time.time() - start_time} seconds.")
 
 
