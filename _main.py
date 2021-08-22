@@ -100,8 +100,8 @@ def check_missing_files_and_directories(students_directory):
     if not pathlib.Path(students_directory).exists():
         raise NotADirectoryError(f"Missing student submissions directory: /{students_directory}")
     if not list(CURRENT_PATH.glob(f"{students_directory}/*.py")):
-        raise FileNotFoundError(f"Missing student Python submissions in appropriate submissions "
-                                f"directory.")
+        raise FileNotFoundError("Missing student Python submissions in appropriate submissions "
+                                "directory.")
 
 
 def verify_student_filename(student_id, student_type, classlist_df, allowed_student_types,
