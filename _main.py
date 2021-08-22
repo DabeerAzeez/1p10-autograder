@@ -24,7 +24,9 @@ MAX_STUDENT_POINTS = 100
 CURRENT_PATH = pathlib.Path('.')
 
 
-# TODO: Add error handling
+# TODO: Add error handling (missing files/folders, empty files/folders, including class list,
+#  submissions, test files, solution files)
+# TODO: Add typing to variables
 
 
 @click.command()
