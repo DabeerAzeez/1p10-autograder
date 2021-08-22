@@ -42,10 +42,6 @@ def main(prefix: str):
 
     classlist_df = pd.read_csv(CLASSLIST_CSV_FILENAME)
 
-    print("Starting Autograder...")
-    print("*" * 20)
-    start_time = time.time()
-
     if not pathlib.Path(students_directory).exists():
         raise NotADirectoryError(f"Missing student submissions directory: /{students_directory}")
 
@@ -61,6 +57,10 @@ def main(prefix: str):
             allowed_student_types.add(test_file.stem.split("_")[-1])
     if len(allowed_student_types) == 0:
         raise FileNotFoundError("No test files found for the selected assignment.")
+
+    print("Starting Autograder...")
+    print("*" * 20)
+    start_time = time.time()
 
     for submission in CURRENT_PATH.glob(f"{students_directory}/{prefix}_*.py"):
         student_id, student_type = student_info_from_filestem(prefix, submission.stem)
