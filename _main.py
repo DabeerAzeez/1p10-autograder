@@ -35,6 +35,8 @@ def main(prefix: str):
     Runs the autograder
     :param prefix: Prefix denoting the specific assignment being marked
     """
+    students_graded = 0
+
     students_directory = f"{prefix}_submissions"
     solutions_module = f"{prefix}_solutions"
 
@@ -72,13 +74,16 @@ def main(prefix: str):
             sys.stdout = output_file
             execute_tests(submission.stem, test_file, students_directory, solutions_module)
             sys.stdout = sys.__stdout__
+            print(f"Submission graded: {submission}")
+            students_graded += 1
 
-    classlist_df_graded = process_outputs(students_directory, prefix, classlist_df)
-    build_grades_csv_for_brightspace(prefix, classlist_df_graded)
-    build_mail_merge_csv(prefix, classlist_df_graded)
+    if students_graded > 0:
+        classlist_df_graded = process_outputs(students_directory, prefix, classlist_df)
+        build_grades_csv_for_brightspace(prefix, classlist_df_graded)
+        build_mail_merge_csv(prefix, classlist_df_graded)
 
     print("*" * 20)
-    print(f"Autograder completed in {time.time() - start_time} seconds.")
+    print(f"Autograder graded {students_graded} submissions in {time.time() - start_time} seconds.")
 
 
 def execute_tests(
