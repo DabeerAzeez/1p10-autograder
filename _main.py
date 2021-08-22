@@ -53,18 +53,9 @@ def main(prefix: str):
         student_id, student_type = student_info_from_filestem(prefix, submission.stem)
 
         # Verify student file names
-        if student_id is False or student_type is False:
-            print("Submission name does not match expected pattern and will not be graded: " + str(
-                submission))
-            continue
-
-        if f"#{student_id}" not in classlist_df['Username'].values:
-            print("Unrecognized student ID: " + str(
-                student_id) + " is not in the classlist and will not be graded.")
-            continue
-
-        if student_type not in allowed_student_types:
-            print(f"Unrecognized student type for submission: {submission} cannot be graded.")
+        verified = verify_student_filename(student_id, student_type, classlist_df,
+                                           allowed_student_types, submission)
+        if not verified:
             continue
 
         # Execute tests and write output into a text file for each student submission
@@ -114,6 +105,25 @@ def check_missing_files_and_directories(students_directory):
     if not list(CURRENT_PATH.glob(f"{students_directory}/*.py")):
         raise FileNotFoundError(f"Missing student Python submissions in appropriate submissions "
                                 f"directory.")
+
+
+def verify_student_filename(student_id, student_type, classlist_df, allowed_student_types,
+                            submission):
+    if student_id is False or student_type is False:
+        print("Submission name does not match expected pattern and will not be graded: " + str(
+            submission))
+        return False
+
+    if f"#{student_id}" not in classlist_df['Username'].values:
+        print("Unrecognized student ID: " + str(
+            student_id) + " is not in the classlist and will not be graded.")
+        return False
+
+    if student_type not in allowed_student_types:
+        print(f"Unrecognized student type for submission: {submission} cannot be graded.")
+        return False
+
+    return True
 
 
 def execute_tests(
