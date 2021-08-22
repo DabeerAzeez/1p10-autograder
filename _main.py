@@ -42,21 +42,8 @@ def main(prefix: str):
 
     classlist_df = pd.read_csv(CLASSLIST_CSV_FILENAME)
 
-    if not pathlib.Path(students_directory).exists():
-        raise NotADirectoryError(f"Missing student submissions directory: /{students_directory}")
-
-    if not list(CURRENT_PATH.glob(f"{students_directory}/*.py")):
-        raise FileNotFoundError(f"Missing student Python submissions in appropriate submissions "
-                                f"directory.")
-
-    allowed_student_types = set()
-    if pathlib.Path(f"{prefix}_test.py").exists():
-        allowed_student_types.add(None)
-    else:
-        for test_file in CURRENT_PATH.glob(f"{prefix}_test_*.py"):
-            allowed_student_types.add(test_file.stem.split("_")[-1])
-    if len(allowed_student_types) == 0:
-        raise FileNotFoundError("No test files found for the selected assignment.")
+    check_missing_files_and_directories(students_directory)
+    allowed_student_types = find_allowed_student_types(prefix)
 
     print("Starting Autograder...")
     print("*" * 20)
@@ -97,6 +84,35 @@ def main(prefix: str):
 
     print("*" * 20)
     print(f"Autograder graded {students_graded} submissions in {time.time() - start_time} seconds.")
+
+
+def find_allowed_student_types(prefix):
+    """
+    Find student types for which there are unit test files created.
+    :param prefix: Prefix denoting the specific assignment being marked
+    :return: set of allowed student types
+    """
+    allowed_student_types = set()
+    if pathlib.Path(f"{prefix}_test.py").exists():
+        allowed_student_types.add(None)
+    else:
+        for test_file in CURRENT_PATH.glob(f"{prefix}_test_*.py"):
+            allowed_student_types.add(test_file.stem.split("_")[-1])
+    if len(allowed_student_types) == 0:
+        raise FileNotFoundError("No test files found for the selected assignment.")
+    return allowed_student_types
+
+
+def check_missing_files_and_directories(students_directory):
+    """
+    Checks for missing directories or files
+    :param students_directory: Directory of student submissions
+    """
+    if not pathlib.Path(students_directory).exists():
+        raise NotADirectoryError(f"Missing student submissions directory: /{students_directory}")
+    if not list(CURRENT_PATH.glob(f"{students_directory}/*.py")):
+        raise FileNotFoundError(f"Missing student Python submissions in appropriate submissions "
+                                f"directory.")
 
 
 def execute_tests(
