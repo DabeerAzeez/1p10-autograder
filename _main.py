@@ -53,7 +53,14 @@ def main(prefix: str):
         raise FileNotFoundError(f"Missing student Python submissions in appropriate submissions "
                                 f"directory.")
 
-    for submission in CURRENT_PATH.glob(f"{students_directory}/*.py"):
+    allowed_student_types = set()
+    if pathlib.Path(f"{prefix}_test.py").exists():
+        allowed_student_types.add(None)
+    else:
+        for test_file in CURRENT_PATH.glob(f"{prefix}_test_*.py"):
+            allowed_student_types.add(test_file.stem.split("_")[-1])
+
+    for submission in CURRENT_PATH.glob(f"{students_directory}/{prefix}_*.py"):
         student_id, student_type = student_info_from_filestem(prefix, submission.stem)
 
         if student_id is False or student_type is False:
@@ -64,6 +71,10 @@ def main(prefix: str):
         if f"#{student_id}" not in classlist_df['Username'].values:
             print("Unrecognized student ID: " + str(
                 student_id) + " is not in the classlist and will not be graded.")
+            continue
+
+        if student_type not in allowed_student_types:
+            print(f"Unrecognized student type for submission: {submission} cannot be graded.")
             continue
 
         test_file = f"{prefix}_test_{student_type}" if student_type else f"{prefix}_test"
