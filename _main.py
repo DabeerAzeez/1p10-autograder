@@ -274,4 +274,4 @@ def student_info_from_filestem(prefix: str,
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pylint: disable=no-value-for-parameter
