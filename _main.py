@@ -45,6 +45,13 @@ def main(prefix: str):
     print("*"*20)
     start_time = time.time()
 
+    if not pathlib.Path(students_directory).exists():
+        raise NotADirectoryError(f"Missing student submissions directory: /{students_directory}")
+
+    if not list(CURRENT_PATH.glob(f"{students_directory}/*.py")):
+        raise FileNotFoundError(f"Missing student Python submissions in appropriate submissions "
+                                f"directory.")
+
     for submission in CURRENT_PATH.glob(f"{students_directory}/*.py"):
         student_id, student_type = student_info_from_filestem(submission.name)
 
