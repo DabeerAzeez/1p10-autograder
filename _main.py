@@ -209,3 +209,7 @@ def student_info_from_filestem(stem: str) -> Tuple[Union[str, bool], Optional[Un
         return student_id, student_type
 
     return False, False
+
+
+if __name__ == "__main__":
+    main()
