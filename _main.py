@@ -5,7 +5,8 @@
 Runs PyTest unit tests on student submissions, compiling the grades into a .csv file for easy
 uploading to a Brightspace Learning Management System. Also generates a .csv file in case the
 professor wants to send the grades in bulk via email (compatible with Mail Merge in Microsoft
-Outlook). """
+Outlook).
+"""
 
 import importlib
 import pathlib
@@ -42,7 +43,7 @@ def main(prefix: str):
     classlist_df = pd.read_csv(CLASSLIST_CSV_FILENAME)
 
     print("Starting Autograder...")
-    print("*"*20)
+    print("*" * 20)
     start_time = time.time()
 
     if not pathlib.Path(students_directory).exists():
