@@ -16,6 +16,49 @@ Ensure the following items are setup properly
   - Contains solutions for all methods in assignment `MMXX` across student types
 - A `MMXX_test_Student?.py` Pytest test file containing boilerplate code for the test harness as well as PyTest tests for testing the functions seen in `MMXX_solutions.py`
   - All student types found in the submissions folder must have respective test files present
+  - Boilerplate code is provided below:
+
+```python
+
+import pytest
+import unittest.mock as mock
+
+
+# BOILER PLATE -- NEEDED BY THE TEST HARNESS
+def assignment_module():
+    pass
+
+
+def solutions_module():
+    pass
+
+
+@pytest.fixture
+def module():
+    return assignment_module()
+
+
+@pytest.fixture
+def solutions():
+    return solutions_module()
+# END BOILER PLATE CODE
+
+
+# Mocking print and input as fixtures since they're used often
+@pytest.fixture
+def mock_print():
+    with mock.patch("builtins.print") as mock_print:
+        yield mock_print
+
+
+@pytest.fixture
+def mock_input():
+    with mock.patch("builtins.input") as mock_input:
+        yield mock_input
+
+
+#  INSERT PYTEST TESTS BELOW
+```
 
 ## Step 2: Running the Autograder
 
