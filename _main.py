@@ -106,6 +106,15 @@ def check_missing_files_and_directories(students_directory):
 
 def verify_student_filename(student_id, student_type, classlist_df, allowed_student_types,
                             submission):
+    """
+    Verifies student filename in terms of pattern, correlation with class list, and student type.
+    :param student_id: Student ID extracted from filename
+    :param student_type: Student type extracted from filename
+    :param classlist_df: Pandas Dataframe containing the class list.
+    :param allowed_student_types: Set of allowed student types
+    :param submission: Submission filename
+    :return: Boolean representing whether the filename passed all checks
+    """
     if student_id is False or student_type is False:
         print("Submission name does not match expected pattern and will not be graded: " + str(
             submission))
